@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConsultaRouteImport } from './routes/consulta'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as IndexRouteImport } from './routes/index'
 
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,27 @@ export interface FileRoutesById {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cadastro' | '/consulta' | '/login' | '/onboarding'
+  fullPaths:
+    | '/'
+    | '/cadastro'
+    | '/consulta'
+    | '/login'
+    | '/onboarding'
+    | '/perfil'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cadastro' | '/consulta' | '/login' | '/onboarding'
-  id: '__root__' | '/' | '/cadastro' | '/consulta' | '/login' | '/onboarding'
+  to: '/' | '/cadastro' | '/consulta' | '/login' | '/onboarding' | '/perfil'
+  id:
+    | '__root__'
+    | '/'
+    | '/cadastro'
+    | '/consulta'
+    | '/login'
+    | '/onboarding'
+    | '/perfil'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +99,18 @@ export interface RootRouteChildren {
   ConsultaRoute: typeof ConsultaRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PerfilRoute: typeof PerfilRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -125,6 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsultaRoute: ConsultaRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PerfilRoute: PerfilRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
