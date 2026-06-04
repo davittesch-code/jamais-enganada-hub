@@ -15,6 +15,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConsultaRouteImport } from './routes/consulta'
 import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as AssessoriaRouteImport } from './routes/assessoria'
 import { Route as IndexRouteImport } from './routes/index'
 
 const PesquisaRoute = PesquisaRouteImport.update({
@@ -47,6 +48,11 @@ const CadastroRoute = CadastroRouteImport.update({
   path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssessoriaRoute = AssessoriaRouteImport.update({
+  id: '/assessoria',
+  path: '/assessoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +61,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/assessoria'
     | '/cadastro'
     | '/consulta'
     | '/login'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/assessoria'
     | '/cadastro'
     | '/consulta'
     | '/login'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/assessoria'
     | '/cadastro'
     | '/consulta'
     | '/login'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssessoriaRoute: typeof AssessoriaRoute
   CadastroRoute: typeof CadastroRoute
   ConsultaRoute: typeof ConsultaRoute
   LoginRoute: typeof LoginRoute
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assessoria': {
+      id: '/assessoria'
+      path: '/assessoria'
+      fullPath: '/assessoria'
+      preLoaderRoute: typeof AssessoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssessoriaRoute: AssessoriaRoute,
   CadastroRoute: CadastroRoute,
   ConsultaRoute: ConsultaRoute,
   LoginRoute: LoginRoute,
