@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PainelAdvogadaRouteImport } from './routes/painel-advogada'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConsultaRouteImport } from './routes/consulta'
@@ -26,6 +27,11 @@ const PesquisaRoute = PesquisaRouteImport.update({
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelAdvogadaRoute = PainelAdvogadaRouteImport.update({
+  id: '/painel-advogada',
+  path: '/painel-advogada',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/consulta': typeof ConsultaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/consulta'
     | '/login'
     | '/onboarding'
+    | '/painel-advogada'
     | '/perfil'
     | '/pesquisa'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/consulta'
     | '/login'
     | '/onboarding'
+    | '/painel-advogada'
     | '/perfil'
     | '/pesquisa'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/consulta'
     | '/login'
     | '/onboarding'
+    | '/painel-advogada'
     | '/perfil'
     | '/pesquisa'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ConsultaRoute: typeof ConsultaRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PainelAdvogadaRoute: typeof PainelAdvogadaRoute
   PerfilRoute: typeof PerfilRoute
   PesquisaRoute: typeof PesquisaRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel-advogada': {
+      id: '/painel-advogada'
+      path: '/painel-advogada'
+      fullPath: '/painel-advogada'
+      preLoaderRoute: typeof PainelAdvogadaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsultaRoute: ConsultaRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PainelAdvogadaRoute: PainelAdvogadaRoute,
   PerfilRoute: PerfilRoute,
   PesquisaRoute: PesquisaRoute,
 }
