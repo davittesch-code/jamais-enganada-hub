@@ -9,8 +9,62 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PesquisaRouteImport } from './routes/pesquisa'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PainelAdvogadaRouteImport } from './routes/painel-advogada'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ConsultaRouteImport } from './routes/consulta'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as AssessoriaRouteImport } from './routes/assessoria'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const PesquisaRoute = PesquisaRouteImport.update({
+  id: '/pesquisa',
+  path: '/pesquisa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelAdvogadaRoute = PainelAdvogadaRouteImport.update({
+  id: '/painel-advogada',
+  path: '/painel-advogada',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultaRoute = ConsultaRouteImport.update({
+  id: '/consulta',
+  path: '/consulta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssessoriaRoute = AssessoriaRouteImport.update({
+  id: '/assessoria',
+  path: '/assessoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +73,158 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assessoria': typeof AssessoriaRoute
+  '/cadastro': typeof CadastroRoute
+  '/consulta': typeof ConsultaRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
+  '/perfil': typeof PerfilRoute
+  '/pesquisa': typeof PesquisaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assessoria': typeof AssessoriaRoute
+  '/cadastro': typeof CadastroRoute
+  '/consulta': typeof ConsultaRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
+  '/perfil': typeof PerfilRoute
+  '/pesquisa': typeof PesquisaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assessoria': typeof AssessoriaRoute
+  '/cadastro': typeof CadastroRoute
+  '/consulta': typeof ConsultaRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/painel-advogada': typeof PainelAdvogadaRoute
+  '/perfil': typeof PerfilRoute
+  '/pesquisa': typeof PesquisaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/assessoria'
+    | '/cadastro'
+    | '/consulta'
+    | '/login'
+    | '/onboarding'
+    | '/painel-advogada'
+    | '/perfil'
+    | '/pesquisa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/assessoria'
+    | '/cadastro'
+    | '/consulta'
+    | '/login'
+    | '/onboarding'
+    | '/painel-advogada'
+    | '/perfil'
+    | '/pesquisa'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/assessoria'
+    | '/cadastro'
+    | '/consulta'
+    | '/login'
+    | '/onboarding'
+    | '/painel-advogada'
+    | '/perfil'
+    | '/pesquisa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AssessoriaRoute: typeof AssessoriaRoute
+  CadastroRoute: typeof CadastroRoute
+  ConsultaRoute: typeof ConsultaRoute
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PainelAdvogadaRoute: typeof PainelAdvogadaRoute
+  PerfilRoute: typeof PerfilRoute
+  PesquisaRoute: typeof PesquisaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pesquisa': {
+      id: '/pesquisa'
+      path: '/pesquisa'
+      fullPath: '/pesquisa'
+      preLoaderRoute: typeof PesquisaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel-advogada': {
+      id: '/painel-advogada'
+      path: '/painel-advogada'
+      fullPath: '/painel-advogada'
+      preLoaderRoute: typeof PainelAdvogadaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consulta': {
+      id: '/consulta'
+      path: '/consulta'
+      fullPath: '/consulta'
+      preLoaderRoute: typeof ConsultaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assessoria': {
+      id: '/assessoria'
+      path: '/assessoria'
+      fullPath: '/assessoria'
+      preLoaderRoute: typeof AssessoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +237,16 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AssessoriaRoute: AssessoriaRoute,
+  CadastroRoute: CadastroRoute,
+  ConsultaRoute: ConsultaRoute,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
+  PainelAdvogadaRoute: PainelAdvogadaRoute,
+  PerfilRoute: PerfilRoute,
+  PesquisaRoute: PesquisaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
