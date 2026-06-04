@@ -14,16 +14,250 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accompaniment_sessions: {
+        Row: {
+          area: string
+          created_at: string
+          id: string
+          messages: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accompaniment_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_responses: {
+        Row: {
+          answer: string | null
+          created_at: string
+          id: string
+          question: string
+          step: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          step: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          step?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_links: {
+        Row: {
+          advogado_id: string
+          code: string
+          commission_percent: number
+          created_at: string
+          id: string
+          total_clients: number
+          total_revenue: number
+        }
+        Insert: {
+          advogado_id: string
+          code: string
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          total_clients?: number
+          total_revenue?: number
+        }
+        Update: {
+          advogado_id?: string
+          code?: string
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          total_clients?: number
+          total_revenue?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_links_advogado_id_fkey"
+            columns: ["advogado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_data: {
+        Row: {
+          areas: Json | null
+          attention_points: Json | null
+          generated_at: string
+          id: string
+          insights: Json | null
+          next_steps: Json | null
+          radar_scores: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          areas?: Json | null
+          attention_points?: Json | null
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          next_steps?: Json | null
+          radar_scores?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          areas?: Json | null
+          attention_points?: Json | null
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          next_steps?: Json | null
+          radar_scores?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          advogado_id: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          partner_code: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+        }
+        Insert: {
+          advogado_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          partner_code?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+        }
+        Update: {
+          advogado_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          partner_code?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_advogado_id_fkey"
+            columns: ["advogado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queries: {
+        Row: {
+          answer: string | null
+          area: string | null
+          created_at: string
+          id: string
+          question: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          area?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          area?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_advogado_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "cliente" | "advogado" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +384,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["cliente", "advogado", "super_admin"],
+    },
   },
 } as const
