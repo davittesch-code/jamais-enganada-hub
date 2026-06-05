@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChatBubble } from "@/components/onboarding/ChatBubble";
 import { TypingIndicator } from "@/components/onboarding/TypingIndicator";
@@ -10,18 +10,23 @@ import { useOnboarding } from "@/components/onboarding/useOnboarding";
 function OnboardingGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
+    setMounted(true);
+  }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (mounted && !loading && !user) navigate({ to: "/login" });
+  }, [mounted, loading, user, navigate]);
+
+  if (!mounted || loading) {
     return (
       <div
-        className="flex h-dvh w-full items-center justify-center"
-        style={{ background: "#FDF6F9", color: "#6B0F4B" }}
+        className="flex min-h-screen items-center justify-center bg-[#FDF6F9]"
+        suppressHydrationWarning
       >
-        <p className="text-sm">Carregando…</p>
+        <div className="w-8 h-8 border-2 border-[#A8006E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

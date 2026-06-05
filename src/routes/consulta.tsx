@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChatBubble } from "@/components/onboarding/ChatBubble";
 import { TypingIndicator } from "@/components/onboarding/TypingIndicator";
@@ -11,18 +11,23 @@ import { useConsulta } from "@/components/consulta/useConsulta";
 function ConsultaGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
+    setMounted(true);
+  }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (mounted && !loading && !user) navigate({ to: "/login" });
+  }, [mounted, loading, user, navigate]);
+
+  if (!mounted || loading) {
     return (
       <div
-        className="flex h-dvh w-full items-center justify-center"
-        style={{ background: "#FDF6F9", color: "#6B0F4B" }}
+        className="flex min-h-screen items-center justify-center bg-[#FDF6F9]"
+        suppressHydrationWarning
       >
-        <p className="text-sm">Carregando…</p>
+        <div className="w-8 h-8 border-2 border-[#A8006E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -62,6 +67,31 @@ function LoadingOverlay({ text }: { text: string }) {
   );
 }
 
+function ErrorOverlay({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center px-6"
+      style={{ background: "rgba(253, 246, 249, 0.98)" }}
+    >
+      <div className="flex flex-col items-center gap-4 p-8 text-center max-w-md">
+        <div className="text-4xl">⚠️</div>
+        <p className="text-[#6B0F4B] font-medium">
+          Houve um problema ao gerar seu perfil.
+        </p>
+        <p className="text-sm text-gray-500">
+          Suas respostas foram salvas. Tente novamente.
+        </p>
+        <button
+          onClick={onRetry}
+          className="bg-[#A8006E] text-white px-6 py-2 rounded-full text-sm"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ConsultaPage() {
   const {
     messages,
@@ -72,6 +102,8 @@ function ConsultaPage() {
     isGenerating,
     loadingText,
     handleReply,
+    erroGeracao,
+    retryGerar,
   } = useConsulta();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -104,7 +136,7 @@ function ConsultaPage() {
         </div>
       </div>
 
-      {!isGenerating && (
+      {!isGenerating && !erroGeracao && (
         <div className="sticky bottom-0">
           <div className="max-w-2xl mx-auto">
             {currentOptions && currentOptions.length > 0 && (
@@ -122,7 +154,8 @@ function ConsultaPage() {
         </div>
       )}
 
-      {isGenerating && <LoadingOverlay text={loadingText} />}
+      {isGenerating && !erroGeracao && <LoadingOverlay text={loadingText} />}
+      {erroGeracao && <ErrorOverlay onRetry={retryGerar} />}
     </div>
   );
 }
