@@ -126,6 +126,7 @@ export type Database = {
         Row: {
           areas: Json | null
           attention_points: Json | null
+          extra_data: Json | null
           generated_at: string
           id: string
           insights: Json | null
@@ -137,6 +138,7 @@ export type Database = {
         Insert: {
           areas?: Json | null
           attention_points?: Json | null
+          extra_data?: Json | null
           generated_at?: string
           id?: string
           insights?: Json | null
@@ -148,6 +150,7 @@ export type Database = {
         Update: {
           areas?: Json | null
           attention_points?: Json | null
+          extra_data?: Json | null
           generated_at?: string
           id?: string
           insights?: Json | null
