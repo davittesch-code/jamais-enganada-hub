@@ -240,19 +240,20 @@ export function useConsulta() {
           await supabase.from("profile_data").upsert(
             {
               user_id: user.id,
-              areas: (p.areas as object) ?? {},
-              insights: (p.insights as object) ?? [],
-              attention_points: (p.attention_points as object) ?? [],
-              next_steps: (p.next_steps as object) ?? [],
-              radar_scores: (p.radar_scores as object) ?? {},
+              areas: (p.areas ?? {}) as never,
+              insights: (p.insights ?? []) as never,
+              attention_points: (p.attention_points ?? []) as never,
+              next_steps: (p.next_steps ?? []) as never,
+              radar_scores: (p.radar_scores ?? {}) as never,
               extra_data: {
                 resumo_geral: p.resumo_geral ?? "",
                 nivel_vulnerabilidade: p.nivel_vulnerabilidade ?? "medio",
                 frase_de_forca: p.frase_de_forca ?? "",
-              },
+              } as never,
               generated_at: new Date().toISOString(),
             },
             { onConflict: "user_id" },
+
           );
         } catch (e) {
           console.error("profile_data upsert failed", e);
