@@ -72,6 +72,7 @@ export function useOnboarding() {
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showCtaButton, setShowCtaButton] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
   const [inputDisabled, setInputDisabled] = useState(true);
 
@@ -101,18 +102,29 @@ export function useOnboarding() {
 
     (async () => {
       try {
-        const { data } = await supabase
+        const { data: pd } = await supabase
+          .from("profile_data")
+          .select("id")
+          .eq("user_id", user.id)
+          .limit(1);
+        if (pd && pd.length > 0) {
+          navigate({ to: "/perfil" });
+          return;
+        }
+
+        const { data: or } = await supabase
           .from("onboarding_responses")
           .select("id")
           .eq("user_id", user.id)
           .limit(1);
-        if (data && data.length > 0) {
-          navigate({ to: "/perfil" });
+        if (or && or.length > 0) {
+          navigate({ to: "/consulta" });
           return;
         }
       } catch (e) {
         console.error("onboarding check failed", e);
       }
+
 
       if (hasStartedRef.current) return;
       hasStartedRef.current = true;
@@ -283,6 +295,8 @@ export function useOnboarding() {
     progress,
     isComplete,
     showCtaButton,
+    showSplash,
+    setShowSplash,
     handleUserReply,
     onboardingData,
     inputDisabled,
