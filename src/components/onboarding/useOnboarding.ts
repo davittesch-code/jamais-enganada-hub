@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { sofiaSpeak } from "@/lib/sofia.functions";
+
 
 type Sender = "sofia" | "user";
 
@@ -51,84 +54,9 @@ const QUESTIONS: { key: QuestionKey; text: string }[] = [
   },
 ];
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+// Sofia's AI responses are generated via the Lovable AI Gateway in
+// src/lib/sofia.functions.ts (server-side, no client-side API key).
 
-const CONFIRMATION_SYSTEM_PROMPT = `Você é Sofia, assessora jurídica da plataforma Jamais Enganada.
-Você é brasileira, calorosa, empática e fala como uma amiga de confiança — não como um robô ou advogada formal. Use linguagem simples, direta e afetuosa.
-
-Sua tarefa: quando a usuária responder uma pergunta, escreva UMA mensagem curta (1 a 3 linhas) que:
-- Mostre que você realmente ouviu e processou a resposta dela
-- Use o conteúdo real da resposta (nome, cidade, situação) — nunca seja genérica
-- Faça ela se sentir vista, acolhida e segura
-- Jamais use juridiquês
-- Pode usar no máximo 1 emoji por mensagem, com naturalidade
-
-Exemplos de confirmações BEM feitas:
-Pergunta: 'Qual é o seu nome?' | Resposta: 'Ana'
-→ 'Que nome lindo, Ana! Fico feliz em te conhecer. 💜'
-
-Pergunta: 'Em qual estado você mora?' | Resposta: 'Minas Gerais'
-→ 'Mineira! Ótimo, conheço bem a legislação do seu estado.'
-
-Pergunta: 'Você tem filhos?' | Resposta: 'Sim, tenho dois'
-→ 'Dois filhos — que responsabilidade linda. Isso vai ser importante no seu perfil.'
-
-Pergunta: 'Existe alguma situação que te preocupa hoje?' | Resposta: 'Estou me separando e tenho medo de perder minha parte do apartamento'
-→ 'Entendo, e você fez muito bem em buscar orientação agora. Isso é exatamente o que vamos analisar juntas.'
-
-Exemplos de confirmações MAL feitas (NUNCA faça assim):
-❌ 'Entendido! 💜'
-❌ 'Obrigada pela sua resposta!'
-❌ 'Anotado. Vamos continuar.'
-❌ Qualquer resposta genérica que ignorar o conteúdo do que ela disse
-
-Responda SOMENTE a confirmação. Sem aspas. Sem introdução. Sem explicação.`;
-
-async function callGemini(
-  userText: string,
-  system: string,
-): Promise<string | null> {
-  const key = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-  if (!key) {
-    console.error("Gemini error: VITE_GEMINI_API_KEY ausente");
-    return null;
-  }
-  try {
-    const res = await fetch(`${GEMINI_URL}?key=${key}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: userText }] }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 150,
-        },
-      }),
-    });
-    if (!res.ok) {
-      const errBody = await res.text().catch(() => "");
-      console.error("Gemini error:", res.status, errBody);
-      return null;
-    }
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return typeof text === "string" ? text.trim() : null;
-  } catch (error) {
-    console.error("Gemini error:", error);
-    return null;
-  }
-}
-
-async function getEmpathicConfirmation(
-  question: string,
-  answer: string,
-): Promise<string> {
-  const prompt = `Pergunta: '${question}' | Resposta: '${answer}'`;
-  const result = await callGemini(prompt, CONFIRMATION_SYSTEM_PROMPT);
-  return result ?? "Entendido! 💜";
-}
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -137,6 +65,7 @@ function uid() {
 export function useOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const speak = useServerFn(sofiaSpeak);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -236,20 +165,13 @@ export function useOnboarding() {
   const finishOnboarding = useCallback(
     async (nome: string) => {
       setIsTyping(true);
-      const closingPrompt = `Gere uma mensagem de encerramento calorosa e pessoal para ${nome}, que acabou de compartilhar sua história com a Sofia na plataforma Jamais Enganada.
-A mensagem deve:
-- Usar o nome dela
-- Reconhecer que ela foi corajosa em buscar orientação
-- Dizer que o perfil jurídico dela está sendo preparado com tudo que ela contou
-- Convidá-la para a próxima etapa com empolgação
-- Soar como uma amiga de confiança, não como um sistema
-- Ter no máximo 3 linhas
-- Um único emoji no final, com naturalidade
-
-Sem aspas. Sem introdução.`;
-      const closing =
-        (await callGemini(closingPrompt, CONFIRMATION_SYSTEM_PROMPT)) ??
-        `${nome}, você foi muito corajosa em compartilhar tudo isso. Seu perfil jurídico já está sendo preparado com cada detalhe que você me contou. Vamos juntas para o próximo passo? 💜`;
+      let closing = `${nome}, você foi muito corajosa em compartilhar tudo isso. Seu perfil jurídico já está sendo preparado com cada detalhe que você me contou. Vamos juntas para o próximo passo? 💜`;
+      try {
+        const res = await speak({ data: { kind: "closing", nome } });
+        if (res?.text) closing = res.text;
+      } catch (e) {
+        console.error("sofiaSpeak closing failed", e);
+      }
       setIsTyping(false);
       addMessage("sofia", closing);
 
@@ -287,8 +209,10 @@ Sem aspas. Sem introdução.`;
         }, 1500);
       }, 500);
     },
-    [addMessage, schedule, user],
+    [addMessage, schedule, speak, user],
   );
+
+
 
   const handleUserReply = useCallback(
     async (text: string) => {
@@ -318,7 +242,15 @@ Sem aspas. Sem introdução.`;
       }
 
       setIsTyping(true);
-      const confirmation = await getEmpathicConfirmation(question.text, text);
+      let confirmation = "Entendido! 💜";
+      try {
+        const res = await speak({
+          data: { kind: "confirmation", question: question.text, answer: text },
+        });
+        if (res?.text) confirmation = res.text;
+      } catch (e) {
+        console.error("sofiaSpeak confirmation failed", e);
+      }
       setIsTyping(false);
       addMessage("sofia", confirmation);
 
@@ -342,7 +274,7 @@ Sem aspas. Sem introdução.`;
         }, 1000);
       }
     },
-    [addMessage, finishOnboarding, inputDisabled, schedule, user],
+    [addMessage, finishOnboarding, inputDisabled, schedule, speak, user],
   );
 
   return {
