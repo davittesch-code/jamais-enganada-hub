@@ -274,7 +274,7 @@ export function useOnboarding() {
         }, 1000);
       }
     },
-    [addMessage, finishOnboarding, inputDisabled, schedule, user],
+    [addMessage, finishOnboarding, inputDisabled, schedule, speak, user],
   );
 
   return {
