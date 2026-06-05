@@ -412,15 +412,17 @@ export function useConsulta() {
             const map: OnboardingCtx = {};
             for (const r of data) {
               const q = (r.question || "").toLowerCase();
-              if (q.includes("nome")) map.nome = r.answer;
-              else if (q.includes("anos")) map.idade = r.answer;
-              else if (q.includes("estado") && q.includes("mora")) map.estado = r.answer;
-              else if (q.includes("relacionamento") || q.includes("civil")) map.estado_civil = r.answer;
-              else if (q.includes("filhos")) map.tem_filhos = r.answer;
-              else if (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma")) map.tem_empresa = r.answer;
-              else if (q.includes("bens")) map.tem_bens = r.answer;
-              else if (q.includes("preocup") || q.includes("buscar")) map.motivacao_principal = r.answer;
+              const a = r.answer ?? undefined;
+              if (q.includes("nome")) map.nome = a;
+              else if (q.includes("anos")) map.idade = a;
+              else if (q.includes("estado") && q.includes("mora")) map.estado = a;
+              else if (q.includes("relacionamento") || q.includes("civil")) map.estado_civil = a;
+              else if (q.includes("filhos")) map.tem_filhos = a;
+              else if (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma")) map.tem_empresa = a;
+              else if (q.includes("bens")) map.tem_bens = a;
+              else if (q.includes("preocup") || q.includes("buscar")) map.motivacao_principal = a;
             }
+
             ctx = map;
           }
         } catch (e) {
