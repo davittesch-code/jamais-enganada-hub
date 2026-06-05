@@ -10,14 +10,12 @@ import {
   ShieldCheck,
   LogOut,
   Menu,
-  Sparkles,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: AppRole[] };
 
 const NAV: NavItem[] = [
-  { to: "/onboarding", label: "Boas-vindas", icon: Sparkles, roles: ["cliente"] },
   { to: "/consulta", label: "Consulta IA", icon: MessageCircle, roles: ["cliente"] },
   { to: "/perfil", label: "Meu Perfil", icon: UserCircle, roles: ["cliente"] },
   { to: "/pesquisa", label: "Tira-dúvidas", icon: Search, roles: ["cliente"] },
