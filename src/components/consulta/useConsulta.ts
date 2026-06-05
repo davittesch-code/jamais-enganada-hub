@@ -177,6 +177,7 @@ export function useConsulta() {
   const [inputDisabled, setInputDisabled] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [erroGeracao, setErroGeracao] = useState(false);
 
   const ctxRef = useRef<OnboardingCtx>({});
   const questionsRef = useRef<Question[]>([]);
@@ -223,51 +224,79 @@ export function useConsulta() {
   const finalize = useCallback(async () => {
     setInputDisabled(true);
     setCurrentOptions(null);
+    setErroGeracao(false);
     setIsGenerating(true);
     setProgress(95);
 
+    console.log("🔄 Iniciando geração do perfil...");
+    console.log("📋 Contexto:", ctxRef.current);
+    console.log("💬 Respostas da consulta:", respostasRef.current);
+
+    let res: Awaited<ReturnType<typeof callGenerate>> | null = null;
     try {
-      const res = await callGenerate({
+      res = await callGenerate({
         data: {
           onboarding: ctxRef.current as Record<string, string>,
           respostas: respostasRef.current,
         },
       });
-
-      if (res.ok && res.profile && user) {
-        const p = res.profile as Record<string, unknown>;
-        try {
-          await supabase.from("profile_data").upsert(
-            {
-              user_id: user.id,
-              areas: (p.areas ?? {}) as never,
-              insights: (p.insights ?? []) as never,
-              attention_points: (p.attention_points ?? []) as never,
-              next_steps: (p.next_steps ?? []) as never,
-              radar_scores: (p.radar_scores ?? {}) as never,
-              extra_data: {
-                resumo_geral: p.resumo_geral ?? "",
-                nivel_vulnerabilidade: p.nivel_vulnerabilidade ?? "medio",
-                frase_de_forca: p.frase_de_forca ?? "",
-              } as never,
-              generated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id" },
-
-          );
-        } catch (e) {
-          console.error("profile_data upsert failed", e);
-        }
-      } else {
-        console.error("generateProfile não retornou perfil", res);
-      }
+      console.log("🤖 Resposta do generateProfile:", res);
     } catch (e) {
-      console.error("generateProfile call failed", e);
+      console.error("❌ generateProfile call failed", e);
+      setErroGeracao(true);
+      return;
     }
 
+    if (!res || !res.ok || !res.profile) {
+      console.error("❌ generateProfile não retornou perfil válido", res);
+      setErroGeracao(true);
+      return;
+    }
+
+    if (!user) {
+      console.error("❌ Usuário ausente ao salvar perfil");
+      setErroGeracao(true);
+      return;
+    }
+
+    const p = res.profile as Record<string, unknown>;
+    console.log("✅ JSON do perfil pronto:", p);
+
+    const { error: upsertError } = await supabase
+      .from("profile_data")
+      .upsert(
+        {
+          user_id: user.id,
+          areas: (p.areas ?? {}) as never,
+          insights: (p.insights ?? []) as never,
+          attention_points: (p.attention_points ?? []) as never,
+          next_steps: (p.next_steps ?? []) as never,
+          radar_scores: (p.radar_scores ?? {}) as never,
+          extra_data: {
+            resumo_geral: p.resumo_geral ?? "",
+            nivel_vulnerabilidade: p.nivel_vulnerabilidade ?? "medio",
+            frase_de_forca: p.frase_de_forca ?? "",
+          } as never,
+          generated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+
+    if (upsertError) {
+      console.error("❌ Erro ao salvar no Supabase:", upsertError);
+      setErroGeracao(true);
+      return;
+    }
+
+    console.log("✅ Perfil salvo no Supabase com sucesso!");
     setProgress(100);
     navigate({ to: "/perfil" });
   }, [callGenerate, navigate, user]);
+
+  const retryGerar = useCallback(() => {
+    setErroGeracao(false);
+    void finalize();
+  }, [finalize]);
 
   const handleReply = useCallback(
     async (text: string) => {
@@ -469,5 +498,7 @@ export function useConsulta() {
     isGenerating,
     loadingText: LOADING_STEPS[loadingStep],
     handleReply,
+    erroGeracao,
+    retryGerar,
   };
 }
