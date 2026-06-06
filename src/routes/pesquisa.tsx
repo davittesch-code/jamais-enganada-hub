@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, Copy, Loader2, MessageCircle, Scale, Check, BookOpen, Lightbulb, AlertTriangle, UserCheck, CheckCircle2 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
