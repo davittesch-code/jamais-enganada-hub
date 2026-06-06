@@ -291,7 +291,7 @@ function PerfilPage() {
           className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
           style={{ backgroundColor: nivelCfg.bg, color: nivelCfg.color }}
         >
-          Vulnerabilidade {nivel}
+          {nivelCfg.label}
         </div>
         {data.extra_data?.frase_de_forca && (
           <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
