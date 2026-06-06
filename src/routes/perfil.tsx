@@ -27,6 +27,7 @@ import { PrivateRoute } from "@/components/PrivateRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Accordion,
   AccordionContent,
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AreaStatusBadge, statusBorderColor } from "@/components/perfil/AreaStatusBadge";
 import { NivelBadge, nivelColor } from "@/components/perfil/NivelBadge";
+import { UpsellModal } from "@/components/UpsellModal";
 
 export const Route = createFileRoute("/perfil")({
   component: () => (
