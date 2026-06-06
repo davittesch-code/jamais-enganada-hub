@@ -211,8 +211,8 @@ function PerfilPage() {
 
       // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
-      if (Array.isArray(adv) && adv.length > 0) {
-        const whats = onlyDigits((adv[0] as { whatsapp: string | null }).whatsapp ?? "");
+      if (adv && typeof adv === "object") {
+        const whats = onlyDigits((adv as { whatsapp?: string | null }).whatsapp ?? "");
         if (whats) setWhatsappAdm(whats);
         console.log("WhatsApp do adm:", whats || "(usando padrão)");
       }
