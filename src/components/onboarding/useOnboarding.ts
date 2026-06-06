@@ -295,15 +295,11 @@ export function useOnboarding() {
           (async () => {
             setIsTyping(true);
             try {
-              const { data } = await supabase
-                .from("advogados")
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .select("id, nome, oab, especialidade" as any)
-                .eq("ativo" as never, true as never)
-                .order("nome" as never);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { data } = await (supabase as any).rpc("list_advogadas_publicas");
               setAdvogadas(((data as unknown as AdvogadaOpt[]) ?? []));
             } catch (e) {
-              console.error("advogados fetch failed", e);
+              console.error("advogadas fetch failed", e);
             }
             setIsTyping(false);
             const nome = newData.nome ?? "";
