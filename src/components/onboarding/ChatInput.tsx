@@ -63,7 +63,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         disabled={disabled || !value.trim()}
         aria-label="Enviar"
         className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white transition-opacity disabled:opacity-40"
-        style={{ background: "#A8006E" }}
+        style={{ background: "#552736" }}
       >
         <Send className="w-4 h-4" />
       </button>

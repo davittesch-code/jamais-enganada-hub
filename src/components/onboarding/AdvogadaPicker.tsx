@@ -28,7 +28,7 @@ export function AdvogadaPicker({ advogadas, onSubmit }: Props) {
                 onClick={() => setSelectedId(a.id)}
                 className="text-left rounded-xl p-3 transition-all bg-white"
                 style={{
-                  border: `2px solid ${sel ? "#A8006E" : "#E8D0E0"}`,
+                  border: `2px solid ${sel ? "#552736" : "#E8D0E0"}`,
                   background: sel ? "#FDF6F9" : "#FFFFFF",
                 }}
               >
@@ -70,7 +70,7 @@ export function AdvogadaPicker({ advogadas, onSubmit }: Props) {
           disabled={!selected}
           onClick={() => selected && onSubmit(selected)}
           className="px-6 py-2.5 rounded-full text-sm font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ background: "#A8006E" }}
+          style={{ background: "#552736" }}
         >
           Confirmar seleção
         </button>

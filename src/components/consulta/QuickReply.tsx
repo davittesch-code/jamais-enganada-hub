@@ -28,9 +28,9 @@ export function QuickReply({ options, onSelect, disabled }: QuickReplyProps) {
             onClick={() => handleClick(opt)}
             className="px-4 py-2 rounded-full text-sm font-medium border transition-all disabled:opacity-60"
             style={{
-              borderColor: "#A8006E",
-              background: isPicked ? "#A8006E" : "#FFFFFF",
-              color: isPicked ? "#FFFFFF" : "#A8006E",
+              borderColor: "#552736",
+              background: isPicked ? "#552736" : "#FFFFFF",
+              color: isPicked ? "#FFFFFF" : "#552736",
               cursor: isDisabled ? "default" : "pointer",
             }}
           >

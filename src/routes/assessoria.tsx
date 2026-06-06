@@ -218,7 +218,7 @@ function AssessoriaPage() {
       {/* SEÇÃO 1 — Hero */}
       <section
         className="px-6 md:px-12 py-12 text-white text-center"
-        style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
+        style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)" }}
       >
         <Scale className="w-12 h-12 mx-auto mb-4" strokeWidth={1.8} />
         <h1 className="text-2xl md:text-3xl font-bold mb-3">
@@ -230,7 +230,7 @@ function AssessoriaPage() {
         </p>
         <span
           className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-white"
-          style={{ color: "#A8006E" }}
+          style={{ color: "#552736" }}
         >
           💜 Baseado no seu perfil jurídico
         </span>
@@ -246,7 +246,7 @@ function AssessoriaPage() {
             <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <div
                 className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold mb-3"
-                style={{ backgroundColor: "#A8006E", fontSize: 32 }}
+                style={{ backgroundColor: "#552736", fontSize: 32 }}
               >
                 {inicialAdv}
               </div>
@@ -329,7 +329,7 @@ function AssessoriaPage() {
               <Link
                 to="/perfil"
                 className="inline-block text-white text-sm font-semibold px-4 py-2 rounded-lg"
-                style={{ backgroundColor: "#A8006E" }}
+                style={{ backgroundColor: "#552736" }}
               >
                 Ir para Meu Perfil
               </Link>
@@ -349,13 +349,13 @@ function AssessoriaPage() {
                     <div className="flex items-start gap-3">
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                        style={{ backgroundColor: "#A8006E" }}
+                        style={{ backgroundColor: "#552736" }}
                       >
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
                         {p.area && (
-                          <span className="inline-block text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#A8006E] mb-1.5">
+                          <span className="inline-block text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#552736] mb-1.5">
                             {p.area}
                           </span>
                         )}
@@ -388,7 +388,7 @@ function AssessoriaPage() {
           {duvidas.length === 0 ? (
             <div className="text-sm text-gray-600">
               <p className="mb-2">Você ainda não fez perguntas no tira-dúvidas.</p>
-              <Link to="/pesquisa" className="font-semibold" style={{ color: "#A8006E" }}>
+              <Link to="/pesquisa" className="font-semibold" style={{ color: "#552736" }}>
                 Ir para Tira-dúvidas →
               </Link>
             </div>
@@ -398,13 +398,13 @@ function AssessoriaPage() {
                 <div
                   key={i}
                   className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-100"
-                  style={{ borderLeft: "4px solid #A8006E" }}
+                  style={{ borderLeft: "4px solid #552736" }}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-[#6B0F4B] truncate">{d.question}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {d.area && (
-                        <span className="text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded bg-[#FDF6F9] text-[#A8006E]">
+                        <span className="text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded bg-[#FDF6F9] text-[#552736]">
                           {d.area}
                         </span>
                       )}
@@ -430,7 +430,7 @@ function AssessoriaPage() {
             {[
               {
                 Icon: FileText,
-                color: "#A8006E",
+                color: "#552736",
                 title: "Perfil analisado",
                 text: "Sua advogada recebe seu perfil jurídico completo antes de qualquer conversa.",
               },
@@ -442,7 +442,7 @@ function AssessoriaPage() {
               },
               {
                 Icon: Shield,
-                color: "#A8006E",
+                color: "#552736",
                 title: "Orientação segura",
                 text: "Decisões importantes com base na lei e no seu caso específico — não conselhos genéricos.",
               },

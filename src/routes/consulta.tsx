@@ -27,7 +27,7 @@ function ConsultaGuard({ children }: { children: ReactNode }) {
         className="flex min-h-screen items-center justify-center bg-[#FDF6F9]"
         suppressHydrationWarning
       >
-        <div className="w-8 h-8 border-2 border-[#A8006E] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#552736] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -45,7 +45,7 @@ function LoadingOverlay({ text }: { text: string }) {
         className="w-14 h-14 rounded-full border-4 mb-6"
         style={{
           borderColor: "#F3E8F0",
-          borderTopColor: "#A8006E",
+          borderTopColor: "#552736",
           animation: "consulta-spin 1s linear infinite",
         }}
       />
@@ -55,7 +55,7 @@ function LoadingOverlay({ text }: { text: string }) {
       <p
         key={text}
         className="text-sm transition-opacity duration-500"
-        style={{ color: "#A8006E", animation: "consulta-fade 500ms ease-out" }}
+        style={{ color: "#552736", animation: "consulta-fade 500ms ease-out" }}
       >
         {text}
       </p>
@@ -83,7 +83,7 @@ function ErrorOverlay({ onRetry }: { onRetry: () => void }) {
         </p>
         <button
           onClick={onRetry}
-          className="bg-[#A8006E] text-white px-6 py-2 rounded-full text-sm"
+          className="bg-[#552736] text-white px-6 py-2 rounded-full text-sm"
         >
           Tentar novamente
         </button>

@@ -251,7 +251,7 @@ function PerfilPage() {
   if (!data) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <Scale className="w-16 h-16 text-[#A8006E] mb-4" />
+        <Scale className="w-16 h-16 text-[#552736] mb-4" />
         <h1 className="text-2xl font-semibold text-[#6B0F4B] mb-2">
           Seu perfil ainda não foi gerado
         </h1>
@@ -260,7 +260,7 @@ function PerfilPage() {
         </p>
         <Button
           onClick={() => navigate({ to: "/consulta" })}
-          className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+          className="bg-[#552736] hover:bg-[#3F1C28] text-white"
         >
           Iniciar consulta
         </Button>
@@ -321,7 +321,7 @@ function PerfilPage() {
       {/* SEÇÃO 1 — Hero */}
       <section
         className="px-6 md:px-12 py-12 text-white text-center print-hero"
-        style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
+        style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)" }}
       >
         <Venus className="w-12 h-12 mx-auto mb-4" />
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
@@ -358,9 +358,9 @@ function PerfilPage() {
                 />
                 <Radar
                   dataKey="score"
-                  fill="#A8006E"
+                  fill="#552736"
                   fillOpacity={0.3}
-                  stroke="#A8006E"
+                  stroke="#552736"
                   strokeWidth={2}
                 />
                 <Tooltip formatter={(value: number) => [`${value}/100`, "Pontuação"]} />
@@ -392,7 +392,7 @@ function PerfilPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <Icon className="w-6 h-6 text-[#A8006E]" />
+                    <Icon className="w-6 h-6 text-[#552736]" />
                     <h3 className="font-semibold text-[#6B0F4B]">{TRADUCAO_AREAS[key]}</h3>
                   </div>
                   <AreaStatusBadge status={info.status} />
@@ -457,7 +457,7 @@ function PerfilPage() {
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-3 text-left">
                     {ins.area && (
-                      <span className="text-xs uppercase font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#A8006E]">
+                      <span className="text-xs uppercase font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#552736]">
                         {ins.area}
                       </span>
                     )}
@@ -469,7 +469,7 @@ function PerfilPage() {
                   {ins.lei_referencia && (
                     <div
                       className="rounded-md p-3 text-sm"
-                      style={{ backgroundColor: "#FDF6F9", borderLeft: "3px solid #A8006E" }}
+                      style={{ backgroundColor: "#FDF6F9", borderLeft: "3px solid #552736" }}
                     >
                       <span className="font-semibold text-[#6B0F4B]">⚖️ Base legal: </span>
                       <span className="text-gray-700">{ins.lei_referencia}</span>
@@ -494,10 +494,10 @@ function PerfilPage() {
               return (
                 <div key={i} className="flex gap-4 relative">
                   <div className="flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-[#A8006E] text-white flex items-center justify-center font-bold shrink-0 z-10">
+                    <div className="w-10 h-10 rounded-full bg-[#552736] text-white flex items-center justify-center font-bold shrink-0 z-10">
                       {step.ordem ?? i + 1}
                     </div>
-                    {!isLast && <div className="w-0.5 flex-1 bg-[#A8006E]/20 my-1" />}
+                    {!isLast && <div className="w-0.5 flex-1 bg-[#552736]/20 my-1" />}
                   </div>
                   <div className="flex-1 bg-white rounded-lg p-5 shadow-sm border border-gray-100 mb-2">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -508,7 +508,7 @@ function PerfilPage() {
                         {prazoCfg.label}
                       </span>
                       {step.area && (
-                        <span className="text-xs uppercase font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#A8006E]">
+                        <span className="text-xs uppercase font-medium px-2 py-0.5 rounded bg-[#FDF6F9] text-[#552736]">
                           {step.area}
                         </span>
                       )}
@@ -516,7 +516,7 @@ function PerfilPage() {
                     <div className="flex items-start gap-3">
                       <input
                         type="checkbox"
-                        className="mt-1 w-4 h-4 accent-[#A8006E]"
+                        className="mt-1 w-4 h-4 accent-[#552736]"
                         aria-label="Marcar como feito"
                       />
                       <div className="flex-1">
@@ -543,7 +543,7 @@ function PerfilPage() {
             }}
           >
             <div className="flex items-center gap-3 mb-4">
-              <Venus className="w-7 h-7 text-[#A8006E]" />
+              <Venus className="w-7 h-7 text-[#552736]" />
               <h2 className="text-xl font-bold text-[#6B0F4B]">
                 Análise Completa do seu Perfil
               </h2>
@@ -571,7 +571,7 @@ function PerfilPage() {
         <div className="flex flex-col md:flex-row gap-3 justify-center max-w-3xl mx-auto">
           <Button
             onClick={() => window.print()}
-            className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+            className="bg-[#552736] hover:bg-[#3F1C28] text-white"
           >
             <Download className="w-4 h-4 mr-2" />
             Baixar resultado em PDF
@@ -579,7 +579,7 @@ function PerfilPage() {
           <Button
             onClick={() => navigate({ to: "/pesquisa" })}
             variant="outline"
-            className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
+            className="border-[#552736] text-[#552736] hover:bg-[#552736] hover:text-white"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Tirar uma dúvida
