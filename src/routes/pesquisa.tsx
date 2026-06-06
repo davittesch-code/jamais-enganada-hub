@@ -535,20 +535,11 @@ function PesquisaPage() {
                 </div>
 
                 <div className="p-6">
-                  <p className="text-sm font-medium text-[#1A0010] mb-3">{ativo.question}</p>
-                  <div className="prose prose-sm max-w-none text-[#1A0010] whitespace-pre-wrap leading-relaxed">
-                    {ativo.answer}
-                  </div>
+                  <p className="text-sm font-medium text-[#1A0010] mb-4">{ativo.question}</p>
+                  {ativo.answer && <RespostaRenderer text={ativo.answer} />}
                 </div>
 
-                {correlacao && (
-                  <div className="mx-6 mb-6 rounded-md bg-[#FDF6F9] border-l-4 border-[#A8006E] p-4">
-                    <p className="text-xs font-semibold text-[#6B0F4B] mb-1">
-                      📌 Relevante para o seu perfil:
-                    </p>
-                    <p className="text-sm text-[#1A0010] whitespace-pre-wrap">{correlacao}</p>
-                  </div>
-                )}
+
 
                 <div className="flex flex-wrap gap-2 px-6 pb-6">
                   <button
