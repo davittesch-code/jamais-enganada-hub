@@ -233,10 +233,18 @@ function PerfilPage() {
 
   const refazer = async () => {
     if (!user) return;
+    if (geracoesRestantes <= 0) {
+      setUpsellPerfil(true);
+      return;
+    }
+    const confirmado = window.confirm("Tem certeza? Seu perfil atual será substituído.");
+    if (!confirmado) return;
     await supabase.from("profile_data").delete().eq("user_id", user.id);
     await supabase.from("onboarding_responses").delete().eq("user_id", user.id).eq("step", "consulta");
-    navigate({ to: "/consulta" });
+    localStorage.removeItem("jamais_onboarding_context");
+    navigate({ to: "/onboarding" });
   };
+
 
   if (loading) return <PerfilSkeleton />;
 
