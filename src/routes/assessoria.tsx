@@ -50,8 +50,10 @@ interface Duvida {
   created_at: string;
 }
 interface AdvContato {
-  full_name: string | null;
+  nome: string | null;
+  oab: string | null;
   whatsapp: string | null;
+  especialidade: string | null;
 }
 
 const onlyDigits = (s: string | null | undefined) => (s || "").replace(/\D+/g, "");
@@ -99,8 +101,22 @@ function AssessoriaPage() {
       ]);
 
       setMeuPerfil(perfilRes.data ?? null);
-      const advObj = advRes.data as { nome?: string | null; full_name?: string | null; whatsapp?: string | null } | null;
-      setContatoAdv(advObj ? { full_name: advObj.nome ?? advObj.full_name ?? null, whatsapp: advObj.whatsapp ?? null } : null);
+      const advObj = advRes.data as {
+        nome?: string | null;
+        oab?: string | null;
+        whatsapp?: string | null;
+        especialidade?: string | null;
+      } | null;
+      setContatoAdv(
+        advObj
+          ? {
+              nome: advObj.nome ?? null,
+              oab: advObj.oab ?? null,
+              whatsapp: advObj.whatsapp ?? null,
+              especialidade: advObj.especialidade ?? null,
+            }
+          : null,
+      );
       if (pdRes.data) {
         setProfileData({
           attention_points: (pdRes.data.attention_points as unknown as AttentionPoint[]) ?? [],
@@ -115,8 +131,10 @@ function AssessoriaPage() {
   }, [user]);
 
   const temAdvogado = !!meuPerfil?.advogado_id && !!contatoAdv;
-  const nomeAdvogada = contatoAdv?.full_name || "Advogada Parceira";
+  const nomeAdvogada = contatoAdv?.nome || "Advogada Parceira";
   const inicialAdv = (nomeAdvogada.trim()[0] || "A").toUpperCase();
+  const especialidadeAdv = contatoAdv?.especialidade || "Direito da Mulher e Família";
+  const oabAdv = contatoAdv?.oab || "";
 
   const handleWhatsApp = () => {
     if (!temAdvogado) return;
@@ -233,7 +251,8 @@ function AssessoriaPage() {
                 {inicialAdv}
               </div>
               <h3 className="font-bold text-xl text-[#6B0F4B]">{nomeAdvogada}</h3>
-              <p className="text-sm text-gray-500 mb-3">Direito da Mulher e Família</p>
+              {oabAdv && <p className="text-xs text-gray-400">OAB {oabAdv}</p>}
+              <p className="text-sm text-gray-500 mb-3">{especialidadeAdv}</p>
               {temAdvogado && (
                 <span
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"

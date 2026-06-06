@@ -7,7 +7,7 @@ import {
   Search,
   Briefcase,
   Users,
-  ShieldCheck,
+  Scale,
   LogOut,
   Menu,
   Settings,
@@ -16,8 +16,7 @@ import { useAuth, type AppRole } from "@/contexts/AuthContext";
 
 const ROLE_LABEL: Record<AppRole, string> = {
   cliente: "Cliente",
-  advogado: "Advogada Parceira",
-  super_admin: "Administradora",
+  admin: "Administradora",
 };
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: AppRole[] };
@@ -27,10 +26,10 @@ const NAV: NavItem[] = [
   { to: "/perfil", label: "Meu Perfil", icon: UserCircle, roles: ["cliente"] },
   { to: "/pesquisa", label: "Tira-dúvidas", icon: Search, roles: ["cliente"] },
   { to: "/assessoria", label: "Assessoria", icon: Briefcase, roles: ["cliente"] },
-  { to: "/painel-advogada", label: "Dashboard", icon: LayoutDashboard, roles: ["advogado"] },
-  { to: "/painel-advogada/clientes", label: "Minhas Clientes", icon: Users, roles: ["advogado"] },
-  { to: "/painel-advogada/configuracoes", label: "Configurações", icon: Settings, roles: ["advogado"] },
-  { to: "/admin", label: "Admin", icon: ShieldCheck, roles: ["super_admin"] },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, roles: ["admin"] },
+  { to: "/admin/usuarios", label: "Usuários", icon: Users, roles: ["admin"] },
+  { to: "/admin/advogados", label: "Advogados", icon: Scale, roles: ["admin"] },
+  { to: "/admin/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -94,7 +93,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="mt-auto border-t border-[#E8D0E0] p-3 space-y-2">
-          {/* Card do usuário */}
           <div className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}>
             <div
               className="w-10 h-10 rounded-full bg-[#A8006E] text-white flex items-center justify-center text-base font-semibold shrink-0"
@@ -112,18 +110,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          {/* Minha conta */}
-          {!collapsed && (
-            <button
-              onClick={() => {}}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-            >
-              <Settings className="w-4 h-4 shrink-0" />
-              <span>Minha conta</span>
-            </button>
-          )}
-
-          {/* Sair */}
           <button
             onClick={handleSignOut}
             title={collapsed ? "Sair" : undefined}

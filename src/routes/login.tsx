@@ -16,8 +16,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (loading || !user || !profile) return;
-    if (profile.role === "advogado") navigate({ to: "/painel-advogada" });
-    else if (profile.role === "super_admin") navigate({ to: "/admin" });
+    if (profile.role === "admin") navigate({ to: "/admin" });
     else navigate({ to: "/onboarding" });
   }, [user, profile, loading, navigate]);
 
