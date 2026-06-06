@@ -373,8 +373,26 @@ export function useConsulta() {
     }
 
     console.log("✅ Perfil salvo no Supabase com sucesso!");
+
+    // Incrementar contador de gerações de perfil
+    try {
+      const { data: atual } = await supabase
+        .from("profiles")
+        .select("perfil_generations_used")
+        .eq("id", user.id)
+        .single();
+      const novoValor = (atual?.perfil_generations_used ?? 0) + 1;
+      await supabase
+        .from("profiles")
+        .update({ perfil_generations_used: novoValor })
+        .eq("id", user.id);
+    } catch (e) {
+      console.error("Falha ao incrementar perfil_generations_used", e);
+    }
+
     setProgress(100);
     navigate({ to: "/perfil" });
+
   }, [callGenerate, navigate, user]);
 
   const retryGerar = useCallback(() => {
