@@ -95,7 +95,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="mt-auto border-t border-[#E8D0E0] p-3 space-y-2">
           <div className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}>
             <div
-              className="w-10 h-10 rounded-full bg-[#A8006E] text-white flex items-center justify-center text-base font-semibold shrink-0"
+              className="w-10 h-10 rounded-full bg-[#552736] text-white flex items-center justify-center text-base font-semibold shrink-0"
               title={collapsed ? profile?.full_name ?? profile?.email ?? "" : undefined}
             >
               {inicial}

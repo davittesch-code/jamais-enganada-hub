@@ -11,7 +11,7 @@ export function ProgressBar({ percent }: ProgressBarProps) {
           className="absolute left-0 top-0 h-full"
           style={{
             width: `${clamped}%`,
-            background: "#A8006E",
+            background: "#552736",
             transition: "width 300ms ease",
           }}
         />

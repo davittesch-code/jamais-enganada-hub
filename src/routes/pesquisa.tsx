@@ -96,7 +96,7 @@ const SECTION_STYLES: Record<
     icon: BookOpen,
     color: "#6B0F4B",
     bg: "#FDF6F9",
-    border: "#A8006E",
+    border: "#552736",
     match: /^(o\s+que\s+diz\s+a\s+lei)\s*[:\-]?$/i,
   },
   pratica: {
@@ -117,7 +117,7 @@ const SECTION_STYLES: Record<
     icon: UserCheck,
     color: "#6B0F4B",
     bg: "#FDF6F9",
-    border: "#A8006E",
+    border: "#552736",
     match: /^(correla[çc][ãa]o\s+com\s+(?:o\s+)?perfil|relevante\s+para\s+(?:o\s+)?(?:seu\s+)?perfil)\s*[:\-]?$/i,
   },
 };
@@ -445,7 +445,7 @@ function PesquisaPage() {
                           setCopiado(false);
                         }}
                         className={`w-full text-left rounded-lg bg-white border border-[#E8D0E0] p-3 transition-colors hover:bg-[#FDF6F9] ${
-                          isAtivo ? "border-l-4 border-l-[#A8006E]" : ""
+                          isAtivo ? "border-l-4 border-l-[#552736]" : ""
                         }`}
                       >
                         <p className="text-sm text-[#1A0010] line-clamp-2">{q.question}</p>
@@ -481,7 +481,7 @@ function PesquisaPage() {
                     <span
                       key={i}
                       className="block h-1.5 w-5 rounded-full"
-                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#A8006E" }}
+                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#552736" }}
                     />
                   ))}
                 </div>
@@ -493,14 +493,14 @@ function PesquisaPage() {
                 onChange={(e) => setPergunta(e.target.value.slice(0, 500))}
                 placeholder="Digite sua dúvida jurídica aqui..."
                 disabled={loading}
-                className="w-full min-h-[80px] max-h-[160px] resize-none rounded-md border border-[#E8D0E0] p-3 text-sm focus:outline-none focus:border-[#A8006E] transition-colors"
+                className="w-full min-h-[80px] max-h-[160px] resize-none rounded-md border border-[#E8D0E0] p-3 text-sm focus:outline-none focus:border-[#552736] transition-colors"
               />
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-xs text-gray-400">{charCount}/500</span>
                 <button
                   onClick={handleSubmit}
                   disabled={!podeEnviar}
-                  className="inline-flex items-center gap-2 rounded-md bg-[#A8006E] text-white px-4 py-2 text-sm font-medium hover:bg-[#8B0058] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-md bg-[#552736] text-white px-4 py-2 text-sm font-medium hover:bg-[#8B0058] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
@@ -528,7 +528,7 @@ function PesquisaPage() {
             {!loading && !ativo && (
               <div className="rounded-xl bg-white border border-[#E8D0E0] p-8 text-center space-y-4">
                 <div className="flex justify-center">
-                  <Search className="w-14 h-14 text-[#A8006E]" />
+                  <Search className="w-14 h-14 text-[#552736]" />
                 </div>
                 <h1 className="text-2xl font-semibold text-[#6B0F4B]">
                   Tire suas dúvidas jurídicas
@@ -591,7 +591,7 @@ function PesquisaPage() {
                 <div className="flex flex-wrap gap-2 px-6 pb-6">
                   <button
                     onClick={novaPergunta}
-                    className="inline-flex items-center gap-2 rounded-md border border-[#A8006E] text-[#A8006E] px-4 py-2 text-sm font-medium hover:bg-[#FDF6F9] transition-colors"
+                    className="inline-flex items-center gap-2 rounded-md border border-[#552736] text-[#552736] px-4 py-2 text-sm font-medium hover:bg-[#FDF6F9] transition-colors"
                   >
                     Fazer outra pergunta
                   </button>

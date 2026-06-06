@@ -62,7 +62,7 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
         }}
       >
         <div className="text-center mb-4">
-          <Icon className="mx-auto text-[#A8006E]" style={{ width: 64, height: 64 }} />
+          <Icon className="mx-auto text-[#552736]" style={{ width: 64, height: 64 }} />
         </div>
 
         <h2 className="text-xl font-bold text-[#6B0F4B] text-center mb-2">{titulo}</h2>
@@ -72,7 +72,7 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
           className="text-white p-5 mb-5"
           style={{
             borderRadius: 12,
-            background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)",
+            background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)",
           }}
         >
           <p className="text-sm font-semibold mb-2">✨ Pacote Extra</p>
@@ -98,7 +98,7 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
         <button
           onClick={onConfirm}
           className="w-full text-white font-semibold py-3 rounded-md hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#A8006E" }}
+          style={{ backgroundColor: "#552736" }}
         >
           Quero continuar por R$ 29,90
         </button>

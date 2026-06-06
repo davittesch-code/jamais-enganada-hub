@@ -27,7 +27,7 @@ function OnboardingGuard({ children }: { children: ReactNode }) {
         className="flex min-h-screen items-center justify-center bg-[#FDF6F9]"
         suppressHydrationWarning
       >
-        <div className="w-8 h-8 border-2 border-[#A8006E] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#552736] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -42,7 +42,7 @@ function SplashScreen({ onStart }: { onStart: () => void }) {
       className="flex flex-col items-center justify-center min-h-dvh w-full px-6 py-10 text-center text-white"
       style={{
         background:
-          "linear-gradient(160deg, #A8006E 0%, #6B0F4B 100%)",
+          "linear-gradient(160deg, #552736 0%, #6B0F4B 100%)",
       }}
     >
       <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur flex items-center justify-center text-4xl mb-6 shadow-lg">
@@ -91,7 +91,7 @@ function SplashScreen({ onStart }: { onStart: () => void }) {
 
       <button
         onClick={onStart}
-        className="bg-white text-[#A8006E] font-semibold px-10 py-4 rounded-full text-base hover:bg-white/90 transition-all shadow-lg"
+        className="bg-white text-[#552736] font-semibold px-10 py-4 rounded-full text-base hover:bg-white/90 transition-all shadow-lg"
       >
         Começar minha jornada →
       </button>
@@ -158,12 +158,12 @@ function OnboardingPage() {
               <button
                 onClick={() => navigate({ to: "/consulta" })}
                 className="px-8 py-3 rounded-full text-base font-medium text-white transition-colors"
-                style={{ background: "#A8006E" }}
+                style={{ background: "#552736" }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "#6B0F4B")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#A8006E")
+                  (e.currentTarget.style.background = "#552736")
                 }
               >
                 Iniciar minha consulta →
