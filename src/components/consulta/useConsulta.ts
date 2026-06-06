@@ -609,7 +609,7 @@ export function useConsulta() {
       }, 5500);
 
     })();
-  }, [user, navigate, schedule, addMessage]);
+  }, [user, navigate, schedule, addMessage, finalize]);
 
   return {
     messages,
