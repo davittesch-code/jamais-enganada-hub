@@ -259,7 +259,7 @@ function PerfilPage() {
   );
   const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
-  const tituloPerfil = `Perfil Jurídico de ${firstName(nome) || "você"}`;
+  const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
   return (
     <div className="min-h-screen bg-white perfil-print-root">
