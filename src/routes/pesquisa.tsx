@@ -609,6 +609,16 @@ function PesquisaPage() {
           </section>
         </div>
       </div>
+
+      <UpsellModal
+        open={upsellOpen}
+        onClose={() => setUpsellOpen(false)}
+        tipo="perguntas"
+        onConfirm={() => {
+          setUpsellOpen(false);
+          toast("Em breve: pagamento integrado! 💜");
+        }}
+      />
     </div>
   );
 }
