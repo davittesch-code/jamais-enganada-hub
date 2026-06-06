@@ -172,10 +172,14 @@ export type Database = {
       profiles: {
         Row: {
           advogado_id: string | null
+          bio: string | null
           created_at: string
           email: string | null
+          escritorio_nome: string | null
+          especialidade: string | null
           full_name: string | null
           id: string
+          oab_number: string | null
           partner_code: string | null
           perfil_generations_limit: number
           perfil_generations_used: number
@@ -188,10 +192,14 @@ export type Database = {
         }
         Insert: {
           advogado_id?: string | null
+          bio?: string | null
           created_at?: string
           email?: string | null
+          escritorio_nome?: string | null
+          especialidade?: string | null
           full_name?: string | null
           id: string
+          oab_number?: string | null
           partner_code?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
@@ -204,10 +212,14 @@ export type Database = {
         }
         Update: {
           advogado_id?: string | null
+          bio?: string | null
           created_at?: string
           email?: string | null
+          escritorio_nome?: string | null
+          especialidade?: string | null
           full_name?: string | null
           id?: string
+          oab_number?: string | null
           partner_code?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
@@ -268,13 +280,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_my_advogado_contact: {
+      get_advogado_stats: { Args: never; Returns: Json }
+      get_minhas_clientes: {
         Args: never
         Returns: {
+          created_at: string
+          email: string
           full_name: string
-          whatsapp: string
+          id: string
+          nivel_vulnerabilidade: string
+          perfil_generations_used: number
+          queries_limit: number
+          queries_used: number
+          status: string
+          tem_perfil: boolean
         }[]
       }
+      get_my_advogado_contact: { Args: never; Returns: Json }
       is_my_client: { Args: { _row_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
     }

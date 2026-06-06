@@ -99,8 +99,8 @@ function AssessoriaPage() {
       ]);
 
       setMeuPerfil(perfilRes.data ?? null);
-      const advArr = advRes.data as AdvContato[] | null;
-      setContatoAdv(Array.isArray(advArr) && advArr.length > 0 ? advArr[0] : null);
+      const advObj = advRes.data as { nome?: string | null; full_name?: string | null; whatsapp?: string | null } | null;
+      setContatoAdv(advObj ? { full_name: advObj.nome ?? advObj.full_name ?? null, whatsapp: advObj.whatsapp ?? null } : null);
       if (pdRes.data) {
         setProfileData({
           attention_points: (pdRes.data.attention_points as unknown as AttentionPoint[]) ?? [],
