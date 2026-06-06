@@ -242,39 +242,61 @@ function PerfilPage() {
   );
   const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
+  const tituloPerfil = nome ? `Perfil Jurídico de ${firstName(nome)}` : "Seu Perfil Jurídico";
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white perfil-print-root">
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 14mm; }
+          html, body { background: #ffffff !important; }
+          .no-print { display: none !important; }
+          .perfil-print-root section { page-break-inside: avoid; padding: 16px 0 !important; max-width: 100% !important; }
+          .perfil-print-root h1, .perfil-print-root h2, .perfil-print-root h3 { color: #6B0F4B !important; }
+          .perfil-print-root .print-hero {
+            background: #6B0F4B !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color: #ffffff !important;
+            border-radius: 8px;
+            padding: 20px !important;
+            margin-bottom: 16px;
+          }
+          .perfil-print-root .print-hero * { color: #ffffff !important; }
+          .perfil-print-root .grid { display: grid !important; }
+          .perfil-print-root [data-print-card] {
+            border: 1px solid #E5E7EB !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+          }
+          .perfil-print-root .recharts-wrapper { page-break-inside: avoid; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+      `}</style>
+
       {/* SEÇÃO 1 — Hero */}
       <section
-        className="px-6 md:px-12 py-12 text-white text-center"
+        className="px-6 md:px-12 py-12 text-white text-center print-hero"
         style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
       >
         <Venus className="w-12 h-12 mx-auto mb-4" />
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
-          Perfil Jurídico de {nome || "você"}
+          {tituloPerfil}
         </h1>
         <p className="text-white/80 text-sm mb-4">
           Gerado em {formatDate(data.generated_at)}
         </p>
         <div
-          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
+          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
           style={{ backgroundColor: nivelCfg.bg, color: nivelCfg.color }}
         >
           Vulnerabilidade {nivel}
         </div>
         {data.extra_data?.frase_de_forca && (
-          <p className="text-lg md:text-xl italic max-w-2xl mx-auto mb-6 leading-relaxed">
+          <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
             "{data.extra_data.frase_de_forca}"
           </p>
         )}
-        <Button
-          onClick={() => window.print()}
-          variant="outline"
-          className="bg-white text-[#6B0F4B] hover:bg-white/90 border-white"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Baixar PDF
-        </Button>
       </section>
 
       {/* SEÇÃO 2 — Radar */}
