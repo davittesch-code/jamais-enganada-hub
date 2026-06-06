@@ -20,7 +20,7 @@ import {
   Scale,
   Venus,
   MessageCircle,
-  UserCheck,
+  
   RotateCcw,
 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
