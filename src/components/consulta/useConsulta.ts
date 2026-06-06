@@ -552,6 +552,40 @@ export function useConsulta() {
 
       const nome = ctx.nome ?? "amiga";
 
+      // Se já existem respostas de consulta salvas → retomar e gerar direto
+      try {
+        const { data: prev } = await supabase
+          .from("onboarding_responses")
+          .select("question, answer, created_at")
+          .eq("user_id", user.id)
+          .eq("step", "consulta")
+          .order("created_at", { ascending: true });
+        if (prev && prev.length > 0) {
+          // dedup por pergunta — mantém a última resposta
+          const map = new Map<string, string>();
+          for (const r of prev) {
+            if (r.answer) map.set(r.question, r.answer);
+          }
+          respostasRef.current = Array.from(map.entries()).map(([question, answer]) => ({
+            question,
+            answer,
+          }));
+
+          schedule(
+            () =>
+              addMessage(
+                "sofia",
+                `${nome}, encontrei as respostas que você já tinha me dado. Não precisa preencher de novo — vou direto gerar o seu perfil. 💜`,
+              ),
+            600,
+          );
+          schedule(() => void finalize(), 2200);
+          return;
+        }
+      } catch (e) {
+        console.error("consulta resume check failed", e);
+      }
+
       schedule(
         () =>
           addMessage(
@@ -573,6 +607,7 @@ export function useConsulta() {
         setInputDisabled(false);
         currentIndexRef.current = -1;
       }, 5500);
+
     })();
   }, [user, navigate, schedule, addMessage]);
 
