@@ -513,28 +513,64 @@ function PerfilPage() {
 
       {/* SEÇÃO 8 — Ações */}
       <section
-        className="px-6 md:px-12 py-12 text-center"
+        className="px-6 md:px-12 py-12 text-center no-print"
         style={{ backgroundColor: "#FDF6F9" }}
       >
-        <div className="flex flex-col md:flex-row gap-3 justify-center max-w-2xl mx-auto">
+        <h2 className="text-xl font-bold text-[#6B0F4B] mb-2">E agora?</h2>
+        <p className="text-gray-600 mb-6 max-w-xl mx-auto text-sm">
+          Salve seu perfil, tire dúvidas com a Sofia ou fale diretamente com sua assessora.
+        </p>
+        <div className="flex flex-col md:flex-row gap-3 justify-center max-w-3xl mx-auto">
+          <Button
+            onClick={() => window.print()}
+            className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Baixar resultado em PDF
+          </Button>
           <Button
             onClick={() => navigate({ to: "/pesquisa" })}
-            className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+            variant="outline"
+            className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Tirar uma dúvida
           </Button>
-          <Button
-            onClick={() => navigate({ to: "/assessoria" })}
-            variant="outline"
-            className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
-          >
-            <UserCheck className="w-4 h-4 mr-2" />
-            Falar com assessora
-          </Button>
+          {(() => {
+            const numero = onlyDigits(advogado?.whatsapp ?? "");
+            const nomeAdv = advogado?.full_name ?? "sua assessora";
+            const mensagem = encodeURIComponent(
+              `Olá! Sou ${nome || "uma cliente"} e gostaria de falar sobre meu perfil jurídico.`,
+            );
+            const href = numero ? `https://wa.me/${numero}?text=${mensagem}` : "";
+            return (
+              <Button
+                asChild={!!numero}
+                disabled={!numero}
+                variant="outline"
+                className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
+                title={numero ? `Falar com ${nomeAdv}` : "Sua assessora ainda não cadastrou um WhatsApp"}
+              >
+                {numero ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Falar com assessoria
+                  </a>
+                ) : (
+                  <span>
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Falar com assessoria
+                  </span>
+                )}
+              </Button>
+            );
+          })()}
+        </div>
+
+        <div className="mt-8">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-[#FDF6F9]">
+              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-white">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Refazer consulta
               </Button>
