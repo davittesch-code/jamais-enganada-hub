@@ -271,6 +271,15 @@ export type Database = {
     Functions: {
       get_my_advogado_contact: { Args: never; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
+      list_advogadas_publicas: {
+        Args: never
+        Returns: {
+          especialidade: string
+          id: string
+          nome: string
+          oab: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
