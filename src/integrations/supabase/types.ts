@@ -49,6 +49,36 @@ export type Database = {
           },
         ]
       }
+      advogados: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          especialidade: string | null
+          id: string
+          nome: string
+          oab: string
+          whatsapp: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          especialidade?: string | null
+          id?: string
+          nome: string
+          oab: string
+          whatsapp: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          especialidade?: string | null
+          id?: string
+          nome?: string
+          oab?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       onboarding_responses: {
         Row: {
           answer: string | null
@@ -78,44 +108,6 @@ export type Database = {
           {
             foreignKeyName: "onboarding_responses_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      partner_links: {
-        Row: {
-          advogado_id: string
-          code: string
-          commission_percent: number
-          created_at: string
-          id: string
-          total_clients: number
-          total_revenue: number
-        }
-        Insert: {
-          advogado_id: string
-          code: string
-          commission_percent?: number
-          created_at?: string
-          id?: string
-          total_clients?: number
-          total_revenue?: number
-        }
-        Update: {
-          advogado_id?: string
-          code?: string
-          commission_percent?: number
-          created_at?: string
-          id?: string
-          total_clients?: number
-          total_revenue?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "partner_links_advogado_id_fkey"
-            columns: ["advogado_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -180,13 +172,12 @@ export type Database = {
           full_name: string | null
           id: string
           oab_number: string | null
-          partner_code: string | null
           perfil_generations_limit: number
           perfil_generations_used: number
           plan_type: string
           queries_limit: number
           queries_used: number
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
           status: string
           whatsapp: string | null
         }
@@ -200,13 +191,12 @@ export type Database = {
           full_name?: string | null
           id: string
           oab_number?: string | null
-          partner_code?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
           plan_type?: string
           queries_limit?: number
           queries_used?: number
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           status?: string
           whatsapp?: string | null
         }
@@ -220,13 +210,12 @@ export type Database = {
           full_name?: string | null
           id?: string
           oab_number?: string | null
-          partner_code?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
           plan_type?: string
           queries_limit?: number
           queries_used?: number
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           status?: string
           whatsapp?: string | null
         }
@@ -235,7 +224,7 @@ export type Database = {
             foreignKeyName: "profiles_advogado_id_fkey"
             columns: ["advogado_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "advogados"
             referencedColumns: ["id"]
           },
         ]
@@ -280,28 +269,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_advogado_stats: { Args: never; Returns: Json }
-      get_minhas_clientes: {
-        Args: never
-        Returns: {
-          created_at: string
-          email: string
-          full_name: string
-          id: string
-          nivel_vulnerabilidade: string
-          perfil_generations_used: number
-          queries_limit: number
-          queries_used: number
-          status: string
-          tem_perfil: boolean
-        }[]
-      }
       get_my_advogado_contact: { Args: never; Returns: Json }
-      is_my_client: { Args: { _row_user_id: string }; Returns: boolean }
-      is_super_admin: { Args: never; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "cliente" | "advogado" | "super_admin"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -428,8 +400,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["cliente", "advogado", "super_admin"],
-    },
+    Enums: {},
   },
 } as const
