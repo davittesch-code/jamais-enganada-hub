@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Copy, Loader2, MessageCircle, Scale, Check } from "lucide-react";
+import { Search, Copy, Loader2, MessageCircle, Scale, Check, BookOpen, Lightbulb, AlertTriangle, UserCheck, CheckCircle2 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
