@@ -152,22 +152,35 @@ function formatDate(iso: string) {
   }
 }
 
+function onlyDigits(s: string) {
+  return (s || "").replace(/\D+/g, "");
+}
+
+function firstName(full: string) {
+  return (full || "").trim().split(/\s+/)[0] ?? "";
+}
+
 function PerfilPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ProfileData | null>(null);
   const [nome, setNome] = useState<string>("");
+  const [advogado, setAdvogado] = useState<{ full_name: string | null; whatsapp: string | null } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       setLoading(true);
-      const [{ data: pd }, { data: prof }] = await Promise.all([
+      const [{ data: pd }, { data: prof }, { data: adv }] = await Promise.all([
         supabase.from("profile_data").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.rpc("get_my_advogado_contact"),
       ]);
       if (prof?.full_name) setNome(prof.full_name);
+      if (Array.isArray(adv) && adv.length > 0) {
+        setAdvogado(adv[0] as { full_name: string | null; whatsapp: string | null });
+      }
       if (pd) {
         setData({
           areas: (pd.areas as unknown as ProfileData["areas"]) ?? {},
