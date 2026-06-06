@@ -27,7 +27,9 @@ const NAV: NavItem[] = [
   { to: "/perfil", label: "Meu Perfil", icon: UserCircle, roles: ["cliente"] },
   { to: "/pesquisa", label: "Tira-dúvidas", icon: Search, roles: ["cliente"] },
   { to: "/assessoria", label: "Assessoria", icon: Briefcase, roles: ["cliente"] },
-  { to: "/painel-advogada", label: "Clientes", icon: Users, roles: ["advogado"] },
+  { to: "/painel-advogada", label: "Dashboard", icon: LayoutDashboard, roles: ["advogado"] },
+  { to: "/painel-advogada/clientes", label: "Minhas Clientes", icon: Users, roles: ["advogado"] },
+  { to: "/painel-advogada/configuracoes", label: "Configurações", icon: Settings, roles: ["advogado"] },
   { to: "/admin", label: "Admin", icon: ShieldCheck, roles: ["super_admin"] },
 ];
 
