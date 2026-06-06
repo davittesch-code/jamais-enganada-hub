@@ -152,22 +152,35 @@ function formatDate(iso: string) {
   }
 }
 
+function onlyDigits(s: string) {
+  return (s || "").replace(/\D+/g, "");
+}
+
+function firstName(full: string) {
+  return (full || "").trim().split(/\s+/)[0] ?? "";
+}
+
 function PerfilPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ProfileData | null>(null);
   const [nome, setNome] = useState<string>("");
+  const [advogado, setAdvogado] = useState<{ full_name: string | null; whatsapp: string | null } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       setLoading(true);
-      const [{ data: pd }, { data: prof }] = await Promise.all([
+      const [{ data: pd }, { data: prof }, { data: adv }] = await Promise.all([
         supabase.from("profile_data").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.rpc("get_my_advogado_contact"),
       ]);
       if (prof?.full_name) setNome(prof.full_name);
+      if (Array.isArray(adv) && adv.length > 0) {
+        setAdvogado(adv[0] as { full_name: string | null; whatsapp: string | null });
+      }
       if (pd) {
         setData({
           areas: (pd.areas as unknown as ProfileData["areas"]) ?? {},
@@ -229,39 +242,62 @@ function PerfilPage() {
   );
   const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
+  const tituloPerfil = nome ? `Perfil Jurídico de ${firstName(nome)}` : "Seu Perfil Jurídico";
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white perfil-print-root">
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 14mm; }
+          html, body { background: #ffffff !important; }
+          aside, nav, header, .no-print { display: none !important; }
+          main { flex: 1 1 100% !important; }
+          .perfil-print-root section { page-break-inside: avoid; padding: 16px 0 !important; max-width: 100% !important; }
+          .perfil-print-root h1, .perfil-print-root h2, .perfil-print-root h3 { color: #6B0F4B !important; }
+          .perfil-print-root .print-hero {
+            background: #6B0F4B !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color: #ffffff !important;
+            border-radius: 8px;
+            padding: 20px !important;
+            margin-bottom: 16px;
+          }
+          .perfil-print-root .print-hero * { color: #ffffff !important; }
+          .perfil-print-root .grid { display: grid !important; }
+          .perfil-print-root [data-print-card] {
+            border: 1px solid #E5E7EB !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+          }
+          .perfil-print-root .recharts-wrapper { page-break-inside: avoid; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+      `}</style>
+
       {/* SEÇÃO 1 — Hero */}
       <section
-        className="px-6 md:px-12 py-12 text-white text-center"
+        className="px-6 md:px-12 py-12 text-white text-center print-hero"
         style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
       >
         <Venus className="w-12 h-12 mx-auto mb-4" />
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
-          Perfil Jurídico de {nome || "você"}
+          {tituloPerfil}
         </h1>
         <p className="text-white/80 text-sm mb-4">
           Gerado em {formatDate(data.generated_at)}
         </p>
         <div
-          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
+          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
           style={{ backgroundColor: nivelCfg.bg, color: nivelCfg.color }}
         >
           Vulnerabilidade {nivel}
         </div>
         {data.extra_data?.frase_de_forca && (
-          <p className="text-lg md:text-xl italic max-w-2xl mx-auto mb-6 leading-relaxed">
+          <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
             "{data.extra_data.frase_de_forca}"
           </p>
         )}
-        <Button
-          onClick={() => window.print()}
-          variant="outline"
-          className="bg-white text-[#6B0F4B] hover:bg-white/90 border-white"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Baixar PDF
-        </Button>
       </section>
 
       {/* SEÇÃO 2 — Radar */}
@@ -478,28 +514,64 @@ function PerfilPage() {
 
       {/* SEÇÃO 8 — Ações */}
       <section
-        className="px-6 md:px-12 py-12 text-center"
+        className="px-6 md:px-12 py-12 text-center no-print"
         style={{ backgroundColor: "#FDF6F9" }}
       >
-        <div className="flex flex-col md:flex-row gap-3 justify-center max-w-2xl mx-auto">
+        <h2 className="text-xl font-bold text-[#6B0F4B] mb-2">E agora?</h2>
+        <p className="text-gray-600 mb-6 max-w-xl mx-auto text-sm">
+          Salve seu perfil, tire dúvidas com a Sofia ou fale diretamente com sua assessora.
+        </p>
+        <div className="flex flex-col md:flex-row gap-3 justify-center max-w-3xl mx-auto">
+          <Button
+            onClick={() => window.print()}
+            className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Baixar resultado em PDF
+          </Button>
           <Button
             onClick={() => navigate({ to: "/pesquisa" })}
-            className="bg-[#A8006E] hover:bg-[#8B005A] text-white"
+            variant="outline"
+            className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Tirar uma dúvida
           </Button>
-          <Button
-            onClick={() => navigate({ to: "/assessoria" })}
-            variant="outline"
-            className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
-          >
-            <UserCheck className="w-4 h-4 mr-2" />
-            Falar com assessora
-          </Button>
+          {(() => {
+            const numero = onlyDigits(advogado?.whatsapp ?? "");
+            const nomeAdv = advogado?.full_name ?? "sua assessora";
+            const mensagem = encodeURIComponent(
+              `Olá! Sou ${nome || "uma cliente"} e gostaria de falar sobre meu perfil jurídico.`,
+            );
+            const href = numero ? `https://wa.me/${numero}?text=${mensagem}` : "";
+            return (
+              <Button
+                asChild={!!numero}
+                disabled={!numero}
+                variant="outline"
+                className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
+                title={numero ? `Falar com ${nomeAdv}` : "Sua assessora ainda não cadastrou um WhatsApp"}
+              >
+                {numero ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Falar com assessoria
+                  </a>
+                ) : (
+                  <span>
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Falar com assessoria
+                  </span>
+                )}
+              </Button>
+            );
+          })()}
+        </div>
+
+        <div className="mt-8">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-[#FDF6F9]">
+              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-white">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Refazer consulta
               </Button>

@@ -179,6 +179,7 @@ export type Database = {
           partner_code: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: string
+          whatsapp: string | null
         }
         Insert: {
           advogado_id?: string | null
@@ -189,6 +190,7 @@ export type Database = {
           partner_code?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
+          whatsapp?: string | null
         }
         Update: {
           advogado_id?: string | null
@@ -199,6 +201,7 @@ export type Database = {
           partner_code?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
+          whatsapp?: string | null
         }
         Relationships: [
           {
@@ -250,6 +253,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_advogado_contact: {
+        Args: never
+        Returns: {
+          full_name: string
+          whatsapp: string
+        }[]
+      }
       is_my_client: { Args: { _row_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
     }
