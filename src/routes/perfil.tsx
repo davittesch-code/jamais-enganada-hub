@@ -165,21 +165,38 @@ function PerfilPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ProfileData | null>(null);
-  const [nome, setNome] = useState<string>("");
-  const [advogado, setAdvogado] = useState<{ full_name: string | null; whatsapp: string | null } | null>(null);
+  const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
+  const [whatsappAdm, setWhatsappAdm] = useState<string>("5511999999999");
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       setLoading(true);
-      const [{ data: pd }, { data: prof }, { data: adv }] = await Promise.all([
-        supabase.from("profile_data").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-        supabase.rpc("get_my_advogado_contact"),
-      ]);
-      if (prof?.full_name) setNome(prof.full_name);
+      const { data: pd } = await supabase
+        .from("profile_data")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      // Nome da usuária (query dedicada e explícita)
+      const { data: perfilUsuaria, error: erroNome } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      console.log("Nome buscado:", perfilUsuaria?.full_name, "Erro:", erroNome);
+      if (perfilUsuaria?.full_name) {
+        setNomeUsuaria(perfilUsuaria.full_name);
+      } else {
+        setNomeUsuaria(user.email?.split("@")[0] || "cliente");
+      }
+
+      // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
+      const { data: adv } = await supabase.rpc("get_my_advogado_contact");
       if (Array.isArray(adv) && adv.length > 0) {
-        setAdvogado(adv[0] as { full_name: string | null; whatsapp: string | null });
+        const whats = onlyDigits((adv[0] as { whatsapp: string | null }).whatsapp ?? "");
+        if (whats) setWhatsappAdm(whats);
+        console.log("WhatsApp do adm:", whats || "(usando padrão)");
       }
       if (pd) {
         setData({
@@ -242,7 +259,7 @@ function PerfilPage() {
   );
   const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
-  const tituloPerfil = `Perfil Jurídico de ${firstName(nome) || "você"}`;
+  const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
   return (
     <div className="min-h-screen bg-white perfil-print-root">
@@ -542,13 +559,12 @@ function PerfilPage() {
             Tirar uma dúvida
           </Button>
           {(() => {
-            const numero = onlyDigits(advogado?.whatsapp ?? "") || "5511999999999";
-            const nomeExibido = firstName(nome) || "uma cliente";
+            const nomeExibido = firstName(nomeUsuaria) || "uma cliente";
             const mensagem = encodeURIComponent(
               `Olá! Sou ${nomeExibido}, cliente da plataforma Jamais Enganada. ` +
                 `Recebi meu perfil jurídico e gostaria de conversar sobre minha situação.`,
             );
-            const href = `https://wa.me/${numero}?text=${mensagem}`;
+            const href = `https://wa.me/${whatsappAdm}?text=${mensagem}`;
             return (
               <Button
                 onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
