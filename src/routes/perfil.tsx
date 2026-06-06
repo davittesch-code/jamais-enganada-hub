@@ -197,6 +197,18 @@ function PerfilPage() {
         setNomeUsuaria(user.email?.split("@")[0] || "cliente");
       }
 
+      // Limites de gerações de perfil
+      const { data: limitesPerfil } = await supabase
+        .from("profiles")
+        .select("perfil_generations_used, perfil_generations_limit")
+        .eq("id", user.id)
+        .single();
+      if (limitesPerfil) {
+        setGeracoesUsed(limitesPerfil.perfil_generations_used ?? 0);
+        setGeracoesLimit(limitesPerfil.perfil_generations_limit ?? 2);
+      }
+
+
       // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
       if (Array.isArray(adv) && adv.length > 0) {
