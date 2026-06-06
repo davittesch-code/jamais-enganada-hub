@@ -160,10 +160,14 @@ function ConsultaPage() {
   );
 }
 
+import { PrivateRoute } from "@/components/PrivateRoute";
+
 export const Route = createFileRoute("/consulta")({
   component: () => (
-    <ConsultaGuard>
-      <ConsultaPage />
-    </ConsultaGuard>
+    <PrivateRoute>
+      <ConsultaGuard>
+        <ConsultaPage />
+      </ConsultaGuard>
+    </PrivateRoute>
   ),
 });
