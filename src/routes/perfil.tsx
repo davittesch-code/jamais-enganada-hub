@@ -559,13 +559,12 @@ function PerfilPage() {
             Tirar uma dúvida
           </Button>
           {(() => {
-            const numero = onlyDigits(advogado?.whatsapp ?? "") || "5511999999999";
-            const nomeExibido = firstName(nome) || "uma cliente";
+            const nomeExibido = firstName(nomeUsuaria) || "uma cliente";
             const mensagem = encodeURIComponent(
               `Olá! Sou ${nomeExibido}, cliente da plataforma Jamais Enganada. ` +
                 `Recebi meu perfil jurídico e gostaria de conversar sobre minha situação.`,
             );
-            const href = `https://wa.me/${numero}?text=${mensagem}`;
+            const href = `https://wa.me/${whatsappAdm}?text=${mensagem}`;
             return (
               <Button
                 onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
