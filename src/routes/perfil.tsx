@@ -400,7 +400,11 @@ function PerfilPage() {
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">💡 Insights Jurídicos</h2>
           <p className="text-gray-600 mb-6">O que a lei diz sobre a sua situação</p>
-          <Accordion type="multiple" className="space-y-2">
+          <Accordion
+            type="multiple"
+            className="space-y-2"
+            defaultValue={data.insights.map((_, i) => `ins-${i}`)}
+          >
             {data.insights.map((ins, i) => (
               <AccordionItem
                 key={i}
