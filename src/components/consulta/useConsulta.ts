@@ -58,20 +58,35 @@ function temFilhos(v: string | undefined) {
 
 function isSolteiraOuDiv(v: string | undefined) {
   if (!v) return false;
-  return /(solteira|divorciada|separada|separando)/i.test(v);
+  return /(solteira|divorciad|separad)/i.test(v);
 }
 function isNamorando(v: string | undefined) {
   return !!v && /namor/i.test(v);
 }
 function isUniaoOuCasada(v: string | undefined) {
-  return !!v && /(uni[aã]o|casada|casamento)/i.test(v);
+  return !!v && /(uni[aã]o|casad|casamento|esposa|marido|c[oô]njuge)/i.test(v);
+}
+function querDivorciar(ctx: OnboardingCtx) {
+  const blob = `${ctx.estado_civil ?? ""} ${ctx.motivacao_principal ?? ""}`.toLowerCase();
+  return /(divorciar|me separar|quero (a )?separa|pedir (o )?div[oó]rcio|sair do casamento)/i.test(blob);
 }
 
 function buildQuestions(ctx: OnboardingCtx): Question[] {
   const qs: Question[] = [];
 
-  // Q1 — depende do estado civil
-  if (isSolteiraOuDiv(ctx.estado_civil)) {
+  // Q1 — depende do estado civil e da intenção
+  if (querDivorciar(ctx)) {
+    qs.push({
+      id: "q1",
+      text: "Você me contou que quer se divorciar. Para eu te ajudar com precisão: seu marido já sabe dessa decisão, ou ainda é algo que você está planejando em silêncio?",
+      options: [
+        "Ele já sabe e concorda",
+        "Ele sabe mas resiste",
+        "Ainda estou planejando em silêncio",
+        "Já procurei advogado(a)",
+      ],
+    });
+  } else if (isSolteiraOuDiv(ctx.estado_civil)) {
     qs.push({
       id: "q1",
       text: "Você está passando por algum processo de separação ou tem pendências jurídicas com um ex-parceiro?",
