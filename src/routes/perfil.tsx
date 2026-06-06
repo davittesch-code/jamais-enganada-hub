@@ -250,7 +250,8 @@ function PerfilPage() {
         @media print {
           @page { size: A4; margin: 14mm; }
           html, body { background: #ffffff !important; }
-          .no-print { display: none !important; }
+          aside, nav, header, .no-print { display: none !important; }
+          main { flex: 1 1 100% !important; }
           .perfil-print-root section { page-break-inside: avoid; padding: 16px 0 !important; max-width: 100% !important; }
           .perfil-print-root h1, .perfil-print-root h2, .perfil-print-root h3 { color: #6B0F4B !important; }
           .perfil-print-root .print-hero {
