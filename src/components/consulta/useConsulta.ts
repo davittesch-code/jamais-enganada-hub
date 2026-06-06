@@ -71,11 +71,23 @@ function querDivorciar(ctx: OnboardingCtx) {
   return /(divorciar|me separar|quero (a )?separa|pedir (o )?div[oó]rcio|sair do casamento)/i.test(blob);
 }
 
-function buildQuestions(ctx: OnboardingCtx): Question[] {
+type Answers = Record<string, string>;
+
+function matchAny(v: string | undefined, re: RegExp) {
+  return !!v && re.test(v);
+}
+
+function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
   const qs: Question[] = [];
+  const querDiv = querDivorciar(ctx);
+  const q1Ans = answers.q1 ?? "";
+  const planejandoSilencio = matchAny(q1Ans, /sil[eê]ncio|planejando|ainda n[aã]o sabe|n[aã]o sabe ainda/i);
+  const eleSabeResiste = matchAny(q1Ans, /resiste|n[aã]o aceita|n[aã]o concorda/i);
+  const eleSabeConcorda = matchAny(q1Ans, /concorda|j[aá] sabe e concorda|de acordo/i);
+  const jaProcurouAdv = matchAny(q1Ans, /procurei advogad|j[aá] tenho advogad/i);
 
   // Q1 — depende do estado civil e da intenção
-  if (querDivorciar(ctx)) {
+  if (querDiv) {
     qs.push({
       id: "q1",
       text: "Você me contou que quer se divorciar. Para eu te ajudar com precisão: seu marido já sabe dessa decisão, ou ainda é algo que você está planejando em silêncio?",
@@ -112,13 +124,54 @@ function buildQuestions(ctx: OnboardingCtx): Question[] {
     });
   }
 
-  // Q2 — só se tem filhos
+  // Q2 — só se tem filhos, e adaptada ao contexto
   if (temFilhos(ctx.tem_filhos)) {
-    qs.push({
-      id: "q2",
-      text: "Me conta mais sobre a guarda e a pensão dos seus filhos. Existe algum acordo formal ou processo em andamento?",
-      options: ["Temos acordo formal", "É informal entre nós", "Está na Justiça", "Não há esse processo"],
-    });
+    if (querDiv && planejandoSilencio) {
+      qs.push({
+        id: "q2",
+        text: "Como você imagina a situação dos seus filhos quando o divórcio acontecer? Já pensou em guarda, pensão ou em como contar pra eles?",
+        options: [
+          "Quero a guarda comigo",
+          "Penso em guarda compartilhada",
+          "Ainda não pensei nisso",
+          "Tenho medo da reação dele",
+        ],
+      });
+    } else if (querDiv && eleSabeResiste) {
+      qs.push({
+        id: "q2",
+        text: "Como vocês têm tratado a questão dos filhos diante da resistência dele? Já conversaram sobre guarda e pensão?",
+        options: [
+          "Conversamos, sem acordo",
+          "Ele usa os filhos como pressão",
+          "Ainda não tocamos no assunto",
+          "Já está na Justiça",
+        ],
+      });
+    } else if (querDiv && (eleSabeConcorda || jaProcurouAdv)) {
+      qs.push({
+        id: "q2",
+        text: "Sobre os filhos: vocês já definiram como ficará a guarda e a pensão, ou ainda está sendo conversado?",
+        options: [
+          "Já temos um acordo verbal",
+          "Vamos formalizar no divórcio",
+          "Está em discussão",
+          "Já está na Justiça",
+        ],
+      });
+    } else if (isSolteiraOuDiv(ctx.estado_civil)) {
+      qs.push({
+        id: "q2",
+        text: "Sobre seus filhos: como está hoje a guarda e a pensão com o pai deles?",
+        options: ["Tenho a guarda e recebo pensão", "Tenho a guarda, sem pensão", "Guarda compartilhada", "Está na Justiça", "Pai ausente"],
+      });
+    } else {
+      qs.push({
+        id: "q2",
+        text: "Me conta sobre seus filhos: existe algum acordo ou processo em andamento sobre guarda e pensão, ou hoje está tudo tranquilo?",
+        options: ["Tudo tranquilo", "Acordo informal", "Acordo formal", "Está na Justiça"],
+      });
+    }
   }
 
   // Q3 — violência
@@ -128,17 +181,29 @@ function buildQuestions(ctx: OnboardingCtx): Question[] {
     options: ["Não, nunca", "Já existiu, mas passou", "Estou passando por isso"],
   });
 
-  // Bloco 2
-  qs.push({
-    id: "q4",
-    text: "Você tem imóveis? Se sim, estão no seu nome, no nome do parceiro ou são compartilhados?",
-    options: ["Não tenho imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
-  });
+  // Bloco 2 — imóveis, adaptado
+  if (querDiv && planejandoSilencio) {
+    qs.push({
+      id: "q4",
+      text: "Pensando no patrimônio: existem imóveis no nome de vocês? Estão no seu nome, no dele ou compartilhados?",
+      options: ["Não temos imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
+    });
+  } else {
+    qs.push({
+      id: "q4",
+      text: "Você tem imóveis? Se sim, estão no seu nome, no nome do parceiro ou são compartilhados?",
+      options: ["Não tenho imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
+    });
+  }
+
   qs.push({
     id: "q5",
-    text: "Como está sua situação financeira hoje? Você tem renda própria?",
-    options: ["Sim, renda própria e estável", "Renda própria mas irregular", "Dependo financeiramente de alguém", "Estou desempregada"],
+    text: querDiv
+      ? "Pensando em independência financeira: você tem renda própria hoje? Como está sua situação?"
+      : "Como está sua situação financeira hoje? Você tem renda própria?",
+    options: ["Sim, renda própria e estável", "Renda própria mas irregular", "Dependo financeiramente dele", "Estou desempregada"],
   });
+
   qs.push({
     id: "q6",
     text: "Você tem dívidas — pessoais, de cartão, financiamentos ou dívidas que possam ser do casal?",
@@ -171,10 +236,13 @@ function buildQuestions(ctx: OnboardingCtx): Question[] {
     options: ["Sim, está no meu nome", "Sim, mas não sei os detalhes", "Não tenho", "Não sei se tenho"],
   });
 
-  // Q11 — aberta
+  // Q11 — aberta, adaptada
   qs.push({
     id: "q11",
-    text: "Para fechar, quero que você me conte livremente: existe algo que ainda não perguntei mas que você sente que é importante para o seu perfil? Pode ser qualquer coisa — um medo, uma dúvida, uma situação específica.",
+    text:
+      querDiv && planejandoSilencio
+        ? "Para fechar: existe algo que você ainda não me contou e que te tira o sono nesse planejamento? Pode ser um medo, uma dúvida ou algo prático que te trava."
+        : "Para fechar, quero que você me conte livremente: existe algo que ainda não perguntei mas que você sente que é importante para o seu perfil? Pode ser qualquer coisa — um medo, uma dúvida, uma situação específica.",
   });
 
   return qs;
