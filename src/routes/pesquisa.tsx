@@ -230,7 +230,13 @@ function PesquisaPage() {
   const [whatsappAdm, setWhatsappAdm] = useState("5511999999999");
   const [perfilCtx, setPerfilCtx] = useState<Record<string, string>>({});
   const [areasCriticas, setAreasCriticas] = useState("não identificadas");
+  const [queriesUsed, setQueriesUsed] = useState(0);
+  const [queriesLimit, setQueriesLimit] = useState(5);
+  const [upsellOpen, setUpsellOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
+
 
   // Carga inicial
   useEffect(() => {
