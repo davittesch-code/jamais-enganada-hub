@@ -385,11 +385,6 @@ function PesquisaPage() {
     textareaRef.current?.focus();
   };
 
-  const correlacao = useMemo(() => {
-    if (!ativo?.answer) return null;
-    const m = ativo.answer.match(/(?:5\.?\s*)?correlação com (?:o\s*)?perfil[:\s]*([\s\S]*)$/i);
-    return m?.[1]?.trim() || null;
-  }, [ativo]);
 
   return (
     <div className="min-h-screen bg-[#FDF6F9]">
