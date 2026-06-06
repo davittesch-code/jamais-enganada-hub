@@ -404,6 +404,9 @@ export function useConsulta() {
       setCurrentOptions(null);
       addMessage("user", trimmed);
       respostasRef.current.push({ question: q.text, answer: trimmed });
+      answersMapRef.current[q.id] = trimmed;
+      // Recompute remaining questions with the latest answers so wording adapts
+      questionsRef.current = buildQuestions(ctxRef.current, answersMapRef.current);
 
       if (user) {
         try {
