@@ -53,7 +53,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full bg-background">
       <aside
-        className={`${open ? "w-64" : "w-16"} hidden sm:flex flex-col border-r bg-sidebar transition-all duration-200`}
+        className={`${open ? "w-64" : "w-16"} hidden sm:flex flex-col border-r bg-sidebar transition-all duration-200 sticky top-0 h-screen overflow-y-auto self-start`}
       >
         <div className="flex items-center justify-between px-4 py-5 border-b">
           {open && (
