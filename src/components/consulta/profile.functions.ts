@@ -122,7 +122,7 @@ ${data.respostas.map((r) => `${r.question}: ${r.answer}`).join("\n")}`;
             { role: "user", content: userPrompt },
           ],
           temperature: 0.3,
-          max_tokens: 2000,
+          max_tokens: 8000,
           response_format: { type: "json_object" },
         }),
       });
