@@ -177,6 +177,11 @@ export type Database = {
           full_name: string | null
           id: string
           partner_code: string | null
+          perfil_generations_limit: number
+          perfil_generations_used: number
+          plan_type: string
+          queries_limit: number
+          queries_used: number
           role: Database["public"]["Enums"]["app_role"]
           status: string
           whatsapp: string | null
@@ -188,6 +193,11 @@ export type Database = {
           full_name?: string | null
           id: string
           partner_code?: string | null
+          perfil_generations_limit?: number
+          perfil_generations_used?: number
+          plan_type?: string
+          queries_limit?: number
+          queries_used?: number
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
           whatsapp?: string | null
@@ -199,6 +209,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           partner_code?: string | null
+          perfil_generations_limit?: number
+          perfil_generations_used?: number
+          plan_type?: string
+          queries_limit?: number
+          queries_used?: number
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
           whatsapp?: string | null
