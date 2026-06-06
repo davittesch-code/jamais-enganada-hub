@@ -38,6 +38,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(true);
 
   const items = NAV.filter((i) => (role ? i.roles.includes(role) : false));
+  const collapsed = !open;
+  const inicial =
+    profile?.full_name?.[0]?.toUpperCase() ||
+    profile?.email?.[0]?.toUpperCase() ||
+    "?";
+  const roleLabel = role ? ROLE_LABEL[role] : "";
 
   const handleSignOut = async () => {
     await signOut();
