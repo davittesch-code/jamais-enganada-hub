@@ -469,6 +469,24 @@ function PesquisaPage() {
           <section className="space-y-4">
             {/* Campo de pergunta */}
             <div className="rounded-xl bg-white border border-[#E8D0E0] p-4">
+              {/* Contador de consultas restantes */}
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className={`text-xs font-medium ${queriesRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
+                  {queriesRestantes > 0
+                    ? `${queriesRestantes} consulta${queriesRestantes !== 1 ? "s" : ""} restante${queriesRestantes !== 1 ? "s" : ""}`
+                    : "Nenhuma consulta restante"}
+                </span>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: queriesLimit }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="block h-1.5 w-5 rounded-full"
+                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#A8006E" }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <textarea
                 ref={textareaRef}
                 value={pergunta}
