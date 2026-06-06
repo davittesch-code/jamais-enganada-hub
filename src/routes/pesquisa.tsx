@@ -2,10 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, Copy, Loader2, MessageCircle, Scale, Check, BookOpen, Lightbulb, AlertTriangle, UserCheck, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { PrivateRoute } from "@/components/PrivateRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarSofia } from "@/lib/pesquisa.functions";
+import { UpsellModal } from "@/components/UpsellModal";
+
 
 export const Route = createFileRoute("/pesquisa")({
   component: () => (
