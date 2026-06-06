@@ -129,9 +129,9 @@ const ICONES_AREAS: Record<AreaKey, typeof Users> = {
 };
 
 const NIVEL_VULN = {
-  baixo: { color: "#16A34A", bg: "#DCFCE7" },
-  medio: { color: "#D97706", bg: "#FEF9C3" },
-  alto: { color: "#DC2626", bg: "#FEE2E2" },
+  baixo: { color: "#16A34A", bg: "#DCFCE7", label: "Vulnerabilidade Baixa" },
+  medio: { color: "#D97706", bg: "#FEF9C3", label: "Vulnerabilidade Média" },
+  alto: { color: "#DC2626", bg: "#FEE2E2", label: "Vulnerabilidade Alta" },
 };
 
 const PRAZO = {
