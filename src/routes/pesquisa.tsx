@@ -78,6 +78,142 @@ function formatDateTime(iso: string): string {
   }
 }
 
+const SECTION_STYLES: Record<
+  string,
+  { icon: typeof BookOpen; color: string; bg: string; border: string; match: RegExp }
+> = {
+  resposta: {
+    icon: CheckCircle2,
+    color: "#0F7B5A",
+    bg: "#E8F7F0",
+    border: "#0F7B5A",
+    match: /^(resposta(?:\s+direta)?)\s*[:\-]?$/i,
+  },
+  lei: {
+    icon: BookOpen,
+    color: "#6B0F4B",
+    bg: "#FDF6F9",
+    border: "#A8006E",
+    match: /^(o\s+que\s+diz\s+a\s+lei)\s*[:\-]?$/i,
+  },
+  pratica: {
+    icon: Lightbulb,
+    color: "#A86B00",
+    bg: "#FFF8E8",
+    border: "#D4A017",
+    match: /^(na\s+pr[áa]tica)\s*[:\-]?$/i,
+  },
+  atencao: {
+    icon: AlertTriangle,
+    color: "#A8002B",
+    bg: "#FDECEF",
+    border: "#D40028",
+    match: /^(ponto\s+de\s+aten[çc][ãa]o|aten[çc][ãa]o)\s*[:\-]?$/i,
+  },
+  perfil: {
+    icon: UserCheck,
+    color: "#6B0F4B",
+    bg: "#FDF6F9",
+    border: "#A8006E",
+    match: /^(correla[çc][ãa]o\s+com\s+(?:o\s+)?perfil|relevante\s+para\s+(?:o\s+)?(?:seu\s+)?perfil)\s*[:\-]?$/i,
+  },
+};
+
+function stripInlineBold(s: string) {
+  return s.replace(/\*\*(.+?)\*\*/g, "$1");
+}
+
+function identifySection(rawTitle: string) {
+  const clean = rawTitle.replace(/^\d+\.?\s*/, "").replace(/\*\*/g, "").trim();
+  for (const key of Object.keys(SECTION_STYLES)) {
+    if (SECTION_STYLES[key].match.test(clean)) return SECTION_STYLES[key];
+  }
+  return null;
+}
+
+function RespostaRenderer({ text }: { text: string }) {
+  // Split by lines, group into sections whenever we hit a recognized heading
+  const lines = text.split(/\r?\n/);
+  type Block = { style: typeof SECTION_STYLES[string] | null; title: string | null; body: string[] };
+  const blocks: Block[] = [];
+  let current: Block = { style: null, title: null, body: [] };
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    // Heading detection: line starts with optional "1." or "**", contains a known section title
+    const headingMatch = line.match(/^\s*(?:\d+\.\s*)?\*\*([^*]+?)\*\*\s*:?\s*(.*)$/);
+    let style = null;
+    let restAfterHeading: string | null = null;
+    let titleText: string | null = null;
+
+    if (headingMatch) {
+      const s = identifySection(headingMatch[1]);
+      if (s) {
+        style = s;
+        titleText = headingMatch[1].replace(/\*\*/g, "").trim().replace(/:$/, "");
+        restAfterHeading = headingMatch[2] ?? "";
+      }
+    } else {
+      // Also support "1. O que diz a lei:" without bold
+      const plainHeading = line.match(/^\s*\d+\.\s*([A-Za-zÀ-ÿ ]+?)\s*:\s*(.*)$/);
+      if (plainHeading) {
+        const s = identifySection(plainHeading[1]);
+        if (s) {
+          style = s;
+          titleText = plainHeading[1].trim();
+          restAfterHeading = plainHeading[2] ?? "";
+        }
+      }
+    }
+
+    if (style) {
+      if (current.title !== null || current.body.length > 0) blocks.push(current);
+      current = { style, title: titleText, body: restAfterHeading ? [restAfterHeading] : [] };
+    } else {
+      current.body.push(line);
+    }
+  }
+  if (current.title !== null || current.body.length > 0) blocks.push(current);
+
+  return (
+    <div className="space-y-4">
+      {blocks.map((b, i) => {
+        const bodyText = stripInlineBold(b.body.join("\n")).trim();
+        if (!b.style) {
+          if (!bodyText) return null;
+          return (
+            <p key={i} className="text-sm text-[#1A0010] whitespace-pre-wrap leading-relaxed">
+              {bodyText}
+            </p>
+          );
+        }
+        const Icon = b.style.icon;
+        return (
+          <div
+            key={i}
+            className="rounded-lg border-l-4 p-4"
+            style={{ backgroundColor: b.style.bg, borderLeftColor: b.style.border }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Icon className="w-4 h-4 shrink-0" style={{ color: b.style.color }} />
+              <h4 className="text-sm font-semibold" style={{ color: b.style.color }}>
+                {b.title}
+              </h4>
+            </div>
+            {bodyText && (
+              <p className="text-sm text-[#1A0010] whitespace-pre-wrap leading-relaxed">
+                {bodyText}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+
 function PesquisaPage() {
   const { user, profile } = useAuth();
   const consultar = useServerFn(consultarSofia);
