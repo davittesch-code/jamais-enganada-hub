@@ -6,6 +6,7 @@ import { TypingIndicator } from "@/components/onboarding/TypingIndicator";
 import { ChatInput } from "@/components/onboarding/ChatInput";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { useOnboarding } from "@/components/onboarding/useOnboarding";
+import { AdvogadaPicker } from "@/components/onboarding/AdvogadaPicker";
 
 function OnboardingGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -113,6 +114,9 @@ function OnboardingPage() {
     setShowSplash,
     handleUserReply,
     inputDisabled,
+    showAdvogadaPicker,
+    advogadas,
+    submitAdvogadaSelection,
   } = useOnboarding();
   const bottomRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -140,6 +144,12 @@ function OnboardingPage() {
             <ChatBubble key={msg.id} sender={msg.sender} message={msg.text} />
           ))}
           {isTyping && <TypingIndicator />}
+          {showAdvogadaPicker && (
+            <AdvogadaPicker
+              advogadas={advogadas}
+              onSubmit={submitAdvogadaSelection}
+            />
+          )}
           {showCtaButton && (
             <div
               className="flex justify-center my-6 transition-opacity duration-500"
@@ -168,7 +178,7 @@ function OnboardingPage() {
         <div className="max-w-2xl mx-auto">
           <ChatInput
             onSend={handleUserReply}
-            disabled={inputDisabled || isComplete}
+            disabled={inputDisabled || isComplete || showAdvogadaPicker}
           />
         </div>
       </div>

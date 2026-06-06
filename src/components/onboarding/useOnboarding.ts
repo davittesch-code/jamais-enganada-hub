@@ -62,6 +62,13 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+export interface AdvogadaOpt {
+  id: string;
+  nome: string;
+  oab: string;
+  especialidade: string | null;
+}
+
 export function useOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -75,6 +82,8 @@ export function useOnboarding() {
   const [showSplash, setShowSplash] = useState(true);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
   const [inputDisabled, setInputDisabled] = useState(true);
+  const [showAdvogadaPicker, setShowAdvogadaPicker] = useState(false);
+  const [advogadas, setAdvogadas] = useState<AdvogadaOpt[]>([]);
 
   const currentIndexRef = useRef(-1);
   const dataRef = useRef<OnboardingData>({});
@@ -281,12 +290,67 @@ export function useOnboarding() {
         }, 800);
       } else {
         currentIndexRef.current = 8;
+        // Open advogada picker after Q8 confirmation
         schedule(() => {
-          void finishOnboarding(newData.nome ?? "");
-        }, 1000);
+          (async () => {
+            setIsTyping(true);
+            try {
+              const { data } = await supabase
+                .from("advogados")
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .select("id, nome, oab, especialidade" as any)
+                .eq("ativo" as never, true as never)
+                .order("nome" as never);
+              setAdvogadas(((data as unknown as AdvogadaOpt[]) ?? []));
+            } catch (e) {
+              console.error("advogados fetch failed", e);
+            }
+            setIsTyping(false);
+            const nome = newData.nome ?? "";
+            addMessage(
+              "sofia",
+              `${nome}, quase pronto! Uma última coisa: você tem uma advogada de confiança cadastrada na plataforma? Selecione abaixo para vincular sua assessoria:`,
+            );
+            setProgress(95);
+            setShowAdvogadaPicker(true);
+          })();
+        }, 800);
       }
     },
-    [addMessage, finishOnboarding, inputDisabled, schedule, speak, user],
+    [addMessage, inputDisabled, schedule, speak, user],
+  );
+
+  const submitAdvogadaSelection = useCallback(
+    async (advogada: AdvogadaOpt | null) => {
+      if (!showAdvogadaPicker) return;
+      setShowAdvogadaPicker(false);
+
+      if (advogada && user) {
+        try {
+          await supabase
+            .from("profiles")
+            .update({ advogado_id: advogada.id } as never)
+            .eq("id", user.id);
+          await supabase.from("onboarding_responses").insert({
+            user_id: user.id,
+            step: "onboarding",
+            question: "Advogada selecionada",
+            answer: advogada.nome,
+          });
+        } catch (e) {
+          console.error("save advogada failed", e);
+        }
+        addMessage(
+          "sofia",
+          `Perfeito! Vinculei você à ${advogada.nome}. Ela poderá acompanhar sua jornada na plataforma. 💜`,
+        );
+      }
+
+      schedule(() => {
+        void finishOnboarding(dataRef.current.nome ?? "");
+      }, advogada ? 1200 : 200);
+    },
+    [addMessage, finishOnboarding, schedule, showAdvogadaPicker, user],
   );
 
   return {
@@ -300,5 +364,8 @@ export function useOnboarding() {
     handleUserReply,
     onboardingData,
     inputDisabled,
+    showAdvogadaPicker,
+    advogadas,
+    submitAdvogadaSelection,
   };
 }
