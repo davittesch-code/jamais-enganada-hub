@@ -170,12 +170,12 @@ function PerfilPage() {
       if (prof?.full_name) setNome(prof.full_name);
       if (pd) {
         setData({
-          areas: (pd.areas as ProfileData["areas"]) ?? {},
-          insights: (pd.insights as Insight[]) ?? [],
-          attention_points: (pd.attention_points as AttentionPoint[]) ?? [],
-          next_steps: (pd.next_steps as NextStep[]) ?? [],
-          radar_scores: (pd.radar_scores as ProfileData["radar_scores"]) ?? {},
-          extra_data: (pd.extra_data as ProfileData["extra_data"]) ?? {},
+          areas: (pd.areas as unknown as ProfileData["areas"]) ?? {},
+          insights: (pd.insights as unknown as Insight[]) ?? [],
+          attention_points: (pd.attention_points as unknown as AttentionPoint[]) ?? [],
+          next_steps: (pd.next_steps as unknown as NextStep[]) ?? [],
+          radar_scores: (pd.radar_scores as unknown as ProfileData["radar_scores"]) ?? {},
+          extra_data: (pd.extra_data as unknown as ProfileData["extra_data"]) ?? {},
           generated_at: pd.generated_at,
         });
       }
