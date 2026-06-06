@@ -251,6 +251,18 @@ function PesquisaPage() {
         .limit(20);
       setHistorico((rows ?? []) as QueryRow[]);
 
+      // Limites de uso
+      const { data: limites } = await supabase
+        .from("profiles")
+        .select("queries_used, queries_limit")
+        .eq("id", user.id)
+        .single();
+      if (limites) {
+        setQueriesUsed(limites.queries_used ?? 0);
+        setQueriesLimit(limites.queries_limit ?? 5);
+      }
+
+
       // WhatsApp adm
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
       if (Array.isArray(adv) && adv.length > 0) {
