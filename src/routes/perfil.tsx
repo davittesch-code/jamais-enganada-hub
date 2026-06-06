@@ -542,31 +542,21 @@ function PerfilPage() {
             Tirar uma dúvida
           </Button>
           {(() => {
-            const numero = onlyDigits(advogado?.whatsapp ?? "");
-            const nomeAdv = advogado?.full_name ?? "sua assessora";
+            const numero = onlyDigits(advogado?.whatsapp ?? "") || "5511999999999";
+            const nomeExibido = firstName(nome) || "uma cliente";
             const mensagem = encodeURIComponent(
-              `Olá! Sou ${nome || "uma cliente"} e gostaria de falar sobre meu perfil jurídico.`,
+              `Olá! Sou ${nomeExibido}, cliente da plataforma Jamais Enganada. ` +
+                `Recebi meu perfil jurídico e gostaria de conversar sobre minha situação.`,
             );
-            const href = numero ? `https://wa.me/${numero}?text=${mensagem}` : "";
+            const href = `https://wa.me/${numero}?text=${mensagem}`;
             return (
               <Button
-                asChild={!!numero}
-                disabled={!numero}
-                variant="outline"
-                className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
-                title={numero ? `Falar com ${nomeAdv}` : "Sua assessora ainda não cadastrou um WhatsApp"}
+                onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+                className="text-white"
+                style={{ backgroundColor: "#25D366" }}
               >
-                {numero ? (
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    <UserCheck className="w-4 h-4 mr-2" />
-                    Falar com assessoria
-                  </a>
-                ) : (
-                  <span>
-                    <UserCheck className="w-4 h-4 mr-2" />
-                    Falar com assessoria
-                  </span>
-                )}
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Falar no WhatsApp
               </Button>
             );
           })()}
