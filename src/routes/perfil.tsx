@@ -169,6 +169,10 @@ function PerfilPage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
   const [whatsappAdm, setWhatsappAdm] = useState<string>("5511999999999");
+  const [geracoesUsed, setGeracoesUsed] = useState(0);
+  const [geracoesLimit, setGeracoesLimit] = useState(2);
+  const [upsellPerfil, setUpsellPerfil] = useState(false);
+  const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
 
   useEffect(() => {
     if (!user) return;
