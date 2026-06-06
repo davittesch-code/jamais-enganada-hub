@@ -604,35 +604,36 @@ function PerfilPage() {
           })()}
         </div>
 
-        <div className="mt-8">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-white">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Refazer consulta
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Refazer consulta?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Isso vai apagar seu perfil atual e suas respostas. Você precisará
-                  responder tudo novamente. Tem certeza?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={refazer}
-                  className="bg-[#A8006E] hover:bg-[#8B005A]"
-                >
-                  Sim, refazer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <Button
+            variant="ghost"
+            className="text-[#6B0F4B] hover:bg-white"
+            onClick={refazer}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Refazer consulta
+          </Button>
+          <p className={`text-xs ${geracoesRestantes > 0 ? "text-gray-500" : "text-[#A8002B]"}`}>
+            {geracoesRestantes > 0
+              ? `${geracoesRestantes} geração${geracoesRestantes !== 1 ? "ões" : ""} restante${geracoesRestantes !== 1 ? "s" : ""}`
+              : "Nenhuma geração restante"}
+          </p>
         </div>
       </section>
+
+      <UpsellModal
+        open={upsellPerfil}
+        onClose={() => setUpsellPerfil(false)}
+        tipo="perfil"
+        onConfirm={() => {
+          setUpsellPerfil(false);
+          toast("Em breve: pagamento integrado! 💜");
+        }}
+      />
+    </div>
+  );
+}
+
     </div>
   );
 }
