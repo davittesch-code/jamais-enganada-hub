@@ -337,6 +337,10 @@ function PesquisaPage() {
 
   const handleSubmit = async () => {
     if (!user || !podeEnviar) return;
+    if (queriesRestantes <= 0) {
+      setUpsellOpen(true);
+      return;
+    }
     const texto = pergunta.trim();
     setLoading(true);
     setLoadingMsgIdx(0);
@@ -374,11 +378,20 @@ function PesquisaPage() {
       created_at: new Date().toISOString(),
     };
 
+    // Incrementar contador de uso
+    const novoUsed = queriesUsed + 1;
+    await supabase
+      .from("profiles")
+      .update({ queries_used: novoUsed })
+      .eq("id", user.id);
+    setQueriesUsed(novoUsed);
+
     setHistorico((prev) => [novo, ...prev]);
     setAtivo(novo);
     setPergunta("");
     setLoading(false);
   };
+
 
   const handleCopy = async () => {
     if (!ativo?.answer) return;
