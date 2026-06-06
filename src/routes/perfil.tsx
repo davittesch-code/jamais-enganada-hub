@@ -20,7 +20,7 @@ import {
   Scale,
   Venus,
   MessageCircle,
-  UserCheck,
+  
   RotateCcw,
 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
@@ -129,9 +129,9 @@ const ICONES_AREAS: Record<AreaKey, typeof Users> = {
 };
 
 const NIVEL_VULN = {
-  baixo: { color: "#16A34A", bg: "#DCFCE7" },
-  medio: { color: "#D97706", bg: "#FEF9C3" },
-  alto: { color: "#DC2626", bg: "#FEE2E2" },
+  baixo: { color: "#16A34A", bg: "#DCFCE7", label: "Vulnerabilidade Baixa" },
+  medio: { color: "#D97706", bg: "#FEF9C3", label: "Vulnerabilidade Média" },
+  alto: { color: "#DC2626", bg: "#FEE2E2", label: "Vulnerabilidade Alta" },
 };
 
 const PRAZO = {
@@ -242,7 +242,7 @@ function PerfilPage() {
   );
   const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
-  const tituloPerfil = nome ? `Perfil Jurídico de ${firstName(nome)}` : "Seu Perfil Jurídico";
+  const tituloPerfil = `Perfil Jurídico de ${firstName(nome) || "você"}`;
 
   return (
     <div className="min-h-screen bg-white perfil-print-root">
@@ -291,7 +291,7 @@ function PerfilPage() {
           className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
           style={{ backgroundColor: nivelCfg.bg, color: nivelCfg.color }}
         >
-          Vulnerabilidade {nivel}
+          {nivelCfg.label}
         </div>
         {data.extra_data?.frase_de_forca && (
           <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
@@ -400,7 +400,11 @@ function PerfilPage() {
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">💡 Insights Jurídicos</h2>
           <p className="text-gray-600 mb-6">O que a lei diz sobre a sua situação</p>
-          <Accordion type="multiple" className="space-y-2">
+          <Accordion
+            type="multiple"
+            className="space-y-2"
+            defaultValue={data.insights.map((_, i) => `ins-${i}`)}
+          >
             {data.insights.map((ins, i) => (
               <AccordionItem
                 key={i}
@@ -538,31 +542,21 @@ function PerfilPage() {
             Tirar uma dúvida
           </Button>
           {(() => {
-            const numero = onlyDigits(advogado?.whatsapp ?? "");
-            const nomeAdv = advogado?.full_name ?? "sua assessora";
+            const numero = onlyDigits(advogado?.whatsapp ?? "") || "5511999999999";
+            const nomeExibido = firstName(nome) || "uma cliente";
             const mensagem = encodeURIComponent(
-              `Olá! Sou ${nome || "uma cliente"} e gostaria de falar sobre meu perfil jurídico.`,
+              `Olá! Sou ${nomeExibido}, cliente da plataforma Jamais Enganada. ` +
+                `Recebi meu perfil jurídico e gostaria de conversar sobre minha situação.`,
             );
-            const href = numero ? `https://wa.me/${numero}?text=${mensagem}` : "";
+            const href = `https://wa.me/${numero}?text=${mensagem}`;
             return (
               <Button
-                asChild={!!numero}
-                disabled={!numero}
-                variant="outline"
-                className="border-[#A8006E] text-[#A8006E] hover:bg-[#A8006E] hover:text-white"
-                title={numero ? `Falar com ${nomeAdv}` : "Sua assessora ainda não cadastrou um WhatsApp"}
+                onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+                className="text-white"
+                style={{ backgroundColor: "#25D366" }}
               >
-                {numero ? (
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    <UserCheck className="w-4 h-4 mr-2" />
-                    Falar com assessoria
-                  </a>
-                ) : (
-                  <span>
-                    <UserCheck className="w-4 h-4 mr-2" />
-                    Falar com assessoria
-                  </span>
-                )}
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Falar no WhatsApp
               </Button>
             );
           })()}
