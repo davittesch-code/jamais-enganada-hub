@@ -634,9 +634,7 @@ function PerfilPage() {
   );
 }
 
-    </div>
-  );
-}
+
 
 function PerfilSkeleton() {
   return (
