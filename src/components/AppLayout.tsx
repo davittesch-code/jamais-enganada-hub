@@ -10,8 +10,15 @@ import {
   ShieldCheck,
   LogOut,
   Menu,
+  Settings,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
+
+const ROLE_LABEL: Record<AppRole, string> = {
+  cliente: "Cliente",
+  advogado: "Advogada Parceira",
+  super_admin: "Administradora",
+};
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: AppRole[] };
 
