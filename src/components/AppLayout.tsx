@@ -10,8 +10,15 @@ import {
   ShieldCheck,
   LogOut,
   Menu,
+  Settings,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
+
+const ROLE_LABEL: Record<AppRole, string> = {
+  cliente: "Cliente",
+  advogado: "Advogada Parceira",
+  super_admin: "Administradora",
+};
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: AppRole[] };
 
@@ -31,6 +38,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(true);
 
   const items = NAV.filter((i) => (role ? i.roles.includes(role) : false));
+  const collapsed = !open;
+  const inicial =
+    profile?.full_name?.[0]?.toUpperCase() ||
+    profile?.email?.[0]?.toUpperCase() ||
+    "?";
+  const roleLabel = role ? ROLE_LABEL[role] : "";
 
   const handleSignOut = async () => {
     await signOut();
@@ -78,29 +91,46 @@ export function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t p-3">
-          <div className={`flex items-center ${open ? "justify-between" : "justify-center"} gap-2`}>
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold shrink-0">
-                {(profile?.full_name || profile?.email || "?").charAt(0).toUpperCase()}
-              </div>
-              {open && (
-                <div className="min-w-0">
-                  <p className="text-xs font-medium truncate">{profile?.full_name || profile?.email}</p>
-                  <p className="text-[10px] text-muted-foreground capitalize">{role}</p>
-                </div>
-              )}
+        <div className="mt-auto border-t border-[#E8D0E0] p-3 space-y-2">
+          {/* Card do usuário */}
+          <div className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}>
+            <div
+              className="w-10 h-10 rounded-full bg-[#A8006E] text-white flex items-center justify-center text-base font-semibold shrink-0"
+              title={collapsed ? profile?.full_name ?? profile?.email ?? "" : undefined}
+            >
+              {inicial}
             </div>
-            {open && (
-              <button
-                onClick={handleSignOut}
-                className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground"
-                aria-label="Sair"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-[#1A0010] truncate">
+                  {profile?.full_name || profile?.email?.split("@")[0]}
+                </p>
+                <p className="text-xs text-gray-400">{roleLabel}</p>
+              </div>
             )}
           </div>
+
+          {/* Minha conta */}
+          {!collapsed && (
+            <button
+              onClick={() => {}}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+            >
+              <Settings className="w-4 h-4 shrink-0" />
+              <span>Minha conta</span>
+            </button>
+          )}
+
+          {/* Sair */}
+          <button
+            onClick={handleSignOut}
+            title={collapsed ? "Sair" : undefined}
+            className={`w-full flex items-center ${collapsed ? "justify-center" : "gap-3"} px-3 py-2 rounded-md text-sm transition-colors hover:bg-[#FEE2E2]`}
+            style={{ color: "#DC2626" }}
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!collapsed && <span>Sair</span>}
+          </button>
         </div>
       </aside>
 
