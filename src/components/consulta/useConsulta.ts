@@ -266,6 +266,7 @@ export function useConsulta() {
   const questionsRef = useRef<Question[]>([]);
   const currentIndexRef = useRef(-1);
   const respostasRef = useRef<{ question: string; answer: string }[]>([]);
+  const answersMapRef = useRef<Answers>({});
   const hasStartedRef = useRef(false);
   const checkedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
