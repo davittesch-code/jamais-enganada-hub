@@ -2,10 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, Copy, Loader2, MessageCircle, Scale, Check, BookOpen, Lightbulb, AlertTriangle, UserCheck, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { PrivateRoute } from "@/components/PrivateRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarSofia } from "@/lib/pesquisa.functions";
+import { UpsellModal } from "@/components/UpsellModal";
+
 
 export const Route = createFileRoute("/pesquisa")({
   component: () => (
@@ -227,7 +230,13 @@ function PesquisaPage() {
   const [whatsappAdm, setWhatsappAdm] = useState("5511999999999");
   const [perfilCtx, setPerfilCtx] = useState<Record<string, string>>({});
   const [areasCriticas, setAreasCriticas] = useState("não identificadas");
+  const [queriesUsed, setQueriesUsed] = useState(0);
+  const [queriesLimit, setQueriesLimit] = useState(5);
+  const [upsellOpen, setUpsellOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
+
 
   // Carga inicial
   useEffect(() => {
@@ -241,6 +250,18 @@ function PesquisaPage() {
         .order("created_at", { ascending: false })
         .limit(20);
       setHistorico((rows ?? []) as QueryRow[]);
+
+      // Limites de uso
+      const { data: limites } = await supabase
+        .from("profiles")
+        .select("queries_used, queries_limit")
+        .eq("id", user.id)
+        .single();
+      if (limites) {
+        setQueriesUsed(limites.queries_used ?? 0);
+        setQueriesLimit(limites.queries_limit ?? 5);
+      }
+
 
       // WhatsApp adm
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
@@ -316,6 +337,10 @@ function PesquisaPage() {
 
   const handleSubmit = async () => {
     if (!user || !podeEnviar) return;
+    if (queriesRestantes <= 0) {
+      setUpsellOpen(true);
+      return;
+    }
     const texto = pergunta.trim();
     setLoading(true);
     setLoadingMsgIdx(0);
@@ -353,11 +378,20 @@ function PesquisaPage() {
       created_at: new Date().toISOString(),
     };
 
+    // Incrementar contador de uso
+    const novoUsed = queriesUsed + 1;
+    await supabase
+      .from("profiles")
+      .update({ queries_used: novoUsed })
+      .eq("id", user.id);
+    setQueriesUsed(novoUsed);
+
     setHistorico((prev) => [novo, ...prev]);
     setAtivo(novo);
     setPergunta("");
     setLoading(false);
   };
+
 
   const handleCopy = async () => {
     if (!ativo?.answer) return;
@@ -435,6 +469,24 @@ function PesquisaPage() {
           <section className="space-y-4">
             {/* Campo de pergunta */}
             <div className="rounded-xl bg-white border border-[#E8D0E0] p-4">
+              {/* Contador de consultas restantes */}
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className={`text-xs font-medium ${queriesRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
+                  {queriesRestantes > 0
+                    ? `${queriesRestantes} consulta${queriesRestantes !== 1 ? "s" : ""} restante${queriesRestantes !== 1 ? "s" : ""}`
+                    : "Nenhuma consulta restante"}
+                </span>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: queriesLimit }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="block h-1.5 w-5 rounded-full"
+                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#A8006E" }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <textarea
                 ref={textareaRef}
                 value={pergunta}
@@ -557,6 +609,16 @@ function PesquisaPage() {
           </section>
         </div>
       </div>
+
+      <UpsellModal
+        open={upsellOpen}
+        onClose={() => setUpsellOpen(false)}
+        tipo="perguntas"
+        onConfirm={() => {
+          setUpsellOpen(false);
+          toast("Em breve: pagamento integrado! 💜");
+        }}
+      />
     </div>
   );
 }

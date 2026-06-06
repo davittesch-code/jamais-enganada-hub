@@ -27,6 +27,7 @@ import { PrivateRoute } from "@/components/PrivateRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Accordion,
   AccordionContent,
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AreaStatusBadge, statusBorderColor } from "@/components/perfil/AreaStatusBadge";
 import { NivelBadge, nivelColor } from "@/components/perfil/NivelBadge";
+import { UpsellModal } from "@/components/UpsellModal";
 
 export const Route = createFileRoute("/perfil")({
   component: () => (
@@ -167,6 +169,10 @@ function PerfilPage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
   const [whatsappAdm, setWhatsappAdm] = useState<string>("5511999999999");
+  const [geracoesUsed, setGeracoesUsed] = useState(0);
+  const [geracoesLimit, setGeracoesLimit] = useState(2);
+  const [upsellPerfil, setUpsellPerfil] = useState(false);
+  const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
 
   useEffect(() => {
     if (!user) return;
@@ -190,6 +196,18 @@ function PerfilPage() {
       } else {
         setNomeUsuaria(user.email?.split("@")[0] || "cliente");
       }
+
+      // Limites de gerações de perfil
+      const { data: limitesPerfil } = await supabase
+        .from("profiles")
+        .select("perfil_generations_used, perfil_generations_limit")
+        .eq("id", user.id)
+        .single();
+      if (limitesPerfil) {
+        setGeracoesUsed(limitesPerfil.perfil_generations_used ?? 0);
+        setGeracoesLimit(limitesPerfil.perfil_generations_limit ?? 2);
+      }
+
 
       // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
@@ -215,10 +233,18 @@ function PerfilPage() {
 
   const refazer = async () => {
     if (!user) return;
+    if (geracoesRestantes <= 0) {
+      setUpsellPerfil(true);
+      return;
+    }
+    const confirmado = window.confirm("Tem certeza? Seu perfil atual será substituído.");
+    if (!confirmado) return;
     await supabase.from("profile_data").delete().eq("user_id", user.id);
     await supabase.from("onboarding_responses").delete().eq("user_id", user.id).eq("step", "consulta");
-    navigate({ to: "/consulta" });
+    localStorage.removeItem("jamais_onboarding_context");
+    navigate({ to: "/onboarding" });
   };
+
 
   if (loading) return <PerfilSkeleton />;
 
@@ -578,38 +604,37 @@ function PerfilPage() {
           })()}
         </div>
 
-        <div className="mt-8">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-[#6B0F4B] hover:bg-white">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Refazer consulta
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Refazer consulta?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Isso vai apagar seu perfil atual e suas respostas. Você precisará
-                  responder tudo novamente. Tem certeza?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={refazer}
-                  className="bg-[#A8006E] hover:bg-[#8B005A]"
-                >
-                  Sim, refazer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <Button
+            variant="ghost"
+            className="text-[#6B0F4B] hover:bg-white"
+            onClick={refazer}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Refazer consulta
+          </Button>
+          <p className={`text-xs ${geracoesRestantes > 0 ? "text-gray-500" : "text-[#A8002B]"}`}>
+            {geracoesRestantes > 0
+              ? `${geracoesRestantes} geração${geracoesRestantes !== 1 ? "ões" : ""} restante${geracoesRestantes !== 1 ? "s" : ""}`
+              : "Nenhuma geração restante"}
+          </p>
         </div>
       </section>
+
+      <UpsellModal
+        open={upsellPerfil}
+        onClose={() => setUpsellPerfil(false)}
+        tipo="perfil"
+        onConfirm={() => {
+          setUpsellPerfil(false);
+          toast("Em breve: pagamento integrado! 💜");
+        }}
+      />
     </div>
   );
 }
+
+
 
 function PerfilSkeleton() {
   return (
