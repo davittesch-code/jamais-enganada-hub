@@ -623,6 +623,58 @@ function PerfilPage() {
         </section>
       )}
 
+      {/* SEÇÃO — Histórico de perfis */}
+      {history.length > 0 && (
+        <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto no-print">
+          <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">📚 Histórico de Perfis</h2>
+          <p className="text-gray-600 mb-6">
+            Seus perfis anteriores ficam salvos aqui — você pode revisitá-los a qualquer momento.
+          </p>
+          <div className="space-y-3">
+            {history.map((h) => {
+              const niv = h.data.extra_data?.nivel_vulnerabilidade ?? "medio";
+              const nivCfg = NIVEL_VULN[niv];
+              const isOpen = viewingHistory?.id === h.id;
+              return (
+                <div
+                  key={h.id}
+                  className="bg-white rounded-lg p-5 shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-4"
+                >
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs uppercase text-gray-400 tracking-wider mb-1">
+                      Arquivado em {formatDate(h.archived_at)}
+                    </p>
+                    <p className="font-semibold text-[#6B0F4B]">
+                      Perfil gerado em {formatDate(h.generated_at)}
+                    </p>
+                    <span
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold mt-2"
+                      style={{ backgroundColor: nivCfg.bg, color: nivCfg.color }}
+                    >
+                      {nivCfg.label}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setViewingHistory(isOpen ? null : h);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    variant={isOpen ? "outline" : "default"}
+                    className={
+                      isOpen
+                        ? "border-[#552736] text-[#552736]"
+                        : "bg-[#552736] hover:bg-[#3F1C28] text-white"
+                    }
+                  >
+                    {isOpen ? "Voltar ao atual" : "Ver este perfil"}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* SEÇÃO 8 — Ações */}
       <section
         className="px-6 md:px-12 py-12 text-center no-print"
