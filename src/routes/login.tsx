@@ -89,12 +89,12 @@ function DepoimentoCard({ d }: { d: Depoimento }) {
     >
       <p className="text-sm text-gray-700 leading-relaxed mb-4">"{d.texto}"</p>
       <div className="flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-          style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)" }}
-        >
-          {d.inicial}
-        </div>
+        <img
+          src={d.foto}
+          alt={d.nome}
+          loading="lazy"
+          className="w-10 h-10 rounded-full object-cover border-2 border-[#F3D9E4]"
+        />
         <div>
           <p className="font-semibold text-[#6B0F4B] text-sm">{d.nome}</p>
           <p className="text-xs text-gray-500">{d.papel}</p>
