@@ -321,7 +321,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 text-center mt-6">
+          <p className="text-xs text-white/70 text-center mt-6">
             🔒 Seus dados são privados e protegidos.
           </p>
         </div>
