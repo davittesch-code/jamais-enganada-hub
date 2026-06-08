@@ -162,17 +162,50 @@ function firstName(full: string) {
   return (full || "").trim().split(/\s+/)[0] ?? "";
 }
 
+interface HistoryEntry {
+  id: string;
+  generated_at: string;
+  archived_at: string;
+  data: ProfileData;
+}
+
 function PerfilPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ProfileData | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [viewingHistory, setViewingHistory] = useState<HistoryEntry | null>(null);
   const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
   const [whatsappAdm, setWhatsappAdm] = useState<string>("5511999999999");
   const [geracoesUsed, setGeracoesUsed] = useState(0);
   const [geracoesLimit, setGeracoesLimit] = useState(2);
   const [upsellPerfil, setUpsellPerfil] = useState(false);
   const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
+
+  const loadHistory = async (uid: string) => {
+    const { data: hist } = await supabase
+      .from("profile_history")
+      .select("*")
+      .eq("user_id", uid)
+      .order("archived_at", { ascending: false });
+    setHistory(
+      ((hist as unknown as Array<Record<string, unknown>>) ?? []).map((h) => ({
+        id: h.id as string,
+        generated_at: h.generated_at as string,
+        archived_at: h.archived_at as string,
+        data: {
+          areas: (h.areas as ProfileData["areas"]) ?? {},
+          insights: (h.insights as Insight[]) ?? [],
+          attention_points: (h.attention_points as AttentionPoint[]) ?? [],
+          next_steps: (h.next_steps as NextStep[]) ?? [],
+          radar_scores: (h.radar_scores as ProfileData["radar_scores"]) ?? {},
+          extra_data: (h.extra_data as ProfileData["extra_data"]) ?? {},
+          generated_at: h.generated_at as string,
+        },
+      })),
+    );
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -184,20 +217,14 @@ function PerfilPage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      // Nome da usuária (query dedicada e explícita)
-      const { data: perfilUsuaria, error: erroNome } = await supabase
+      const { data: perfilUsuaria } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .maybeSingle();
-      console.log("Nome buscado:", perfilUsuaria?.full_name, "Erro:", erroNome);
-      if (perfilUsuaria?.full_name) {
-        setNomeUsuaria(perfilUsuaria.full_name);
-      } else {
-        setNomeUsuaria(user.email?.split("@")[0] || "cliente");
-      }
+      if (perfilUsuaria?.full_name) setNomeUsuaria(perfilUsuaria.full_name);
+      else setNomeUsuaria(user.email?.split("@")[0] || "cliente");
 
-      // Limites de gerações de perfil
       const { data: limitesPerfil } = await supabase
         .from("profiles")
         .select("perfil_generations_used, perfil_generations_limit")
@@ -208,13 +235,10 @@ function PerfilPage() {
         setGeracoesLimit(limitesPerfil.perfil_generations_limit ?? 2);
       }
 
-
-      // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
       if (adv && typeof adv === "object") {
         const whats = onlyDigits((adv as { whatsapp?: string | null }).whatsapp ?? "");
         if (whats) setWhatsappAdm(whats);
-        console.log("WhatsApp do adm:", whats || "(usando padrão)");
       }
       if (pd) {
         setData({
@@ -227,6 +251,7 @@ function PerfilPage() {
           generated_at: pd.generated_at,
         });
       }
+      await loadHistory(user.id);
       setLoading(false);
     })();
   }, [user]);
@@ -237,13 +262,35 @@ function PerfilPage() {
       setUpsellPerfil(true);
       return;
     }
-    const confirmado = window.confirm("Tem certeza? Seu perfil atual será substituído.");
+    const confirmado = window.confirm(
+      "Tem certeza? Seu perfil atual será arquivado no histórico e um novo será gerado.",
+    );
     if (!confirmado) return;
+
+    if (data) {
+      const { error: histErr } = await supabase.from("profile_history").insert({
+        user_id: user.id,
+        areas: data.areas as never,
+        insights: data.insights as never,
+        attention_points: data.attention_points as never,
+        next_steps: data.next_steps as never,
+        radar_scores: data.radar_scores as never,
+        extra_data: data.extra_data as never,
+        generated_at: data.generated_at,
+      });
+      if (histErr) {
+        console.error("Erro ao arquivar perfil no histórico:", histErr);
+        toast.error("Não foi possível arquivar seu perfil atual. Tente novamente.");
+        return;
+      }
+    }
+
     await supabase.from("profile_data").delete().eq("user_id", user.id);
     await supabase.from("onboarding_responses").delete().eq("user_id", user.id).eq("step", "consulta");
     localStorage.removeItem("jamais_onboarding_context");
     navigate({ to: "/onboarding" });
   };
+
 
 
   if (loading) return <PerfilSkeleton />;
