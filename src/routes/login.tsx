@@ -162,7 +162,7 @@ function LoginPage() {
   const col3 = DEPOIMENTOS.slice(6, 9);
 
   return (
-    <div className="min-h-screen flex bg-[#FDF6F9]">
+    <div className="lg:h-screen lg:overflow-hidden min-h-screen flex bg-[#FDF6F9]">
       <style>{`
         @keyframes marquee-up {
           from { transform: translateY(0); }
