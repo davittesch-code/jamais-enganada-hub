@@ -367,6 +367,21 @@ function PerfilPage() {
         }
       `}</style>
 
+      {isViewingArchive && (
+        <div className="sticky top-0 z-30 bg-[#6B0F4B] text-white px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-3 no-print">
+          <span>
+            📂 Você está vendo um perfil arquivado em{" "}
+            <strong>{formatDate(viewingHistory!.archived_at)}</strong>
+          </span>
+          <button
+            onClick={() => setViewingHistory(null)}
+            className="bg-white text-[#6B0F4B] font-semibold px-3 py-1 rounded-md text-xs hover:bg-white/90"
+          >
+            Voltar ao perfil atual
+          </button>
+        </div>
+      )}
+
       {/* SEÇÃO 1 — Hero */}
       <section
         className="px-6 md:px-12 py-12 text-white text-center print-hero"
