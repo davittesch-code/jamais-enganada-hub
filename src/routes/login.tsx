@@ -11,7 +11,7 @@ type Depoimento = {
   texto: string;
   nome: string;
   papel: string;
-  inicial: string;
+  foto: string;
 };
 
 const DEPOIMENTOS: Depoimento[] = [
@@ -20,65 +20,66 @@ const DEPOIMENTOS: Depoimento[] = [
       "Descobri direitos que eu nem sabia que tinha. Hoje me sinto muito mais segura para tomar decisões.",
     nome: "Mariana S.",
     papel: "Empresária — SP",
-    inicial: "M",
+    foto: "https://randomuser.me/api/portraits/women/68.jpg",
   },
   {
     texto:
       "A Sofia me ajudou a entender o processo de divórcio sem juridiquês. Mudou minha vida.",
     nome: "Carla R.",
     papel: "Professora — MG",
-    inicial: "C",
+    foto: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
     texto:
       "Em 10 minutos eu tinha um perfil jurídico completo. Nunca pensei que seria tão simples.",
     nome: "Patrícia L.",
     papel: "Designer — RJ",
-    inicial: "P",
+    foto: "https://randomuser.me/api/portraits/women/65.jpg",
   },
   {
     texto:
       "Fui orientada sobre guarda dos filhos com clareza. Plataforma feita por mulheres, para mulheres.",
     nome: "Juliana M.",
     papel: "Mãe — PR",
-    inicial: "J",
+    foto: "https://randomuser.me/api/portraits/women/12.jpg",
   },
   {
     texto:
       "O acompanhamento com a advogada parceira foi rápido e acolhedor. Recomendo demais.",
     nome: "Fernanda A.",
     papel: "Autônoma — BA",
-    inicial: "F",
+    foto: "https://randomuser.me/api/portraits/women/32.jpg",
   },
   {
     texto:
       "Finalmente uma plataforma que fala a minha língua. Saí do medo, entrei na ação.",
     nome: "Beatriz O.",
     papel: "Médica — RS",
-    inicial: "B",
+    foto: "https://randomuser.me/api/portraits/women/90.jpg",
   },
   {
     texto:
       "Aprendi sobre meus direitos patrimoniais antes do casamento. Conhecimento é poder.",
     nome: "Renata C.",
     papel: "Arquiteta — SC",
-    inicial: "R",
+    foto: "https://randomuser.me/api/portraits/women/22.jpg",
   },
   {
     texto:
       "A análise foi tão completa que minha advogada elogiou. Vale cada minuto investido.",
     nome: "Larissa P.",
     papel: "Contadora — DF",
-    inicial: "L",
+    foto: "https://randomuser.me/api/portraits/women/76.jpg",
   },
   {
     texto:
       "Saí de um relacionamento abusivo sabendo exatamente o que fazer. Obrigada por existirem.",
     nome: "Camila T.",
     papel: "Enfermeira — CE",
-    inicial: "C",
+    foto: "https://randomuser.me/api/portraits/women/52.jpg",
   },
 ];
+
 
 function DepoimentoCard({ d }: { d: Depoimento }) {
   return (
