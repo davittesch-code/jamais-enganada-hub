@@ -162,17 +162,50 @@ function firstName(full: string) {
   return (full || "").trim().split(/\s+/)[0] ?? "";
 }
 
+interface HistoryEntry {
+  id: string;
+  generated_at: string;
+  archived_at: string;
+  data: ProfileData;
+}
+
 function PerfilPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ProfileData | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [viewingHistory, setViewingHistory] = useState<HistoryEntry | null>(null);
   const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
   const [whatsappAdm, setWhatsappAdm] = useState<string>("5511999999999");
   const [geracoesUsed, setGeracoesUsed] = useState(0);
   const [geracoesLimit, setGeracoesLimit] = useState(2);
   const [upsellPerfil, setUpsellPerfil] = useState(false);
   const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
+
+  const loadHistory = async (uid: string) => {
+    const { data: hist } = await supabase
+      .from("profile_history")
+      .select("*")
+      .eq("user_id", uid)
+      .order("archived_at", { ascending: false });
+    setHistory(
+      ((hist as unknown as Array<Record<string, unknown>>) ?? []).map((h) => ({
+        id: h.id as string,
+        generated_at: h.generated_at as string,
+        archived_at: h.archived_at as string,
+        data: {
+          areas: (h.areas as ProfileData["areas"]) ?? {},
+          insights: (h.insights as Insight[]) ?? [],
+          attention_points: (h.attention_points as AttentionPoint[]) ?? [],
+          next_steps: (h.next_steps as NextStep[]) ?? [],
+          radar_scores: (h.radar_scores as ProfileData["radar_scores"]) ?? {},
+          extra_data: (h.extra_data as ProfileData["extra_data"]) ?? {},
+          generated_at: h.generated_at as string,
+        },
+      })),
+    );
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -184,20 +217,14 @@ function PerfilPage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      // Nome da usuária (query dedicada e explícita)
-      const { data: perfilUsuaria, error: erroNome } = await supabase
+      const { data: perfilUsuaria } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .maybeSingle();
-      console.log("Nome buscado:", perfilUsuaria?.full_name, "Erro:", erroNome);
-      if (perfilUsuaria?.full_name) {
-        setNomeUsuaria(perfilUsuaria.full_name);
-      } else {
-        setNomeUsuaria(user.email?.split("@")[0] || "cliente");
-      }
+      if (perfilUsuaria?.full_name) setNomeUsuaria(perfilUsuaria.full_name);
+      else setNomeUsuaria(user.email?.split("@")[0] || "cliente");
 
-      // Limites de gerações de perfil
       const { data: limitesPerfil } = await supabase
         .from("profiles")
         .select("perfil_generations_used, perfil_generations_limit")
@@ -208,13 +235,10 @@ function PerfilPage() {
         setGeracoesLimit(limitesPerfil.perfil_generations_limit ?? 2);
       }
 
-
-      // WhatsApp do advogado vinculado (usa RPC segura — RLS bloqueia leitura direta)
       const { data: adv } = await supabase.rpc("get_my_advogado_contact");
       if (adv && typeof adv === "object") {
         const whats = onlyDigits((adv as { whatsapp?: string | null }).whatsapp ?? "");
         if (whats) setWhatsappAdm(whats);
-        console.log("WhatsApp do adm:", whats || "(usando padrão)");
       }
       if (pd) {
         setData({
@@ -227,6 +251,7 @@ function PerfilPage() {
           generated_at: pd.generated_at,
         });
       }
+      await loadHistory(user.id);
       setLoading(false);
     })();
   }, [user]);
@@ -237,13 +262,35 @@ function PerfilPage() {
       setUpsellPerfil(true);
       return;
     }
-    const confirmado = window.confirm("Tem certeza? Seu perfil atual será substituído.");
+    const confirmado = window.confirm(
+      "Tem certeza? Seu perfil atual será arquivado no histórico e um novo será gerado.",
+    );
     if (!confirmado) return;
+
+    if (data) {
+      const { error: histErr } = await supabase.from("profile_history").insert({
+        user_id: user.id,
+        areas: data.areas as never,
+        insights: data.insights as never,
+        attention_points: data.attention_points as never,
+        next_steps: data.next_steps as never,
+        radar_scores: data.radar_scores as never,
+        extra_data: data.extra_data as never,
+        generated_at: data.generated_at,
+      });
+      if (histErr) {
+        console.error("Erro ao arquivar perfil no histórico:", histErr);
+        toast.error("Não foi possível arquivar seu perfil atual. Tente novamente.");
+        return;
+      }
+    }
+
     await supabase.from("profile_data").delete().eq("user_id", user.id);
     await supabase.from("onboarding_responses").delete().eq("user_id", user.id).eq("step", "consulta");
     localStorage.removeItem("jamais_onboarding_context");
     navigate({ to: "/onboarding" });
   };
+
 
 
   if (loading) return <PerfilSkeleton />;
@@ -268,22 +315,24 @@ function PerfilPage() {
     );
   }
 
-  const nivel = data.extra_data?.nivel_vulnerabilidade ?? "medio";
+  const displayData = viewingHistory?.data ?? data;
+  const isViewingArchive = !!viewingHistory;
+  const nivel = displayData.extra_data?.nivel_vulnerabilidade ?? "medio";
   const nivelCfg = NIVEL_VULN[nivel];
 
-  const radarData = Object.entries(data.radar_scores).map(([area, score]) => ({
+  const radarData = Object.entries(displayData.radar_scores).map(([area, score]) => ({
     area: TRADUCAO_AREAS[area as AreaKey] ?? area,
     score: Number(score) || 0,
   }));
 
-  const areasList = (Object.entries(data.areas) as [AreaKey, AreaInfo][])
+  const areasList = (Object.entries(displayData.areas) as [AreaKey, AreaInfo][])
     .filter(([, info]) => info && info.status !== "nao_aplicavel");
 
   const orderNivel = { alto: 0, medio: 1, baixo: 2 } as const;
-  const pontosOrdenados = [...data.attention_points].sort(
+  const pontosOrdenados = [...displayData.attention_points].sort(
     (a, b) => (orderNivel[a.nivel] ?? 99) - (orderNivel[b.nivel] ?? 99),
   );
-  const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const passosOrdenados = [...displayData.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
   const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
@@ -318,6 +367,21 @@ function PerfilPage() {
         }
       `}</style>
 
+      {isViewingArchive && (
+        <div className="sticky top-0 z-30 bg-[#6B0F4B] text-white px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-3 no-print">
+          <span>
+            📂 Você está vendo um perfil arquivado em{" "}
+            <strong>{formatDate(viewingHistory!.archived_at)}</strong>
+          </span>
+          <button
+            onClick={() => setViewingHistory(null)}
+            className="bg-white text-[#6B0F4B] font-semibold px-3 py-1 rounded-md text-xs hover:bg-white/90"
+          >
+            Voltar ao perfil atual
+          </button>
+        </div>
+      )}
+
       {/* SEÇÃO 1 — Hero */}
       <section
         className="px-6 md:px-12 py-12 text-white text-center print-hero"
@@ -328,7 +392,7 @@ function PerfilPage() {
           {tituloPerfil}
         </h1>
         <p className="text-white/80 text-sm mb-4">
-          Gerado em {formatDate(data.generated_at)}
+          Gerado em {formatDate(displayData.generated_at)}
         </p>
         <div
           className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
@@ -336,9 +400,9 @@ function PerfilPage() {
         >
           {nivelCfg.label}
         </div>
-        {data.extra_data?.frase_de_forca && (
+        {displayData.extra_data?.frase_de_forca && (
           <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
-            "{data.extra_data.frase_de_forca}"
+            "{displayData.extra_data.frase_de_forca}"
           </p>
         )}
       </section>
@@ -439,16 +503,16 @@ function PerfilPage() {
       )}
 
       {/* SEÇÃO 5 — Insights */}
-      {data.insights.length > 0 && (
+      {displayData.insights.length > 0 && (
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">💡 Insights Jurídicos</h2>
           <p className="text-gray-600 mb-6">O que a lei diz sobre a sua situação</p>
           <Accordion
             type="multiple"
             className="space-y-2"
-            defaultValue={data.insights.map((_, i) => `ins-${i}`)}
+            defaultValue={displayData.insights.map((_, i) => `ins-${i}`)}
           >
-            {data.insights.map((ins, i) => (
+            {displayData.insights.map((ins, i) => (
               <AccordionItem
                 key={i}
                 value={`ins-${i}`}
@@ -533,7 +597,7 @@ function PerfilPage() {
       )}
 
       {/* SEÇÃO 7 — Resumo geral */}
-      {data.extra_data?.resumo_geral && (
+      {displayData.extra_data?.resumo_geral && (
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <div
             className="rounded-xl p-8 border"
@@ -549,12 +613,64 @@ function PerfilPage() {
               </h2>
             </div>
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {data.extra_data.resumo_geral}
+              {displayData.extra_data.resumo_geral}
             </p>
             <p className="text-xs text-gray-400 mt-6 pt-4 border-t border-[#E8D0E0]">
               Este perfil foi gerado com base nas leis brasileiras vigentes e nas informações
               fornecidas por você. Não substitui consulta com advogada.
             </p>
+          </div>
+        </section>
+      )}
+
+      {/* SEÇÃO — Histórico de perfis */}
+      {history.length > 0 && (
+        <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto no-print">
+          <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">📚 Histórico de Perfis</h2>
+          <p className="text-gray-600 mb-6">
+            Seus perfis anteriores ficam salvos aqui — você pode revisitá-los a qualquer momento.
+          </p>
+          <div className="space-y-3">
+            {history.map((h) => {
+              const niv = h.data.extra_data?.nivel_vulnerabilidade ?? "medio";
+              const nivCfg = NIVEL_VULN[niv];
+              const isOpen = viewingHistory?.id === h.id;
+              return (
+                <div
+                  key={h.id}
+                  className="bg-white rounded-lg p-5 shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-4"
+                >
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs uppercase text-gray-400 tracking-wider mb-1">
+                      Arquivado em {formatDate(h.archived_at)}
+                    </p>
+                    <p className="font-semibold text-[#6B0F4B]">
+                      Perfil gerado em {formatDate(h.generated_at)}
+                    </p>
+                    <span
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold mt-2"
+                      style={{ backgroundColor: nivCfg.bg, color: nivCfg.color }}
+                    >
+                      {nivCfg.label}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setViewingHistory(isOpen ? null : h);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    variant={isOpen ? "outline" : "default"}
+                    className={
+                      isOpen
+                        ? "border-[#552736] text-[#552736]"
+                        : "bg-[#552736] hover:bg-[#3F1C28] text-white"
+                    }
+                  >
+                    {isOpen ? "Voltar ao atual" : "Ver este perfil"}
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

@@ -161,6 +161,53 @@ export type Database = {
           },
         ]
       }
+      profile_history: {
+        Row: {
+          archived_at: string
+          areas: Json | null
+          attention_points: Json | null
+          extra_data: Json | null
+          generated_at: string
+          id: string
+          insights: Json | null
+          next_steps: Json | null
+          radar_scores: Json | null
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string
+          areas?: Json | null
+          attention_points?: Json | null
+          extra_data?: Json | null
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          next_steps?: Json | null
+          radar_scores?: Json | null
+          user_id: string
+        }
+        Update: {
+          archived_at?: string
+          areas?: Json | null
+          attention_points?: Json | null
+          extra_data?: Json | null
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          next_steps?: Json | null
+          radar_scores?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           advogado_id: string | null
