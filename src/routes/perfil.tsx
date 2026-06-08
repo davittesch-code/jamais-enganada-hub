@@ -315,7 +315,9 @@ function PerfilPage() {
     );
   }
 
-  const nivel = data.extra_data?.nivel_vulnerabilidade ?? "medio";
+  const displayData = viewingHistory?.data ?? data;
+  const isViewingArchive = !!viewingHistory;
+  const nivel = displayData.extra_data?.nivel_vulnerabilidade ?? "medio";
   const nivelCfg = NIVEL_VULN[nivel];
 
   const radarData = Object.entries(data.radar_scores).map(([area, score]) => ({
