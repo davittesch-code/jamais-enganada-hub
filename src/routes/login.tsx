@@ -222,19 +222,35 @@ function LoginPage() {
       </div>
 
       {/* LADO DIREITO — Login */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-12 lg:h-screen relative overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, #6B0F4B 0%, #552736 60%, #3F1C28 100%)",
+        }}
+      >
+        {/* Brilhos decorativos */}
+        <div
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #A8336A 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #F0DCE7 0%, transparent 70%)" }}
+        />
+
+        <div className="w-full max-w-md relative z-10">
           {/* Logo mobile */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2">
-              <Scale className="w-6 h-6 text-[#552736]" />
-              <span className="font-display text-xl font-semibold text-[#6B0F4B]">
+              <Scale className="w-6 h-6 text-white" />
+              <span className="font-display text-xl font-semibold text-white">
                 Jamais Enganada
               </span>
             </Link>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-[0_20px_50px_-20px_rgba(85,39,54,0.25)] p-8 border border-[#F0DCE7]">
+          <div className="bg-white rounded-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-8 border border-white/20">
             <h2 className="font-display text-2xl font-bold text-[#6B0F4B] mb-1">
               Bem-vinda de volta
             </h2>
