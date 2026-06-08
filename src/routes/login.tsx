@@ -11,7 +11,7 @@ type Depoimento = {
   texto: string;
   nome: string;
   papel: string;
-  inicial: string;
+  foto: string;
 };
 
 const DEPOIMENTOS: Depoimento[] = [
@@ -20,65 +20,66 @@ const DEPOIMENTOS: Depoimento[] = [
       "Descobri direitos que eu nem sabia que tinha. Hoje me sinto muito mais segura para tomar decisões.",
     nome: "Mariana S.",
     papel: "Empresária — SP",
-    inicial: "M",
+    foto: "https://randomuser.me/api/portraits/women/68.jpg",
   },
   {
     texto:
       "A Sofia me ajudou a entender o processo de divórcio sem juridiquês. Mudou minha vida.",
     nome: "Carla R.",
     papel: "Professora — MG",
-    inicial: "C",
+    foto: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
     texto:
       "Em 10 minutos eu tinha um perfil jurídico completo. Nunca pensei que seria tão simples.",
     nome: "Patrícia L.",
     papel: "Designer — RJ",
-    inicial: "P",
+    foto: "https://randomuser.me/api/portraits/women/65.jpg",
   },
   {
     texto:
       "Fui orientada sobre guarda dos filhos com clareza. Plataforma feita por mulheres, para mulheres.",
     nome: "Juliana M.",
     papel: "Mãe — PR",
-    inicial: "J",
+    foto: "https://randomuser.me/api/portraits/women/12.jpg",
   },
   {
     texto:
       "O acompanhamento com a advogada parceira foi rápido e acolhedor. Recomendo demais.",
     nome: "Fernanda A.",
     papel: "Autônoma — BA",
-    inicial: "F",
+    foto: "https://randomuser.me/api/portraits/women/32.jpg",
   },
   {
     texto:
       "Finalmente uma plataforma que fala a minha língua. Saí do medo, entrei na ação.",
     nome: "Beatriz O.",
     papel: "Médica — RS",
-    inicial: "B",
+    foto: "https://randomuser.me/api/portraits/women/90.jpg",
   },
   {
     texto:
       "Aprendi sobre meus direitos patrimoniais antes do casamento. Conhecimento é poder.",
     nome: "Renata C.",
     papel: "Arquiteta — SC",
-    inicial: "R",
+    foto: "https://randomuser.me/api/portraits/women/22.jpg",
   },
   {
     texto:
       "A análise foi tão completa que minha advogada elogiou. Vale cada minuto investido.",
     nome: "Larissa P.",
     papel: "Contadora — DF",
-    inicial: "L",
+    foto: "https://randomuser.me/api/portraits/women/76.jpg",
   },
   {
     texto:
       "Saí de um relacionamento abusivo sabendo exatamente o que fazer. Obrigada por existirem.",
     nome: "Camila T.",
     papel: "Enfermeira — CE",
-    inicial: "C",
+    foto: "https://randomuser.me/api/portraits/women/52.jpg",
   },
 ];
+
 
 function DepoimentoCard({ d }: { d: Depoimento }) {
   return (
@@ -88,12 +89,12 @@ function DepoimentoCard({ d }: { d: Depoimento }) {
     >
       <p className="text-sm text-gray-700 leading-relaxed mb-4">"{d.texto}"</p>
       <div className="flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-          style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)" }}
-        >
-          {d.inicial}
-        </div>
+        <img
+          src={d.foto}
+          alt={d.nome}
+          loading="lazy"
+          className="w-10 h-10 rounded-full object-cover border-2 border-[#F3D9E4]"
+        />
         <div>
           <p className="font-semibold text-[#6B0F4B] text-sm">{d.nome}</p>
           <p className="text-xs text-gray-500">{d.papel}</p>
@@ -161,7 +162,7 @@ function LoginPage() {
   const col3 = DEPOIMENTOS.slice(6, 9);
 
   return (
-    <div className="min-h-screen flex bg-[#FDF6F9]">
+    <div className="lg:h-screen lg:overflow-hidden min-h-screen flex bg-[#FDF6F9]">
       <style>{`
         @keyframes marquee-up {
           from { transform: translateY(0); }
@@ -221,19 +222,35 @@ function LoginPage() {
       </div>
 
       {/* LADO DIREITO — Login */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-12 lg:h-screen relative overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, #6B0F4B 0%, #552736 60%, #3F1C28 100%)",
+        }}
+      >
+        {/* Brilhos decorativos */}
+        <div
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #A8336A 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #F0DCE7 0%, transparent 70%)" }}
+        />
+
+        <div className="w-full max-w-md relative z-10">
           {/* Logo mobile */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2">
-              <Scale className="w-6 h-6 text-[#552736]" />
-              <span className="font-display text-xl font-semibold text-[#6B0F4B]">
+              <Scale className="w-6 h-6 text-white" />
+              <span className="font-display text-xl font-semibold text-white">
                 Jamais Enganada
               </span>
             </Link>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-[0_20px_50px_-20px_rgba(85,39,54,0.25)] p-8 border border-[#F0DCE7]">
+          <div className="bg-white rounded-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-8 border border-white/20">
             <h2 className="font-display text-2xl font-bold text-[#6B0F4B] mb-1">
               Bem-vinda de volta
             </h2>
@@ -304,7 +321,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 text-center mt-6">
+          <p className="text-xs text-white/70 text-center mt-6">
             🔒 Seus dados são privados e protegidos.
           </p>
         </div>
