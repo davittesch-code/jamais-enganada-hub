@@ -320,19 +320,19 @@ function PerfilPage() {
   const nivel = displayData.extra_data?.nivel_vulnerabilidade ?? "medio";
   const nivelCfg = NIVEL_VULN[nivel];
 
-  const radarData = Object.entries(data.radar_scores).map(([area, score]) => ({
+  const radarData = Object.entries(displayData.radar_scores).map(([area, score]) => ({
     area: TRADUCAO_AREAS[area as AreaKey] ?? area,
     score: Number(score) || 0,
   }));
 
-  const areasList = (Object.entries(data.areas) as [AreaKey, AreaInfo][])
+  const areasList = (Object.entries(displayData.areas) as [AreaKey, AreaInfo][])
     .filter(([, info]) => info && info.status !== "nao_aplicavel");
 
   const orderNivel = { alto: 0, medio: 1, baixo: 2 } as const;
-  const pontosOrdenados = [...data.attention_points].sort(
+  const pontosOrdenados = [...displayData.attention_points].sort(
     (a, b) => (orderNivel[a.nivel] ?? 99) - (orderNivel[b.nivel] ?? 99),
   );
-  const passosOrdenados = [...data.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const passosOrdenados = [...displayData.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
   const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
@@ -377,7 +377,7 @@ function PerfilPage() {
           {tituloPerfil}
         </h1>
         <p className="text-white/80 text-sm mb-4">
-          Gerado em {formatDate(data.generated_at)}
+          Gerado em {formatDate(displayData.generated_at)}
         </p>
         <div
           className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
@@ -385,9 +385,9 @@ function PerfilPage() {
         >
           {nivelCfg.label}
         </div>
-        {data.extra_data?.frase_de_forca && (
+        {displayData.extra_data?.frase_de_forca && (
           <p className="text-lg md:text-xl italic max-w-2xl mx-auto mt-6 leading-relaxed">
-            "{data.extra_data.frase_de_forca}"
+            "{displayData.extra_data.frase_de_forca}"
           </p>
         )}
       </section>
@@ -488,16 +488,16 @@ function PerfilPage() {
       )}
 
       {/* SEÇÃO 5 — Insights */}
-      {data.insights.length > 0 && (
+      {displayData.insights.length > 0 && (
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">💡 Insights Jurídicos</h2>
           <p className="text-gray-600 mb-6">O que a lei diz sobre a sua situação</p>
           <Accordion
             type="multiple"
             className="space-y-2"
-            defaultValue={data.insights.map((_, i) => `ins-${i}`)}
+            defaultValue={displayData.insights.map((_, i) => `ins-${i}`)}
           >
-            {data.insights.map((ins, i) => (
+            {displayData.insights.map((ins, i) => (
               <AccordionItem
                 key={i}
                 value={`ins-${i}`}
@@ -582,7 +582,7 @@ function PerfilPage() {
       )}
 
       {/* SEÇÃO 7 — Resumo geral */}
-      {data.extra_data?.resumo_geral && (
+      {displayData.extra_data?.resumo_geral && (
         <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
           <div
             className="rounded-xl p-8 border"
@@ -598,7 +598,7 @@ function PerfilPage() {
               </h2>
             </div>
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {data.extra_data.resumo_geral}
+              {displayData.extra_data.resumo_geral}
             </p>
             <p className="text-xs text-gray-400 mt-6 pt-4 border-t border-[#E8D0E0]">
               Este perfil foi gerado com base nas leis brasileiras vigentes e nas informações
