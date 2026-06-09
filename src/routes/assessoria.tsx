@@ -9,6 +9,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -79,6 +80,7 @@ function AssessoriaPage() {
   const [contatoAdv, setContatoAdv] = useState<AdvContato | null>(null);
   const [profileData, setProfileData] = useState<ProfileDataRow | null>(null);
   const [duvidas, setDuvidas] = useState<Duvida[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -136,7 +138,7 @@ function AssessoriaPage() {
   const especialidadeAdv = contatoAdv?.especialidade || "Direito da Mulher e Família";
   const oabAdv = contatoAdv?.oab || "";
 
-  const handleWhatsApp = () => {
+  const executeWhatsApp = () => {
     if (!temAdvogado) return;
     const numero = onlyDigits(contatoAdv?.whatsapp) || "5511999999999";
     const areasCriticas = profileData?.areas
@@ -155,6 +157,11 @@ function AssessoriaPage() {
         `Gostaria de conversar sobre minha situação.`,
     );
     window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
+  };
+
+  const handleWhatsApp = () => {
+    if (!temAdvogado) return;
+    setConfirmOpen(true);
   };
 
   if (loading) {
@@ -199,6 +206,11 @@ function AssessoriaPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF6F9]">
+      <WhatsAppConsultaModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={executeWhatsApp}
+      />
       {/* Banner sem advogada */}
       {!temAdvogado && (
         <div

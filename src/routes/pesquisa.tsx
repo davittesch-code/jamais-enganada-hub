@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarSofia } from "@/lib/pesquisa.functions";
 import { UpsellModal } from "@/components/UpsellModal";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 
 
 export const Route = createFileRoute("/pesquisa")({
@@ -233,6 +234,7 @@ function PesquisaPage() {
   const [queriesUsed, setQueriesUsed] = useState(0);
   const [queriesLimit, setQueriesLimit] = useState(5);
   const [upsellOpen, setUpsellOpen] = useState(false);
+  const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
@@ -404,13 +406,15 @@ function PesquisaPage() {
     }
   };
 
-  const handleWhatsApp = () => {
+  const executeWhatsApp = () => {
     const nome = profile?.full_name?.split(" ")[0] ?? "cliente";
     const mensagem = encodeURIComponent(
       `Olá! Sou ${nome}, cliente da Jamais Enganada. Fiz uma consulta no Tira-dúvidas e gostaria de conversar.`
     );
     window.open(`https://wa.me/${whatsappAdm}?text=${mensagem}`, "_blank");
   };
+
+  const handleWhatsApp = () => setWhatsappConfirmOpen(true);
 
   const novaPergunta = () => {
     setAtivo(null);
@@ -422,6 +426,11 @@ function PesquisaPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF6F9]">
+      <WhatsAppConsultaModal
+        open={whatsappConfirmOpen}
+        onClose={() => setWhatsappConfirmOpen(false)}
+        onConfirm={executeWhatsApp}
+      />
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
         <div className="grid gap-6 md:grid-cols-[35%_65%]">
           {/* Histórico */}

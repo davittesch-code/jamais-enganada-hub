@@ -55,6 +55,7 @@ import {
 import { AreaStatusBadge, statusBorderColor } from "@/components/perfil/AreaStatusBadge";
 import { NivelBadge, nivelColor } from "@/components/perfil/NivelBadge";
 import { UpsellModal } from "@/components/UpsellModal";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 
 export const Route = createFileRoute("/perfil")({
   component: () => (
@@ -188,6 +189,8 @@ function PerfilPage() {
   const [geracoesUsed, setGeracoesUsed] = useState(0);
   const [geracoesLimit, setGeracoesLimit] = useState(2);
   const [upsellPerfil, setUpsellPerfil] = useState(false);
+  const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
+  const [pendingWhatsappHref, setPendingWhatsappHref] = useState<string | null>(null);
   const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
 
   const loadHistory = async (uid: string) => {
@@ -882,7 +885,10 @@ function PerfilPage() {
             const href = `https://wa.me/${whatsappAdm}?text=${mensagem}`;
             return (
               <Button
-                onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+                onClick={() => {
+                  setPendingWhatsappHref(href);
+                  setWhatsappConfirmOpen(true);
+                }}
                 className="text-white"
                 style={{ backgroundColor: "#25D366" }}
               >
@@ -917,6 +923,16 @@ function PerfilPage() {
         onConfirm={() => {
           setUpsellPerfil(false);
           toast("Em breve: pagamento integrado! 💜");
+        }}
+      />
+      <WhatsAppConsultaModal
+        open={whatsappConfirmOpen}
+        onClose={() => setWhatsappConfirmOpen(false)}
+        onConfirm={() => {
+          if (pendingWhatsappHref) {
+            window.open(pendingWhatsappHref, "_blank", "noopener,noreferrer");
+          }
+          setPendingWhatsappHref(null);
         }}
       />
     </div>
