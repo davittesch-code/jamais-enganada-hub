@@ -30,6 +30,7 @@ interface Question {
   id: string;
   text: string;
   options?: string[];
+  multiSelect?: boolean;
 }
 
 const LOADING_STEPS = [
@@ -38,6 +39,19 @@ const LOADING_STEPS = [
   "Identificando pontos de atenção...",
   "Finalizando seu perfil...",
 ];
+
+// Calcula tempo de digitação realista (1500-4500ms) baseado no tamanho da mensagem
+function calcTypingDelay(texto: string): number {
+  const base = 800;
+  const porCaractere = texto.length * 30;
+  const jitter = Math.random() * 400;
+  return Math.min(Math.max(base + porCaractere + jitter, 1500), 4500);
+}
+
+// Pausa natural entre confirmação e próxima pergunta (1000-1800ms)
+function calcPauseDelay(): number {
+  return 1000 + Math.random() * 800;
+}
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -181,20 +195,24 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
     options: ["Não, nunca", "Já existiu, mas passou", "Estou passando por isso"],
   });
 
-  // Bloco 2 — imóveis, adaptado
-  if (querDiv && planejandoSilencio) {
-    qs.push({
-      id: "q4",
-      text: "Pensando no patrimônio: existem imóveis no nome de vocês? Estão no seu nome, no dele ou compartilhados?",
-      options: ["Não temos imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
-    });
-  } else {
-    qs.push({
-      id: "q4",
-      text: "Você tem imóveis? Se sim, estão no seu nome, no nome do parceiro ou são compartilhados?",
-      options: ["Não tenho imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
-    });
-  }
+  // Bloco 2 — imóveis (multi-seleção)
+  qs.push({
+    id: "q4",
+    text:
+      querDiv && planejandoSilencio
+        ? "Pensando no patrimônio: vocês têm imóveis? Selecione tudo que se aplica."
+        : "Você tem imóveis? Selecione tudo que se aplica.",
+    multiSelect: true,
+    options: [
+      "Não tenho imóveis",
+      "Imóvel só no meu nome",
+      "Imóvel só no nome dele",
+      "Imóvel em nome dos dois",
+      "Financiamento em meu nome",
+      "Financiamento no nome dele",
+      "Financiamento nos dois nomes",
+    ],
+  });
 
   qs.push({
     id: "q5",
@@ -206,8 +224,16 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
 
   qs.push({
     id: "q6",
-    text: "Você tem dívidas — pessoais, de cartão, financiamentos ou dívidas que possam ser do casal?",
-    options: ["Não tenho dívidas", "Tenho dívidas pessoais", "Temos dívidas do casal", "Tenho dívidas empresariais"],
+    text: "Você tem dívidas? Selecione todas que se aplicam:",
+    multiSelect: true,
+    options: [
+      "Não tenho dívidas",
+      "Dívidas pessoais (cartão, empréstimo)",
+      "Dívidas do casal conjuntas",
+      "Financiamento imobiliário",
+      "Financiamento de veículo",
+      "Dívidas empresariais",
+    ],
   });
 
   // Bloco 3 — empresa
@@ -219,10 +245,20 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
     });
     qs.push({
       id: "q8",
-      text: "Existe alguma questão societária — sócio, divisão de cotas, contrato social desatualizado — que te preocupa?",
-      options: ["Não, está tudo ok", "Tenho sócio e há conflito", "Contrato desatualizado", "Quero encerrar a empresa"],
+      text: "Em relação à sua empresa, o que se aplica? (selecione tudo que vale)",
+      multiSelect: true,
+      options: [
+        "Sou a única sócia",
+        "Tenho sócio(a)",
+        "Meu parceiro é sócio",
+        "Empresa em meu nome",
+        "Empresa no nome dele",
+        "Empresa nos dois nomes",
+        "Quero encerrar a empresa",
+      ],
     });
   }
+
 
   // Bloco 4 — herança
   qs.push({
@@ -257,6 +293,7 @@ export function useConsulta() {
   const [isTyping, setIsTyping] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentOptions, setCurrentOptions] = useState<string[] | null>(null);
+  const [currentMultiSelect, setCurrentMultiSelect] = useState<boolean>(false);
   const [inputDisabled, setInputDisabled] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -287,6 +324,7 @@ export function useConsulta() {
       if (!q) return;
       setIsTyping(true);
       setCurrentOptions(null);
+      setCurrentMultiSelect(false);
       schedule(() => {
         setIsTyping(false);
         addMessage("sofia", q.text);
@@ -295,12 +333,14 @@ export function useConsulta() {
         setProgress(Math.round((index / total) * 90));
         if (q.options) {
           setCurrentOptions(q.options);
+          setCurrentMultiSelect(!!q.multiSelect);
           setInputDisabled(false);
         } else {
           setCurrentOptions(null);
+          setCurrentMultiSelect(false);
           setInputDisabled(false);
         }
-      }, 1100);
+      }, calcTypingDelay(q.text));
     },
     [addMessage, schedule],
   );
@@ -420,6 +460,7 @@ export function useConsulta() {
 
       setInputDisabled(true);
       setCurrentOptions(null);
+      setCurrentMultiSelect(false);
       addMessage("user", trimmed);
       respostasRef.current.push({ question: q.text, answer: trimmed });
       answersMapRef.current[q.id] = trimmed;
@@ -441,15 +482,14 @@ export function useConsulta() {
 
       // Acolhimento extra para violência atual (q3 - 3ª opção)
       if (q.id === "q3" && /passando por isso/i.test(trimmed)) {
+        const acolhimento =
+          "Sinto muito que você esteja vivendo isso. Você não está sozinha — a Lei Maria da Penha existe para te proteger, e vamos garantir que seu perfil destaque os caminhos seguros para você. 💜";
         setIsTyping(true);
         schedule(() => {
           setIsTyping(false);
-          addMessage(
-            "sofia",
-            "Sinto muito que você esteja vivendo isso. Você não está sozinha — a Lei Maria da Penha existe para te proteger, e vamos garantir que seu perfil destaque os caminhos seguros para você. 💜",
-          );
-          schedule(() => proceed(), 1800);
-        }, 1000);
+          addMessage("sofia", acolhimento);
+          schedule(() => proceed(), calcPauseDelay());
+        }, calcTypingDelay(acolhimento));
         return;
       }
 
@@ -459,30 +499,27 @@ export function useConsulta() {
         const next = index + 1;
         if (next >= questionsRef.current.length) {
           // Encerramento
+          const msg1 = `Obrigada por compartilhar tudo isso comigo, ${ctxRef.current.nome ?? "amiga"}. Agora vou analisar cada resposta com cuidado e preparar o seu perfil jurídico.`;
+          const msg2 =
+            "Isso pode levar alguns segundos... Já já você terá um panorama completo dos seus direitos e dos pontos que merecem atenção. 🔍";
           schedule(() => {
             setIsTyping(true);
             schedule(() => {
               setIsTyping(false);
-              addMessage(
-                "sofia",
-                `Obrigada por compartilhar tudo isso comigo, ${ctxRef.current.nome ?? "amiga"}. Agora vou analisar cada resposta com cuidado e preparar o seu perfil jurídico.`,
-              );
+              addMessage("sofia", msg1);
               schedule(() => {
                 setIsTyping(true);
                 schedule(() => {
                   setIsTyping(false);
-                  addMessage(
-                    "sofia",
-                    "Isso pode levar alguns segundos... Já já você terá um panorama completo dos seus direitos e dos pontos que merecem atenção. 🔍",
-                  );
+                  addMessage("sofia", msg2);
                   schedule(() => void finalize(), 1500);
-                }, 1500);
-              }, 2200);
-            }, 1100);
-          }, 1000);
+                }, calcTypingDelay(msg2));
+              }, calcPauseDelay());
+            }, calcTypingDelay(msg1));
+          }, calcPauseDelay());
           return;
         }
-        schedule(() => askQuestion(next), 700);
+        schedule(() => askQuestion(next), calcPauseDelay());
       }
     },
     [addMessage, askQuestion, finalize, inputDisabled, schedule, user],
@@ -634,6 +671,7 @@ export function useConsulta() {
     isTyping,
     progress,
     currentOptions,
+    currentMultiSelect,
     inputDisabled,
     isGenerating,
     loadingText: LOADING_STEPS[loadingStep],

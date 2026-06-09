@@ -98,6 +98,7 @@ function ConsultaPage() {
     isTyping,
     progress,
     currentOptions,
+    currentMultiSelect,
     inputDisabled,
     isGenerating,
     loadingText,
@@ -142,7 +143,8 @@ function ConsultaPage() {
             {currentOptions && currentOptions.length > 0 && (
               <QuickReply
                 options={currentOptions}
-                onSelect={handleReply}
+                multiSelect={currentMultiSelect}
+                onSelect={(opts) => handleReply(opts.join(", "))}
                 disabled={inputDisabled}
               />
             )}
