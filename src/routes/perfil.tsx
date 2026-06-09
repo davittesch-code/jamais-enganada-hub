@@ -925,6 +925,16 @@ function PerfilPage() {
           toast("Em breve: pagamento integrado! 💜");
         }}
       />
+      <WhatsAppConsultaModal
+        open={whatsappConfirmOpen}
+        onClose={() => setWhatsappConfirmOpen(false)}
+        onConfirm={() => {
+          if (pendingWhatsappHref) {
+            window.open(pendingWhatsappHref, "_blank", "noopener,noreferrer");
+          }
+          setPendingWhatsappHref(null);
+        }}
+      />
     </div>
   );
 }
