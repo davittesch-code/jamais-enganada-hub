@@ -98,6 +98,7 @@ function ConsultaPage() {
     isTyping,
     progress,
     currentOptions,
+    currentMultiSelect,
     inputDisabled,
     isGenerating,
     loadingText,
@@ -110,39 +111,12 @@ function ConsultaPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping, currentOptions]);
-
-  return (
-    <div
-      className="relative flex flex-col h-dvh w-full"
-      style={{ background: "#FDF6F9" }}
-    >
-      <div className="sticky top-0 z-10">
-        <ProgressBar percent={progress} />
-        <div
-          className="text-[11px] text-center px-3 py-1 bg-white border-b"
-          style={{ color: "#6B0F4B", borderColor: "#F3E8F0" }}
-        >
-          Construindo seu perfil...
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto">
-          {messages.map((msg) => (
-            <ChatBubble key={msg.id} sender={msg.sender} message={msg.text} />
-          ))}
-          {isTyping && <TypingIndicator />}
-          <div ref={bottomRef} />
-        </div>
-      </div>
-
-      {!isGenerating && !erroGeracao && (
-        <div className="sticky bottom-0">
-          <div className="max-w-2xl mx-auto">
+...
             {currentOptions && currentOptions.length > 0 && (
               <QuickReply
                 options={currentOptions}
-                onSelect={handleReply}
+                multiSelect={currentMultiSelect}
+                onSelect={(opts) => handleReply(opts.join(", "))}
                 disabled={inputDisabled}
               />
             )}
