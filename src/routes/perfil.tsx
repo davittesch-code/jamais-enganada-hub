@@ -189,6 +189,8 @@ function PerfilPage() {
   const [geracoesUsed, setGeracoesUsed] = useState(0);
   const [geracoesLimit, setGeracoesLimit] = useState(2);
   const [upsellPerfil, setUpsellPerfil] = useState(false);
+  const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
+  const [pendingWhatsappHref, setPendingWhatsappHref] = useState<string | null>(null);
   const geracoesRestantes = Math.max(0, geracoesLimit - geracoesUsed);
 
   const loadHistory = async (uid: string) => {
