@@ -293,6 +293,7 @@ export function useConsulta() {
   const [isTyping, setIsTyping] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentOptions, setCurrentOptions] = useState<string[] | null>(null);
+  const [currentMultiSelect, setCurrentMultiSelect] = useState<boolean>(false);
   const [inputDisabled, setInputDisabled] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -323,6 +324,7 @@ export function useConsulta() {
       if (!q) return;
       setIsTyping(true);
       setCurrentOptions(null);
+      setCurrentMultiSelect(false);
       schedule(() => {
         setIsTyping(false);
         addMessage("sofia", q.text);
@@ -331,12 +333,14 @@ export function useConsulta() {
         setProgress(Math.round((index / total) * 90));
         if (q.options) {
           setCurrentOptions(q.options);
+          setCurrentMultiSelect(!!q.multiSelect);
           setInputDisabled(false);
         } else {
           setCurrentOptions(null);
+          setCurrentMultiSelect(false);
           setInputDisabled(false);
         }
-      }, 1100);
+      }, calcTypingDelay(q.text));
     },
     [addMessage, schedule],
   );
