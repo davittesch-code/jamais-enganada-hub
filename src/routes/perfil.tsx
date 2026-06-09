@@ -486,7 +486,7 @@ function PerfilPage() {
                   dot={{ fill: "#6B0F4B", strokeWidth: 2, r: 5 }}
                 />
                 <Tooltip
-                  content={({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { area: string } }> }) => {
+                  content={((props: { active?: boolean; payload?: Array<{ value?: number; payload?: { area?: string } }> }) => {
                     if (!active || !payload?.length) return null;
                     const real = payload.find((p) => typeof p.value === "number" && p.payload?.area);
                     if (!real) return null;
@@ -560,7 +560,7 @@ function PerfilPage() {
                   tickLine={false}
                 />
                 <Tooltip
-                  content={({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { area: string } }> }) => {
+                  content={((props: { active?: boolean; payload?: Array<{ value?: number; payload?: { area?: string } }> }) => {
                     if (!active || !payload?.length) return null;
                     const score = Number(payload[0].value);
                     const status =
