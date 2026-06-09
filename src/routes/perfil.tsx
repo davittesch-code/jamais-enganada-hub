@@ -563,7 +563,9 @@ function PerfilPage() {
                   tickLine={false}
                 />
                 <Tooltip
-                  content={((props: { active?: boolean; payload?: Array<{ value?: number; payload?: { area?: string } }> }) => {
+                  content={(props) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { active, payload } = props as any;
                     if (!active || !payload?.length) return null;
                     const score = Number(payload[0].value);
                     const status =
