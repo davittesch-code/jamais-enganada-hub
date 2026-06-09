@@ -138,7 +138,7 @@ function AssessoriaPage() {
   const especialidadeAdv = contatoAdv?.especialidade || "Direito da Mulher e Família";
   const oabAdv = contatoAdv?.oab || "";
 
-  const handleWhatsApp = () => {
+  const executeWhatsApp = () => {
     if (!temAdvogado) return;
     const numero = onlyDigits(contatoAdv?.whatsapp) || "5511999999999";
     const areasCriticas = profileData?.areas
@@ -157,6 +157,11 @@ function AssessoriaPage() {
         `Gostaria de conversar sobre minha situação.`,
     );
     window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
+  };
+
+  const handleWhatsApp = () => {
+    if (!temAdvogado) return;
+    setConfirmOpen(true);
   };
 
   if (loading) {
