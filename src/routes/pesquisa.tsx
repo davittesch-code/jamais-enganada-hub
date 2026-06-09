@@ -234,6 +234,7 @@ function PesquisaPage() {
   const [queriesUsed, setQueriesUsed] = useState(0);
   const [queriesLimit, setQueriesLimit] = useState(5);
   const [upsellOpen, setUpsellOpen] = useState(false);
+  const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
