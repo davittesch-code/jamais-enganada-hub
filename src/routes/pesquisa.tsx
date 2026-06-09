@@ -406,13 +406,15 @@ function PesquisaPage() {
     }
   };
 
-  const handleWhatsApp = () => {
+  const executeWhatsApp = () => {
     const nome = profile?.full_name?.split(" ")[0] ?? "cliente";
     const mensagem = encodeURIComponent(
       `Olá! Sou ${nome}, cliente da Jamais Enganada. Fiz uma consulta no Tira-dúvidas e gostaria de conversar.`
     );
     window.open(`https://wa.me/${whatsappAdm}?text=${mensagem}`, "_blank");
   };
+
+  const handleWhatsApp = () => setWhatsappConfirmOpen(true);
 
   const novaPergunta = () => {
     setAtivo(null);
