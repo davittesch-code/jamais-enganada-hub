@@ -80,6 +80,7 @@ function AssessoriaPage() {
   const [contatoAdv, setContatoAdv] = useState<AdvContato | null>(null);
   const [profileData, setProfileData] = useState<ProfileDataRow | null>(null);
   const [duvidas, setDuvidas] = useState<Duvida[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
