@@ -206,6 +206,11 @@ function AssessoriaPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF6F9]">
+      <WhatsAppConsultaModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={executeWhatsApp}
+      />
       {/* Banner sem advogada */}
       {!temAdvogado && (
         <div
