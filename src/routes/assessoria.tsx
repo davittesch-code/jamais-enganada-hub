@@ -9,6 +9,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { PrivateRoute } from "@/components/PrivateRoute";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
