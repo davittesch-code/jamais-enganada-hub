@@ -291,16 +291,18 @@ export function useOnboarding() {
       const nextIndex = index + 1;
 
       if (nextIndex < QUESTIONS.length) {
+        const nextText = QUESTIONS[nextIndex].text;
+        // Pausa natural após confirmação, depois nova digitação
         schedule(() => {
           setIsTyping(true);
           schedule(() => {
             setIsTyping(false);
-            addMessage("sofia", QUESTIONS[nextIndex].text);
+            addMessage("sofia", nextText);
             currentIndexRef.current = nextIndex;
             setProgress(Math.round((nextIndex / 8) * 88));
             setInputDisabled(false);
-          }, 1000);
-        }, 800);
+          }, calcTypingDelay(nextText));
+        }, calcPauseDelay());
       } else {
         currentIndexRef.current = 8;
         // Open advogada picker after Q8 confirmation
