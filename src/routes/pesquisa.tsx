@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarSofia } from "@/lib/pesquisa.functions";
 import { UpsellModal } from "@/components/UpsellModal";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 
 
 export const Route = createFileRoute("/pesquisa")({
