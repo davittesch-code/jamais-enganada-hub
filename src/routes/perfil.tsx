@@ -486,9 +486,12 @@ function PerfilPage() {
                   dot={{ fill: "#6B0F4B", strokeWidth: 2, r: 5 }}
                 />
                 <Tooltip
-                  content={((props: { active?: boolean; payload?: Array<{ value?: number; payload?: { area?: string } }> }) => {
+                  content={(props) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { active, payload } = props as any;
                     if (!active || !payload?.length) return null;
-                    const real = payload.find((p) => typeof p.value === "number" && p.payload?.area);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const real = (payload as any[]).find((p) => typeof p.value === "number" && p.payload?.area);
                     if (!real) return null;
                     const score = Number(real.value);
                     const status =
