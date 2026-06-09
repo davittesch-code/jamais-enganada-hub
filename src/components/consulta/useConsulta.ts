@@ -460,6 +460,7 @@ export function useConsulta() {
 
       setInputDisabled(true);
       setCurrentOptions(null);
+      setCurrentMultiSelect(false);
       addMessage("user", trimmed);
       respostasRef.current.push({ question: q.text, answer: trimmed });
       answersMapRef.current[q.id] = trimmed;
@@ -481,15 +482,14 @@ export function useConsulta() {
 
       // Acolhimento extra para violência atual (q3 - 3ª opção)
       if (q.id === "q3" && /passando por isso/i.test(trimmed)) {
+        const acolhimento =
+          "Sinto muito que você esteja vivendo isso. Você não está sozinha — a Lei Maria da Penha existe para te proteger, e vamos garantir que seu perfil destaque os caminhos seguros para você. 💜";
         setIsTyping(true);
         schedule(() => {
           setIsTyping(false);
-          addMessage(
-            "sofia",
-            "Sinto muito que você esteja vivendo isso. Você não está sozinha — a Lei Maria da Penha existe para te proteger, e vamos garantir que seu perfil destaque os caminhos seguros para você. 💜",
-          );
-          schedule(() => proceed(), 1800);
-        }, 1000);
+          addMessage("sofia", acolhimento);
+          schedule(() => proceed(), calcPauseDelay());
+        }, calcTypingDelay(acolhimento));
         return;
       }
 
@@ -499,30 +499,27 @@ export function useConsulta() {
         const next = index + 1;
         if (next >= questionsRef.current.length) {
           // Encerramento
+          const msg1 = `Obrigada por compartilhar tudo isso comigo, ${ctxRef.current.nome ?? "amiga"}. Agora vou analisar cada resposta com cuidado e preparar o seu perfil jurídico.`;
+          const msg2 =
+            "Isso pode levar alguns segundos... Já já você terá um panorama completo dos seus direitos e dos pontos que merecem atenção. 🔍";
           schedule(() => {
             setIsTyping(true);
             schedule(() => {
               setIsTyping(false);
-              addMessage(
-                "sofia",
-                `Obrigada por compartilhar tudo isso comigo, ${ctxRef.current.nome ?? "amiga"}. Agora vou analisar cada resposta com cuidado e preparar o seu perfil jurídico.`,
-              );
+              addMessage("sofia", msg1);
               schedule(() => {
                 setIsTyping(true);
                 schedule(() => {
                   setIsTyping(false);
-                  addMessage(
-                    "sofia",
-                    "Isso pode levar alguns segundos... Já já você terá um panorama completo dos seus direitos e dos pontos que merecem atenção. 🔍",
-                  );
+                  addMessage("sofia", msg2);
                   schedule(() => void finalize(), 1500);
-                }, 1500);
-              }, 2200);
-            }, 1100);
-          }, 1000);
+                }, calcTypingDelay(msg2));
+              }, calcPauseDelay());
+            }, calcTypingDelay(msg1));
+          }, calcPauseDelay());
           return;
         }
-        schedule(() => askQuestion(next), 700);
+        schedule(() => askQuestion(next), calcPauseDelay());
       }
     },
     [addMessage, askQuestion, finalize, inputDisabled, schedule, user],
