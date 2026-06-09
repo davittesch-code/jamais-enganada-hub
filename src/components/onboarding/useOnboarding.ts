@@ -62,6 +62,19 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+// Tempo de digitação realista (1500-4500ms) baseado no tamanho da mensagem
+function calcTypingDelay(texto: string): number {
+  const base = 800;
+  const porCaractere = texto.length * 30;
+  const jitter = Math.random() * 400;
+  return Math.min(Math.max(base + porCaractere + jitter, 1500), 4500);
+}
+
+// Pausa natural entre confirmação e próxima pergunta (1000-1800ms)
+function calcPauseDelay(): number {
+  return 1000 + Math.random() * 800;
+}
+
 export interface AdvogadaOpt {
   id: string;
   nome: string;
