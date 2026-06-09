@@ -195,20 +195,24 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
     options: ["Não, nunca", "Já existiu, mas passou", "Estou passando por isso"],
   });
 
-  // Bloco 2 — imóveis, adaptado
-  if (querDiv && planejandoSilencio) {
-    qs.push({
-      id: "q4",
-      text: "Pensando no patrimônio: existem imóveis no nome de vocês? Estão no seu nome, no dele ou compartilhados?",
-      options: ["Não temos imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
-    });
-  } else {
-    qs.push({
-      id: "q4",
-      text: "Você tem imóveis? Se sim, estão no seu nome, no nome do parceiro ou são compartilhados?",
-      options: ["Não tenho imóveis", "Só no meu nome", "Só no nome dele", "Compartilhado", "Em financiamento"],
-    });
-  }
+  // Bloco 2 — imóveis (multi-seleção)
+  qs.push({
+    id: "q4",
+    text:
+      querDiv && planejandoSilencio
+        ? "Pensando no patrimônio: vocês têm imóveis? Selecione tudo que se aplica."
+        : "Você tem imóveis? Selecione tudo que se aplica.",
+    multiSelect: true,
+    options: [
+      "Não tenho imóveis",
+      "Imóvel só no meu nome",
+      "Imóvel só no nome dele",
+      "Imóvel em nome dos dois",
+      "Financiamento em meu nome",
+      "Financiamento no nome dele",
+      "Financiamento nos dois nomes",
+    ],
+  });
 
   qs.push({
     id: "q5",
@@ -220,8 +224,16 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
 
   qs.push({
     id: "q6",
-    text: "Você tem dívidas — pessoais, de cartão, financiamentos ou dívidas que possam ser do casal?",
-    options: ["Não tenho dívidas", "Tenho dívidas pessoais", "Temos dívidas do casal", "Tenho dívidas empresariais"],
+    text: "Você tem dívidas? Selecione todas que se aplicam:",
+    multiSelect: true,
+    options: [
+      "Não tenho dívidas",
+      "Dívidas pessoais (cartão, empréstimo)",
+      "Dívidas do casal conjuntas",
+      "Financiamento imobiliário",
+      "Financiamento de veículo",
+      "Dívidas empresariais",
+    ],
   });
 
   // Bloco 3 — empresa
@@ -233,10 +245,20 @@ function buildQuestions(ctx: OnboardingCtx, answers: Answers = {}): Question[] {
     });
     qs.push({
       id: "q8",
-      text: "Existe alguma questão societária — sócio, divisão de cotas, contrato social desatualizado — que te preocupa?",
-      options: ["Não, está tudo ok", "Tenho sócio e há conflito", "Contrato desatualizado", "Quero encerrar a empresa"],
+      text: "Em relação à sua empresa, o que se aplica? (selecione tudo que vale)",
+      multiSelect: true,
+      options: [
+        "Sou a única sócia",
+        "Tenho sócio(a)",
+        "Meu parceiro é sócio",
+        "Empresa em meu nome",
+        "Empresa no nome dele",
+        "Empresa nos dois nomes",
+        "Quero encerrar a empresa",
+      ],
     });
   }
+
 
   // Bloco 4 — herança
   qs.push({
