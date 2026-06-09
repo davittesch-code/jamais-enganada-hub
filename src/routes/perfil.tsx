@@ -7,6 +7,13 @@ import {
   Radar,
   ResponsiveContainer,
   Tooltip,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import {
   Users,
