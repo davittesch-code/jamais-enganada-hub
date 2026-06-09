@@ -414,40 +414,201 @@ function PerfilPage() {
         )}
       </section>
 
-      {/* SEÇÃO 2 — Radar */}
+      {/* SEÇÃO 2 — Radar com zonas de cor */}
       <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">Panorama Jurídico</h2>
         <p className="text-gray-600 mb-6">Visão geral das suas áreas de direito</p>
         <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
-          <div className="w-full" style={{ height: 400 }}>
+          <div className="w-full" style={{ height: 420 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData} outerRadius={120}>
-                <PolarGrid gridType="polygon" />
+              <RadarChart data={radarData} outerRadius={130}>
+                <PolarGrid gridType="polygon" stroke="#E5E7EB" />
+                {/* Zona OK 70-100 (verde claro) — fundo mais externo */}
+                <Radar
+                  name="zona-ok"
+                  dataKey={() => 100}
+                  fill="#DCFCE7"
+                  fillOpacity={0.35}
+                  stroke="none"
+                  isAnimationActive={false}
+                  legendType="none"
+                />
+                {/* Zona Atenção 40-69 (amarela) */}
+                <Radar
+                  name="zona-atencao"
+                  dataKey={() => 69}
+                  fill="#FEF9C3"
+                  fillOpacity={0.45}
+                  stroke="none"
+                  isAnimationActive={false}
+                  legendType="none"
+                />
+                {/* Zona Crítica 0-39 (vermelha) — fundo mais interno */}
+                <Radar
+                  name="zona-critica"
+                  dataKey={() => 39}
+                  fill="#FEE2E2"
+                  fillOpacity={0.55}
+                  stroke="none"
+                  isAnimationActive={false}
+                  legendType="none"
+                />
                 <PolarAngleAxis
                   dataKey="area"
-                  tick={{ fontSize: 12, fill: "#6B0F4B" }}
+                  tick={(props: { x: number; y: number; payload: { value: string } }) => {
+                    const item = radarData.find((d) => d.area === props.payload.value);
+                    const score = item?.score ?? 0;
+                    const color = score >= 70 ? "#16A34A" : score >= 40 ? "#D97706" : "#DC2626";
+                    const icon = score >= 70 ? "✓" : score >= 40 ? "⚠" : "⚡";
+                    return (
+                      <text
+                        x={props.x}
+                        y={props.y}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fill={color}
+                        fontSize={12}
+                        fontWeight={600}
+                      >
+                        {icon} {props.payload.value}
+                      </text>
+                    );
+                  }}
                 />
+                {/* Dados reais da usuária */}
                 <Radar
+                  name="score"
                   dataKey="score"
-                  fill="#552736"
-                  fillOpacity={0.3}
-                  stroke="#552736"
+                  fill="#A8006E"
+                  fillOpacity={0.6}
+                  stroke="#6B0F4B"
                   strokeWidth={2}
+                  dot={{ fill: "#6B0F4B", strokeWidth: 2, r: 5 }}
                 />
-                <Tooltip formatter={(value: number) => [`${value}/100`, "Pontuação"]} />
+                <Tooltip
+                  content={({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { area: string } }> }) => {
+                    if (!active || !payload?.length) return null;
+                    const real = payload.find((p) => typeof p.value === "number" && p.payload?.area);
+                    if (!real) return null;
+                    const score = Number(real.value);
+                    const status =
+                      score >= 70 ? "✓ Tranquila" : score >= 40 ? "⚠ Atenção" : "⚡ Crítica";
+                    const color =
+                      score >= 70 ? "#16A34A" : score >= 40 ? "#D97706" : "#DC2626";
+                    return (
+                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                        <p className="font-bold text-sm" style={{ color }}>
+                          {real.payload.area}: {score}/100
+                        </p>
+                        <p className="text-xs text-gray-500">{status}</p>
+                      </div>
+                    );
+                  }}
+                />
               </RadarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            Escala de 0 a 100, onde 100 = sem vulnerabilidade
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 text-sm">
-            <div className="flex items-center gap-2"><span>🟢</span> 70-100: Situação tranquila</div>
-            <div className="flex items-center gap-2"><span>🟡</span> 40-69: Requer atenção</div>
-            <div className="flex items-center gap-2"><span>🔴</span> 0-39: Situação crítica</div>
+          <div className="flex flex-wrap justify-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 bg-[#DCFCE7] rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
+              <span className="text-xs text-[#16A34A] font-medium">70-100 Tranquila</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-[#FEF9C3] rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#D97706]" />
+              <span className="text-xs text-[#D97706] font-medium">40-69 Atenção</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-[#FEE2E2] rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
+              <span className="text-xs text-[#DC2626] font-medium">0-39 Crítica</span>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* SEÇÃO 2b — Gráfico de barras: nível de exposição */}
+      <section className="px-6 md:px-12 pb-4 max-w-5xl mx-auto">
+        <div
+          className="bg-white border border-gray-100"
+          style={{ borderRadius: 12, padding: 32, boxShadow: "0 4px 12px rgba(85,39,54,0.06)" }}
+        >
+          <h2 className="text-xl font-bold text-[#6B0F4B] mb-1">📊 Nível de Exposição por Área</h2>
+          <p className="text-gray-600 text-sm mb-6">
+            Quanto menor a pontuação, maior a atenção necessária
+          </p>
+          <div className="w-full" style={{ height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={radarData.map((item) => ({
+                  area: item.area,
+                  score: item.score,
+                  fill:
+                    item.score >= 70 ? "#16A34A" : item.score >= 40 ? "#D97706" : "#DC2626",
+                }))}
+                margin={{ top: 10, right: 20, bottom: 20, left: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3E8F0" />
+                <XAxis
+                  dataKey="area"
+                  tick={{ fontSize: 11, fill: "#6B0F4B" }}
+                  angle={-20}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11, fill: "#9CA3AF" }}
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { area: string } }> }) => {
+                    if (!active || !payload?.length) return null;
+                    const score = Number(payload[0].value);
+                    const status =
+                      score >= 70 ? "✓ Tranquila" : score >= 40 ? "⚠ Atenção" : "⚡ Crítica";
+                    const color =
+                      score >= 70 ? "#16A34A" : score >= 40 ? "#D97706" : "#DC2626";
+                    return (
+                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                        <p className="font-bold text-sm" style={{ color }}>
+                          {payload[0].payload.area}: {score}/100
+                        </p>
+                        <p className="text-xs text-gray-500">{status}</p>
+                      </div>
+                    );
+                  }}
+                />
+                <ReferenceLine
+                  y={70}
+                  stroke="#16A34A"
+                  strokeDasharray="4 4"
+                  label={{ value: "Tranquila", fill: "#16A34A", fontSize: 10, position: "right" }}
+                />
+                <ReferenceLine
+                  y={40}
+                  stroke="#D97706"
+                  strokeDasharray="4 4"
+                  label={{ value: "Atenção", fill: "#D97706", fontSize: 10, position: "right" }}
+                />
+                <Bar dataKey="score" radius={[6, 6, 0, 0]}>
+                  {radarData.map((item, index) => (
+                    <Cell
+                      key={index}
+                      fill={
+                        item.score >= 70
+                          ? "#16A34A"
+                          : item.score >= 40
+                            ? "#D97706"
+                            : "#DC2626"
+                      }
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
 
       {/* SEÇÃO 3 — Cards de áreas */}
       <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
