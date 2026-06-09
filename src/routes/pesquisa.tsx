@@ -426,6 +426,11 @@ function PesquisaPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF6F9]">
+      <WhatsAppConsultaModal
+        open={whatsappConfirmOpen}
+        onClose={() => setWhatsappConfirmOpen(false)}
+        onConfirm={executeWhatsApp}
+      />
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
         <div className="grid gap-6 md:grid-cols-[35%_65%]">
           {/* Histórico */}
