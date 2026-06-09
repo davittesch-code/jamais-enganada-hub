@@ -55,6 +55,7 @@ import {
 import { AreaStatusBadge, statusBorderColor } from "@/components/perfil/AreaStatusBadge";
 import { NivelBadge, nivelColor } from "@/components/perfil/NivelBadge";
 import { UpsellModal } from "@/components/UpsellModal";
+import { WhatsAppConsultaModal } from "@/components/WhatsAppConsultaModal";
 
 export const Route = createFileRoute("/perfil")({
   component: () => (
