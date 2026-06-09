@@ -671,6 +671,7 @@ export function useConsulta() {
     isTyping,
     progress,
     currentOptions,
+    currentMultiSelect,
     inputDisabled,
     isGenerating,
     loadingText: LOADING_STEPS[loadingStep],
