@@ -885,7 +885,10 @@ function PerfilPage() {
             const href = `https://wa.me/${whatsappAdm}?text=${mensagem}`;
             return (
               <Button
-                onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+                onClick={() => {
+                  setPendingWhatsappHref(href);
+                  setWhatsappConfirmOpen(true);
+                }}
                 className="text-white"
                 style={{ backgroundColor: "#25D366" }}
               >
