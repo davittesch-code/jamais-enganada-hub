@@ -824,6 +824,15 @@ function PerfilPage() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-sm text-gray-700 mb-3 leading-relaxed">{ins.descricao}</p>
+                  {ins.direito_aplicavel && (
+                    <div
+                      className="rounded-md p-3 text-sm mb-2"
+                      style={{ backgroundColor: "#F0FDF4", borderLeft: "3px solid #16A34A" }}
+                    >
+                      <span className="font-semibold text-[#16A34A]">⚖️ O direito que você tem: </span>
+                      <span className="text-[#15803D]">{ins.direito_aplicavel}</span>
+                    </div>
+                  )}
                   {ins.lei_referencia && (
                     <div
                       className="rounded-md p-3 text-sm"
