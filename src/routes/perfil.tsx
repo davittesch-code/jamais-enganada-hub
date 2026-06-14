@@ -643,7 +643,29 @@ function PerfilPage() {
                   </div>
                   <AreaStatusBadge status={info.status} />
                 </div>
+                {info.dado_faltante && (
+                  <div className="mb-2 text-xs text-[#D97706] flex items-center gap-1">
+                    <span>⚠️</span>
+                    <span>Informação não fornecida — veja o que descobrir abaixo</span>
+                  </div>
+                )}
                 {info.resumo && <p className="text-sm text-gray-600 leading-relaxed">{info.resumo}</p>}
+                {info.direito_correspondente && (
+                  <div
+                    className="mt-3 p-3 rounded-r-lg"
+                    style={{
+                      background: "#F0FDF4",
+                      borderLeft: "3px solid #16A34A",
+                    }}
+                  >
+                    <p className="text-xs font-semibold text-[#16A34A] mb-1">
+                      ⚖️ Seu direito nesta situação:
+                    </p>
+                    <p className="text-xs text-[#15803D] leading-relaxed">
+                      {info.direito_correspondente}
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}
