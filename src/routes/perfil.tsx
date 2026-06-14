@@ -871,7 +871,14 @@ function PerfilPage() {
                     </div>
                     {!isLast && <div className="w-0.5 flex-1 bg-[#552736]/20 my-1" />}
                   </div>
-                  <div className="flex-1 bg-white rounded-lg p-5 shadow-sm border border-gray-100 mb-2">
+                  <div
+                    className="flex-1 bg-white rounded-lg p-5 shadow-sm border mb-2"
+                    style={
+                      step.area && areasFaltantes.has(step.area)
+                        ? { borderColor: "#FBBF24", borderWidth: 2, background: "#FFFBEB" }
+                        : { borderColor: "#F3F4F6" }
+                    }
+                  >
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span
                         className="text-xs font-semibold px-2.5 py-1 rounded-full"
