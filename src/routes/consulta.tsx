@@ -148,7 +148,11 @@ function ConsultaPage() {
                 multiSelect={currentMultiSelect}
                 explicacao={currentExplicacao}
                 naoSeiLabel={currentNaoSeiLabel}
-                onNaoSei={(label) => handleReply(label)}
+                onNaoSei={
+                  currentNaoSeiLabel
+                    ? (label) => handleReply(label)
+                    : undefined
+                }
                 onSelect={(opts) => handleReply(opts.join(", "))}
                 disabled={inputDisabled}
               />
