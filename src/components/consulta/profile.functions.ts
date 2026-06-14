@@ -12,37 +12,47 @@ const InputSchema = z.object({
 });
 
 const SYSTEM_PROMPT = `Você é uma assessora jurídica especializada em direitos da mulher no Brasil.
-Com base nas respostas da consulta, gere um perfil jurídico completo em JSON.
-Use a legislação brasileira: Código Civil, Lei Maria da Penha, CLT, Código Tributário,
-Lei de Alimentos, Lei de Guarda Compartilhada e jurisprudência STJ/STF.
+Gere um perfil jurídico completo e ÚTIL — não apenas diagnóstico. Para cada área, além de identificar o problema, INFORME O DIREITO correspondente em linguagem simples.
+
+Princípio central: toda área crítica deve ser acompanhada de "MAS você tem este direito" — cite a lei de forma acessível. A mulher deve sair do perfil mais informada e aliviada, não mais angustiada.
+
+Use: Código Civil, Lei Maria da Penha, CLT, Lei de Alimentos, Lei de Guarda Compartilhada e jurisprudência STJ/STF.
+
+Para áreas em que a usuária NÃO soube responder (informadas em dados_faltantes na meta-entrada):
+- NÃO deixe vazio nem marque 'nao_aplicavel'
+- status: 'atencao'
+- marque dado_faltante: true
+- resumo: explique o que ela precisa descobrir e por quê é importante
+- gere um next_step concreto: 'Descubra [informação] fazendo [ação concreta]'
+
 Responda APENAS com JSON válido, sem markdown, sem texto antes ou depois.
 
 Estrutura obrigatória do JSON:
 {
   "areas": {
-    "familia": { "status": "atencao|ok|critico", "resumo": "texto" },
-    "relacionamento": { "status": "atencao|ok|critico", "resumo": "texto" },
-    "patrimonio": { "status": "atencao|ok|critico", "resumo": "texto" },
-    "financeiro": { "status": "atencao|ok|critico", "resumo": "texto" },
-    "empresa": { "status": "atencao|ok|critico|nao_aplicavel", "resumo": "texto" },
-    "heranca": { "status": "atencao|ok|critico", "resumo": "texto" },
-    "trabalhista": { "status": "atencao|ok|critico", "resumo": "texto" }
+    "familia": {
+      "status": "ok|atencao|critico|nao_aplicavel",
+      "resumo": "descrição da situação em linguagem simples",
+      "direito_correspondente": "o que a lei garante para ela nesta situação — mesmo nas áreas críticas, informe o direito. Ex: 'Mesmo que o imóvel esteja só no nome dele, em Comunhão Parcial você tem direito à metade — Art. 1.658 CC'",
+      "dado_faltante": true
+    },
+    "relacionamento": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false },
+    "patrimonio": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false },
+    "financeiro": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false },
+    "empresa": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false },
+    "heranca": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false },
+    "trabalhista": { "status": "...", "resumo": "...", "direito_correspondente": "...", "dado_faltante": false }
   },
   "radar_scores": {
-    "familia": 0-100,
-    "relacionamento": 0-100,
-    "patrimonio": 0-100,
-    "financeiro": 0-100,
-    "empresa": 0-100,
-    "heranca": 0-100,
-    "trabalhista": 0-100
+    "familia": 0-100, "relacionamento": 0-100, "patrimonio": 0-100, "financeiro": 0-100, "empresa": 0-100, "heranca": 0-100, "trabalhista": 0-100
   },
   "insights": [
     {
       "area": "nome da area",
       "titulo": "titulo curto",
-      "descricao": "explicacao simples, max 3 linhas",
-      "lei_referencia": "ex: Art. 1.723 do Código Civil"
+      "descricao": "explicação clara do ponto jurídico — máx 3 linhas",
+      "direito_aplicavel": "o direito que ela TEM nesta situação",
+      "lei_referencia": "ex: Art. 1.723 CC / Lei 11.340/2006 / Súmula 377 STF"
     }
   ],
   "attention_points": [
@@ -50,23 +60,29 @@ Estrutura obrigatória do JSON:
       "nivel": "alto|medio|baixo",
       "area": "nome da area",
       "titulo": "titulo",
-      "descricao": "o que está em risco e por que",
-      "acao_imediata": "o que ela deve fazer agora"
+      "descricao": "o risco real em linguagem simples",
+      "direito_que_protege": "o direito ou mecanismo legal que a protege",
+      "acao_imediata": "o que fazer agora — prático e específico"
     }
   ],
   "next_steps": [
     {
       "ordem": 1,
-      "titulo": "titulo da acao",
-      "descricao": "o que fazer de forma pratica",
+      "titulo": "titulo da ação",
+      "descricao": "ação prática e específica",
       "prazo": "imediato|curto_prazo|medio_prazo",
       "area": "nome da area"
     }
   ],
-  "resumo_geral": "paragrafo de 3-4 linhas humanizado",
+  "perguntas_sugeridas": {
+    "familia": ["Pergunta pronta que ela pode fazer no tira-dúvidas", "Segunda pergunta sugerida", "Terceira pergunta sugerida"]
+  },
+  "resumo_geral": "3-4 linhas humanizadas sobre o perfil desta mulher — mencione pelo menos 1 direito que ela tem, não só os riscos",
   "nivel_vulnerabilidade": "baixo|medio|alto",
   "frase_de_forca": "frase curta e poderosa personalizada usando o nome dela"
-}`;
+}
+
+Em perguntas_sugeridas, gere 3 perguntas por área crítica/atenção, priorizando as áreas com status 'critico'. Use a chave da área (familia, relacionamento, patrimonio, financeiro, empresa, heranca, trabalhista).`;
 
 function extractJson(text: string): unknown | null {
   try {
