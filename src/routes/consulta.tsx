@@ -99,6 +99,8 @@ function ConsultaPage() {
     progress,
     currentOptions,
     currentMultiSelect,
+    currentExplicacao,
+    currentNaoSeiLabel,
     inputDisabled,
     isGenerating,
     loadingText,
