@@ -235,7 +235,19 @@ function PesquisaPage() {
   const [queriesLimit, setQueriesLimit] = useState(5);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
+  const [perguntaSugeridaBanner, setPerguntaSugeridaBanner] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Pergunta pré-preenchida vinda do perfil
+  useEffect(() => {
+    const perguntaSugerida = localStorage.getItem("jamais_pergunta_sugerida");
+    if (perguntaSugerida) {
+      setPergunta(perguntaSugerida);
+      setPerguntaSugeridaBanner(true);
+      localStorage.removeItem("jamais_pergunta_sugerida");
+      setTimeout(() => textareaRef.current?.focus(), 300);
+    }
+  }, []);
 
   const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
 
@@ -495,6 +507,22 @@ function PesquisaPage() {
                   ))}
                 </div>
               </div>
+
+              {perguntaSugeridaBanner && (
+                <div
+                  className="mb-2 flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-xs"
+                  style={{ backgroundColor: "#FDF6F9", borderColor: "#A8006E", color: "#6B0F4B" }}
+                >
+                  <span>💜 Pergunta sugerida pelo seu perfil jurídico</span>
+                  <button
+                    onClick={() => setPerguntaSugeridaBanner(false)}
+                    className="p-0.5 rounded hover:bg-white/60"
+                    aria-label="Dispensar"
+                  >
+                    <span className="text-[#6B0F4B] text-sm leading-none">×</span>
+                  </button>
+                </div>
+              )}
 
               <textarea
                 ref={textareaRef}
