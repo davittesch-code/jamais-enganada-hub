@@ -79,6 +79,8 @@ type AreaStatus = "ok" | "atencao" | "critico" | "nao_aplicavel";
 interface AreaInfo {
   status: AreaStatus;
   resumo?: string;
+  direito_correspondente?: string;
+  dado_faltante?: boolean;
 }
 
 interface AttentionPoint {
@@ -87,6 +89,7 @@ interface AttentionPoint {
   descricao: string;
   nivel: "alto" | "medio" | "baixo";
   acao_imediata?: string;
+  direito_que_protege?: string;
 }
 
 interface Insight {
@@ -94,6 +97,7 @@ interface Insight {
   titulo: string;
   descricao: string;
   lei_referencia?: string;
+  direito_aplicavel?: string;
 }
 
 interface NextStep {
@@ -114,6 +118,8 @@ interface ProfileData {
     resumo_geral?: string;
     nivel_vulnerabilidade?: "baixo" | "medio" | "alto";
     frase_de_forca?: string;
+    perguntas_sugeridas?: Record<string, string[]>;
+    dados_faltantes?: string[];
   };
   generated_at: string;
 }
