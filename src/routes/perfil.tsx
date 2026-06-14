@@ -79,6 +79,8 @@ type AreaStatus = "ok" | "atencao" | "critico" | "nao_aplicavel";
 interface AreaInfo {
   status: AreaStatus;
   resumo?: string;
+  direito_correspondente?: string;
+  dado_faltante?: boolean;
 }
 
 interface AttentionPoint {
@@ -87,6 +89,7 @@ interface AttentionPoint {
   descricao: string;
   nivel: "alto" | "medio" | "baixo";
   acao_imediata?: string;
+  direito_que_protege?: string;
 }
 
 interface Insight {
@@ -94,6 +97,7 @@ interface Insight {
   titulo: string;
   descricao: string;
   lei_referencia?: string;
+  direito_aplicavel?: string;
 }
 
 interface NextStep {
@@ -114,6 +118,8 @@ interface ProfileData {
     resumo_geral?: string;
     nivel_vulnerabilidade?: "baixo" | "medio" | "alto";
     frase_de_forca?: string;
+    perguntas_sugeridas?: Record<string, string[]>;
+    dados_faltantes?: string[];
   };
   generated_at: string;
 }
@@ -343,6 +349,11 @@ function PerfilPage() {
     (a, b) => (orderNivel[a.nivel] ?? 99) - (orderNivel[b.nivel] ?? 99),
   );
   const passosOrdenados = [...displayData.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const areasFaltantes = new Set(
+    (Object.entries(displayData.areas) as [AreaKey, AreaInfo][])
+      .filter(([, info]) => info?.dado_faltante)
+      .map(([k]) => k as string),
+  );
 
   const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
@@ -637,7 +648,29 @@ function PerfilPage() {
                   </div>
                   <AreaStatusBadge status={info.status} />
                 </div>
+                {info.dado_faltante && (
+                  <div className="mb-2 text-xs text-[#D97706] flex items-center gap-1">
+                    <span>⚠️</span>
+                    <span>Informação não fornecida — veja o que descobrir abaixo</span>
+                  </div>
+                )}
                 {info.resumo && <p className="text-sm text-gray-600 leading-relaxed">{info.resumo}</p>}
+                {info.direito_correspondente && (
+                  <div
+                    className="mt-3 p-3 rounded-r-lg"
+                    style={{
+                      background: "#F0FDF4",
+                      borderLeft: "3px solid #16A34A",
+                    }}
+                  >
+                    <p className="text-xs font-semibold text-[#16A34A] mb-1">
+                      ⚖️ Seu direito nesta situação:
+                    </p>
+                    <p className="text-xs text-[#15803D] leading-relaxed">
+                      {info.direito_correspondente}
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -666,6 +699,19 @@ function PerfilPage() {
                   <NivelBadge nivel={p.nivel} />
                 </div>
                 <p className="text-sm text-gray-600 mb-3 leading-relaxed">{p.descricao}</p>
+                {p.direito_que_protege && (
+                  <div
+                    className="mb-2 p-3 rounded-r-md"
+                    style={{ background: "#F0FDF4", borderLeft: "3px solid #16A34A" }}
+                  >
+                    <p className="text-xs font-semibold text-[#16A34A] mb-1">
+                      ⚖️ O direito que te protege:
+                    </p>
+                    <p className="text-xs text-[#15803D] leading-relaxed">
+                      {p.direito_que_protege}
+                    </p>
+                  </div>
+                )}
                 {p.acao_imediata && (
                   <div className="bg-gray-50 rounded-md p-3 text-sm">
                     <span className="font-semibold text-[#6B0F4B]">💡 Ação recomendada: </span>
@@ -677,6 +723,83 @@ function PerfilPage() {
           </div>
         </section>
       )}
+
+      {/* SEÇÃO 4b — Perguntas sugeridas para a advogada */}
+      {(() => {
+        const perguntas = displayData.extra_data?.perguntas_sugeridas ?? {};
+        const STATUS_ORDER = { critico: 0, atencao: 1, ok: 2, nao_aplicavel: 3 } as const;
+        const entradas = Object.entries(perguntas)
+          .filter(([, qs]) => Array.isArray(qs) && qs.length > 0)
+          .map(([areaKey, qs]) => {
+            const info = displayData.areas[areaKey as AreaKey];
+            return {
+              areaKey,
+              status: info?.status ?? "atencao",
+              perguntas: (qs as string[]).slice(0, 3),
+            };
+          })
+          .sort(
+            (a, b) =>
+              (STATUS_ORDER[a.status as keyof typeof STATUS_ORDER] ?? 9) -
+              (STATUS_ORDER[b.status as keyof typeof STATUS_ORDER] ?? 9),
+          )
+          .slice(0, 3);
+
+        if (entradas.length === 0) return null;
+
+        return (
+          <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
+            <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">
+              💬 Perguntas para aprofundar com sua advogada
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Com base no seu perfil, estas são as perguntas certas para fazer no tira-dúvidas
+              ou com sua advogada:
+            </p>
+            <div className="space-y-4">
+              {entradas.map(({ areaKey, status, perguntas: qs }) => (
+                <div
+                  key={areaKey}
+                  className="bg-white rounded-lg p-5 shadow-sm border border-gray-100"
+                  style={{ borderLeft: `4px solid ${statusBorderColor(status as AreaStatus)}` }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="font-semibold text-[#6B0F4B]">
+                      {TRADUCAO_AREAS[areaKey as AreaKey] ?? areaKey}
+                    </h3>
+                    <AreaStatusBadge status={status as AreaStatus} />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {qs.map((pergunta, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          try {
+                            localStorage.setItem("jamais_pergunta_sugerida", pergunta);
+                          } catch {
+                            /* ignore */
+                          }
+                          navigate({ to: "/pesquisa" });
+                        }}
+                        className="text-left text-sm px-3 py-2 rounded-lg border transition-all hover:bg-[#FDF6F9]"
+                        style={{
+                          borderColor: "#E8D0E0",
+                          background: "#FFFFFF",
+                          color: "#552736",
+                        }}
+                      >
+                        💬 {pergunta}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
 
       {/* SEÇÃO 5 — Insights */}
       {displayData.insights.length > 0 && (
@@ -706,6 +829,15 @@ function PerfilPage() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-sm text-gray-700 mb-3 leading-relaxed">{ins.descricao}</p>
+                  {ins.direito_aplicavel && (
+                    <div
+                      className="rounded-md p-3 text-sm mb-2"
+                      style={{ backgroundColor: "#F0FDF4", borderLeft: "3px solid #16A34A" }}
+                    >
+                      <span className="font-semibold text-[#16A34A]">⚖️ O direito que você tem: </span>
+                      <span className="text-[#15803D]">{ins.direito_aplicavel}</span>
+                    </div>
+                  )}
                   {ins.lei_referencia && (
                     <div
                       className="rounded-md p-3 text-sm"
@@ -739,7 +871,14 @@ function PerfilPage() {
                     </div>
                     {!isLast && <div className="w-0.5 flex-1 bg-[#552736]/20 my-1" />}
                   </div>
-                  <div className="flex-1 bg-white rounded-lg p-5 shadow-sm border border-gray-100 mb-2">
+                  <div
+                    className="flex-1 bg-white rounded-lg p-5 shadow-sm border mb-2"
+                    style={
+                      step.area && areasFaltantes.has(step.area)
+                        ? { borderColor: "#FBBF24", borderWidth: 2, background: "#FFFBEB" }
+                        : { borderColor: "#F3F4F6" }
+                    }
+                  >
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span
                         className="text-xs font-semibold px-2.5 py-1 rounded-full"
