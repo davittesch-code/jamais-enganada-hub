@@ -349,6 +349,11 @@ function PerfilPage() {
     (a, b) => (orderNivel[a.nivel] ?? 99) - (orderNivel[b.nivel] ?? 99),
   );
   const passosOrdenados = [...displayData.next_steps].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const areasFaltantes = new Set(
+    (Object.entries(displayData.areas) as [AreaKey, AreaInfo][])
+      .filter(([, info]) => info?.dado_faltante)
+      .map(([k]) => k as string),
+  );
 
   const tituloPerfil = `Perfil Jurídico de ${nomeUsuaria || "você"}`;
 
