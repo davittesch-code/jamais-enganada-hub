@@ -235,7 +235,19 @@ function PesquisaPage() {
   const [queriesLimit, setQueriesLimit] = useState(5);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
+  const [perguntaSugeridaBanner, setPerguntaSugeridaBanner] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Pergunta pré-preenchida vinda do perfil
+  useEffect(() => {
+    const perguntaSugerida = localStorage.getItem("jamais_pergunta_sugerida");
+    if (perguntaSugerida) {
+      setPergunta(perguntaSugerida);
+      setPerguntaSugeridaBanner(true);
+      localStorage.removeItem("jamais_pergunta_sugerida");
+      setTimeout(() => textareaRef.current?.focus(), 300);
+    }
+  }, []);
 
   const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
 
