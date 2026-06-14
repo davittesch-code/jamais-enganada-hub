@@ -146,6 +146,9 @@ function ConsultaPage() {
               <QuickReply
                 options={currentOptions}
                 multiSelect={currentMultiSelect}
+                explicacao={currentExplicacao}
+                naoSeiLabel={currentNaoSeiLabel}
+                onNaoSei={(label) => handleReply(label)}
                 onSelect={(opts) => handleReply(opts.join(", "))}
                 disabled={inputDisabled}
               />
