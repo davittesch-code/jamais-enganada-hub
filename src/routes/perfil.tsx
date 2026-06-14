@@ -694,6 +694,19 @@ function PerfilPage() {
                   <NivelBadge nivel={p.nivel} />
                 </div>
                 <p className="text-sm text-gray-600 mb-3 leading-relaxed">{p.descricao}</p>
+                {p.direito_que_protege && (
+                  <div
+                    className="mb-2 p-3 rounded-r-md"
+                    style={{ background: "#F0FDF4", borderLeft: "3px solid #16A34A" }}
+                  >
+                    <p className="text-xs font-semibold text-[#16A34A] mb-1">
+                      ⚖️ O direito que te protege:
+                    </p>
+                    <p className="text-xs text-[#15803D] leading-relaxed">
+                      {p.direito_que_protege}
+                    </p>
+                  </div>
+                )}
                 {p.acao_imediata && (
                   <div className="bg-gray-50 rounded-md p-3 text-sm">
                     <span className="font-semibold text-[#6B0F4B]">💡 Ação recomendada: </span>
@@ -705,6 +718,83 @@ function PerfilPage() {
           </div>
         </section>
       )}
+
+      {/* SEÇÃO 4b — Perguntas sugeridas para a advogada */}
+      {(() => {
+        const perguntas = displayData.extra_data?.perguntas_sugeridas ?? {};
+        const STATUS_ORDER = { critico: 0, atencao: 1, ok: 2, nao_aplicavel: 3 } as const;
+        const entradas = Object.entries(perguntas)
+          .filter(([, qs]) => Array.isArray(qs) && qs.length > 0)
+          .map(([areaKey, qs]) => {
+            const info = displayData.areas[areaKey as AreaKey];
+            return {
+              areaKey,
+              status: info?.status ?? "atencao",
+              perguntas: (qs as string[]).slice(0, 3),
+            };
+          })
+          .sort(
+            (a, b) =>
+              (STATUS_ORDER[a.status as keyof typeof STATUS_ORDER] ?? 9) -
+              (STATUS_ORDER[b.status as keyof typeof STATUS_ORDER] ?? 9),
+          )
+          .slice(0, 3);
+
+        if (entradas.length === 0) return null;
+
+        return (
+          <section className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
+            <h2 className="text-2xl font-bold text-[#6B0F4B] mb-1">
+              💬 Perguntas para aprofundar com sua advogada
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Com base no seu perfil, estas são as perguntas certas para fazer no tira-dúvidas
+              ou com sua advogada:
+            </p>
+            <div className="space-y-4">
+              {entradas.map(({ areaKey, status, perguntas: qs }) => (
+                <div
+                  key={areaKey}
+                  className="bg-white rounded-lg p-5 shadow-sm border border-gray-100"
+                  style={{ borderLeft: `4px solid ${statusBorderColor(status as AreaStatus)}` }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="font-semibold text-[#6B0F4B]">
+                      {TRADUCAO_AREAS[areaKey as AreaKey] ?? areaKey}
+                    </h3>
+                    <AreaStatusBadge status={status as AreaStatus} />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {qs.map((pergunta, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          try {
+                            localStorage.setItem("jamais_pergunta_sugerida", pergunta);
+                          } catch {
+                            /* ignore */
+                          }
+                          navigate({ to: "/pesquisa" });
+                        }}
+                        className="text-left text-sm px-3 py-2 rounded-lg border transition-all hover:bg-[#FDF6F9]"
+                        style={{
+                          borderColor: "#E8D0E0",
+                          background: "#FFFFFF",
+                          color: "#552736",
+                        }}
+                      >
+                        💬 {pergunta}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
 
       {/* SEÇÃO 5 — Insights */}
       {displayData.insights.length > 0 && (
