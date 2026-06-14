@@ -483,6 +483,7 @@ export function useConsulta() {
           nivel_vulnerabilidade: p.nivel_vulnerabilidade ?? "medio",
           frase_de_forca: p.frase_de_forca ?? "",
           dados_faltantes: Array.from(dadosFaltantesRef.current),
+          perguntas_sugeridas: (p.perguntas_sugeridas as Record<string, string[]>) ?? {},
         } as never,
         generated_at: new Date().toISOString(),
       },
