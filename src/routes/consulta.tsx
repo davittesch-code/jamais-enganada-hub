@@ -99,6 +99,8 @@ function ConsultaPage() {
     progress,
     currentOptions,
     currentMultiSelect,
+    currentExplicacao,
+    currentNaoSeiLabel,
     inputDisabled,
     isGenerating,
     loadingText,
@@ -144,6 +146,13 @@ function ConsultaPage() {
               <QuickReply
                 options={currentOptions}
                 multiSelect={currentMultiSelect}
+                explicacao={currentExplicacao}
+                naoSeiLabel={currentNaoSeiLabel}
+                onNaoSei={
+                  currentNaoSeiLabel
+                    ? (label) => handleReply(label)
+                    : undefined
+                }
                 onSelect={(opts) => handleReply(opts.join(", "))}
                 disabled={inputDisabled}
               />

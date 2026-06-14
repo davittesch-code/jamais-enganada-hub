@@ -6,6 +6,9 @@ interface QuickReplyProps {
   disabled: boolean;
   multiSelect?: boolean;
   confirmLabel?: string;
+  explicacao?: string;
+  naoSeiLabel?: string;
+  onNaoSei?: (label: string) => void;
 }
 
 export function QuickReply({
@@ -14,14 +17,27 @@ export function QuickReply({
   disabled,
   multiSelect = false,
   confirmLabel = "Confirmar",
+  explicacao,
+  naoSeiLabel,
+  onNaoSei,
 }: QuickReplyProps) {
   const [picked, setPicked] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showExpl, setShowExpl] = useState(false);
+
+  const effectiveNaoSei = naoSeiLabel ?? "Não sei";
+  const showNaoSei = !!onNaoSei;
 
   const handleSingle = (opt: string) => {
     if (disabled || picked) return;
     setPicked(opt);
     onSelect([opt]);
+  };
+
+  const handleNaoSei = () => {
+    if (disabled || picked) return;
+    setPicked(effectiveNaoSei);
+    onNaoSei?.(effectiveNaoSei);
   };
 
   const toggle = (opt: string) => {
@@ -36,36 +52,105 @@ export function QuickReply({
     onSelect(selected);
   };
 
+  const helpButton = explicacao ? (
+    <button
+      type="button"
+      onClick={() => setShowExpl((v) => !v)}
+      aria-label="Ver explicação"
+      className="inline-flex items-center justify-center text-[11px] font-bold rounded-full transition-all"
+      style={{
+        width: 18,
+        height: 18,
+        borderWidth: 1,
+        borderStyle: "solid",
+        borderColor: "#A8006E",
+        color: "#A8006E",
+        background: "#FFFFFF",
+        lineHeight: 1,
+      }}
+    >
+      ?
+    </button>
+  ) : null;
+
+  const explBox =
+    explicacao && showExpl ? (
+      <div
+        className="mb-3 text-sm text-gray-600 flex gap-2"
+        style={{
+          background: "#FDF6F9",
+          borderLeft: "3px solid #A8006E",
+          padding: "12px",
+          borderRadius: "8px",
+        }}
+      >
+        <span aria-hidden>⚖️</span>
+        <span>{explicacao}</span>
+      </div>
+    ) : null;
+
+  const naoSeiChip = showNaoSei ? (
+    <button
+      key="__naosei"
+      type="button"
+      disabled={disabled || picked !== null}
+      onClick={handleNaoSei}
+      className="px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-60 inline-flex items-center gap-1"
+      style={{
+        borderWidth: 1,
+        borderStyle: "dashed",
+        borderColor: "#9CA3AF",
+        background: "#FFFFFF",
+        color: "#6B7280",
+        cursor: disabled || picked !== null ? "default" : "pointer",
+      }}
+    >
+      <span style={{ fontWeight: 700 }}>?</span>
+      <span>{effectiveNaoSei}</span>
+    </button>
+  ) : null;
+
   if (!multiSelect) {
     return (
-      <div className="flex flex-wrap gap-2 px-4 py-3 bg-transparent">
-        {options.map((opt) => {
-          const isPicked = picked === opt;
-          const isDisabled = disabled || picked !== null;
-          return (
-            <button
-              key={opt}
-              type="button"
-              disabled={isDisabled}
-              onClick={() => handleSingle(opt)}
-              className="px-4 py-2 rounded-full text-sm font-medium border transition-all disabled:opacity-60"
-              style={{
-                borderColor: "#552736",
-                background: isPicked ? "#552736" : "#FFFFFF",
-                color: isPicked ? "#FFFFFF" : "#552736",
-                cursor: isDisabled ? "default" : "pointer",
-              }}
-            >
-              {opt}
-            </button>
-          );
-        })}
+      <div className="px-4 py-3 bg-transparent">
+        {(explicacao || showNaoSei) && (
+          <div className="mb-2 flex items-center justify-end">{helpButton}</div>
+        )}
+        {explBox}
+        <div className="flex flex-wrap gap-2">
+          {options.map((opt) => {
+            const isPicked = picked === opt;
+            const isDisabled = disabled || picked !== null;
+            return (
+              <button
+                key={opt}
+                type="button"
+                disabled={isDisabled}
+                onClick={() => handleSingle(opt)}
+                className="px-4 py-2 rounded-full text-sm font-medium border transition-all disabled:opacity-60"
+                style={{
+                  borderColor: "#552736",
+                  background: isPicked ? "#552736" : "#FFFFFF",
+                  color: isPicked ? "#FFFFFF" : "#552736",
+                  cursor: isDisabled ? "default" : "pointer",
+                }}
+              >
+                {opt}
+              </button>
+            );
+          })}
+          {naoSeiChip}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="px-4 py-3 bg-transparent">
+      {(explicacao || showNaoSei) && (
+        <div className="mb-2 flex items-center justify-end">{helpButton}</div>
+      )}
+      {explBox}
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const isSel = selected.includes(opt);
@@ -87,6 +172,7 @@ export function QuickReply({
             </button>
           );
         })}
+        {naoSeiChip}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-xs text-gray-400">
