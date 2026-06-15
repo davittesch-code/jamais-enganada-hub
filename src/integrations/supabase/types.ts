@@ -79,6 +79,27 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracoes: {
+        Row: {
+          chave: string
+          id: string
+          updated_at: string
+          valor: string | null
+        }
+        Insert: {
+          chave: string
+          id?: string
+          updated_at?: string
+          valor?: string | null
+        }
+        Update: {
+          chave?: string
+          id?: string
+          updated_at?: string
+          valor?: string | null
+        }
+        Relationships: []
+      }
       onboarding_responses: {
         Row: {
           answer: string | null
@@ -311,11 +332,59 @@ export type Database = {
           },
         ]
       }
+      suporte_notas: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          id: string
+          nota: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          id?: string
+          nota: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          id?: string
+          nota?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suporte_notas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_admin_stats: { Args: never; Returns: Json }
+      get_all_clientes: {
+        Args: never
+        Returns: {
+          advogado_id: string
+          advogado_nome: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          nivel_vulnerabilidade: string
+          perfil_generations_limit: number
+          perfil_generations_used: number
+          queries_limit: number
+          queries_used: number
+          status: string
+          tem_perfil: boolean
+        }[]
+      }
       get_my_advogado_contact: { Args: never; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       list_advogadas_publicas: {

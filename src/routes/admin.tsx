@@ -1,11 +1,9 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
-import { Placeholder } from "@/components/Placeholder";
 
-function AdminGuard({ children }: { children: ReactNode }) {
+export function AdminGuard({ children }: { children: ReactNode }) {
   const { user, profile, loading } = useAuth();
   if (loading) {
     return (
@@ -22,11 +20,7 @@ function AdminGuard({ children }: { children: ReactNode }) {
 export const Route = createFileRoute("/admin")({
   component: () => (
     <AdminGuard>
-      <Placeholder
-        title="Painel Administrativo"
-        subtitle="Próximo passo — cadastro de advogadas e gestão de usuários."
-        icon={<ShieldCheck className="w-6 h-6" />}
-      />
+      <Outlet />
     </AdminGuard>
   ),
 });
