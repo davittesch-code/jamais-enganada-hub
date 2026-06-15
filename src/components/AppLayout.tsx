@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
   MessageCircle,
@@ -8,28 +8,39 @@ import {
   Briefcase,
   Users,
   Scale,
+  Headphones,
   LogOut,
   Menu,
   Settings,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const ROLE_LABEL: Record<AppRole, string> = {
   cliente: "Cliente",
   admin: "Administradora",
 };
 
-type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; roles: AppRole[] };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  badgeKey?: "suporte";
+};
 
-const NAV: NavItem[] = [
-  { to: "/consulta", label: "Consulta IA", icon: MessageCircle, roles: ["cliente"] },
-  { to: "/perfil", label: "Meu Perfil", icon: UserCircle, roles: ["cliente"] },
-  { to: "/pesquisa", label: "Tira-dúvidas", icon: Search, roles: ["cliente"] },
-  { to: "/assessoria", label: "Assessoria", icon: Briefcase, roles: ["cliente"] },
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, roles: ["admin"] },
-  { to: "/admin/usuarios", label: "Usuários", icon: Users, roles: ["admin"] },
-  { to: "/admin/advogados", label: "Advogados", icon: Scale, roles: ["admin"] },
-  { to: "/admin/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
+const navCliente: NavItem[] = [
+  { to: "/consulta", label: "Consulta IA", icon: MessageCircle },
+  { to: "/perfil", label: "Meu Perfil", icon: UserCircle },
+  { to: "/pesquisa", label: "Tira-dúvidas", icon: Search },
+  { to: "/assessoria", label: "Assessoria", icon: Briefcase },
+];
+
+const navAdmin: NavItem[] = [
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/clientes", label: "Clientes", icon: Users },
+  { to: "/admin/advogados", label: "Advogados", icon: Scale },
+  { to: "/admin/suporte", label: "Suporte", icon: Headphones, badgeKey: "suporte" },
+  { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -37,14 +48,31 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(true);
+  const [adminAlertCount, setAdminAlertCount] = useState(0);
 
-  const items = NAV.filter((i) => (role ? i.roles.includes(role) : false));
+  const items: NavItem[] = role === "admin" ? navAdmin : role === "cliente" ? navCliente : [];
   const collapsed = !open;
   const inicial =
     profile?.full_name?.[0]?.toUpperCase() ||
     profile?.email?.[0]?.toUpperCase() ||
     "?";
   const roleLabel = role ? ROLE_LABEL[role] : "";
+
+  useEffect(() => {
+    if (role !== "admin") return;
+    let cancelled = false;
+    void (async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "cliente")
+        .eq("status", "pendente");
+      if (!cancelled) setAdminAlertCount(count ?? 0);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [role, pathname]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -74,19 +102,41 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {items.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.to;
+            const active =
+              item.to === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.to || pathname.startsWith(item.to + "/");
+            const showBadge = item.badgeKey === "suporte" && adminAlertCount > 0;
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground font-medium"
                     : "text-sidebar-foreground hover:bg-sidebar-accent"
                 }`}
               >
-                <Icon className="w-4 h-4 shrink-0" />
-                {open && <span>{item.label}</span>}
+                <span className="relative shrink-0">
+                  <Icon className="w-4 h-4" />
+                  {showBadge && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse"
+                    >
+                      {adminAlertCount > 9 ? "9+" : adminAlertCount}
+                    </span>
+                  )}
+                </span>
+                {open && (
+                  <span className="flex-1 flex items-center justify-between">
+                    <span>{item.label}</span>
+                    {showBadge && (
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+                        {adminAlertCount}
+                      </span>
+                    )}
+                  </span>
+                )}
               </Link>
             );
           })}
