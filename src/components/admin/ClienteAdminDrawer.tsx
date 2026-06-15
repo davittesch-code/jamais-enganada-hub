@@ -74,10 +74,9 @@ export function ClienteAdminDrawer({ cliente, onClose, onUpdated }: Props) {
   const adicionarLimite = async (campo: "queries_limit" | "perfil_generations_limit", inc: number) => {
     const novoValor =
       campo === "queries_limit" ? cli.queries_limit + inc : cli.perfil_generations_limit + inc;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ [campo]: novoValor })
-      .eq("id", cliente.id);
+    const update: { queries_limit?: number; perfil_generations_limit?: number } = {};
+    update[campo] = novoValor;
+    const { error } = await supabase.from("profiles").update(update).eq("id", cliente.id);
     if (error) return toast.error("Falha");
     toast.success("Limite atualizado");
     setCli({ ...cli, [campo]: novoValor });
