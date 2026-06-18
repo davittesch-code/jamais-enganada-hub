@@ -252,7 +252,7 @@ function PesquisaPage() {
     }
   }, []);
 
-  const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
+  const consultasRestantes = Math.max(0, consultasLimit - consultasUsed);
 
 
   // Carga inicial
@@ -271,12 +271,19 @@ function PesquisaPage() {
       // Limites de uso
       const { data: limites } = await supabase
         .from("profiles")
-        .select("queries_used, queries_limit")
+        .select("consultas_used, consultas_limit")
         .eq("id", user.id)
         .single();
       if (limites) {
-        setQueriesUsed(limites.queries_used ?? 0);
-        setQueriesLimit(limites.queries_limit ?? 5);
+        setConsultasUsed(limites.consultas_used ?? 0);
+        setConsultasLimit(limites.consultas_limit ?? 17);
+      }
+
+      // Verifica restantes hoje
+      const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user.id });
+      if (chk && typeof chk === "object") {
+        const c = chk as { restantes_hoje?: number };
+        if (typeof c.restantes_hoje === "number") setRestantesHoje(c.restantes_hoje);
       }
 
 
