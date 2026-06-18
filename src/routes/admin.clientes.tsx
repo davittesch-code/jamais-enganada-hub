@@ -195,14 +195,29 @@ function AdminClientes() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <header
-        className="px-10 py-6 text-white"
+        className="px-10 py-6 text-white flex items-start justify-between gap-4"
         style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
       >
-        <h1 className="text-[22px] font-bold">Clientes</h1>
-        <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.6)" }}>
-          {clientes.length} cadastradas
-        </p>
+        <div>
+          <h1 className="text-[22px] font-bold">Clientes</h1>
+          <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.6)" }}>
+            {clientes.length} cadastradas
+          </p>
+        </div>
+        <button
+          onClick={() => setNovaOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-md text-sm font-medium transition-colors"
+        >
+          <UserPlus className="w-4 h-4" />
+          Cadastrar cliente
+        </button>
       </header>
+
+      <NovaClienteModal
+        open={novaOpen}
+        onClose={() => setNovaOpen(false)}
+        onCreated={() => void carregar()}
+      />
 
       <div className="p-6 lg:p-10 space-y-4">
         <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
