@@ -231,9 +231,12 @@ function PesquisaPage() {
   const [whatsappAdm, setWhatsappAdm] = useState("5511999999999");
   const [perfilCtx, setPerfilCtx] = useState<Record<string, string>>({});
   const [areasCriticas, setAreasCriticas] = useState("não identificadas");
-  const [queriesUsed, setQueriesUsed] = useState(0);
-  const [queriesLimit, setQueriesLimit] = useState(5);
+  const [consultasUsed, setConsultasUsed] = useState(0);
+  const [consultasLimit, setConsultasLimit] = useState(17);
+  const [restantesHoje, setRestantesHoje] = useState<number | null>(null);
   const [upsellOpen, setUpsellOpen] = useState(false);
+  const [diarioModal, setDiarioModal] = useState<{ restantes: number } | null>(null);
+  const [planoExpiradoModal, setPlanoExpiradoModal] = useState(false);
   const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
   const [perguntaSugeridaBanner, setPerguntaSugeridaBanner] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
