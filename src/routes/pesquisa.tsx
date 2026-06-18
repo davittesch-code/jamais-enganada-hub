@@ -361,10 +361,26 @@ function PesquisaPage() {
 
   const handleSubmit = async () => {
     if (!user || !podeEnviar) return;
-    if (queriesRestantes <= 0) {
-      setUpsellOpen(true);
+
+    // Verifica limites antes de chamar a IA
+    const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user.id });
+    const r = (chk ?? {}) as {
+      pode?: boolean;
+      motivo?: string;
+      restantes_hoje?: number;
+      consultas_restantes?: number;
+    };
+    if (!r.pode) {
+      if (r.motivo === "limite_diario") {
+        setDiarioModal({ restantes: r.consultas_restantes ?? 0 });
+      } else if (r.motivo === "plano_expirado") {
+        setPlanoExpiradoModal(true);
+      } else {
+        setUpsellOpen(true);
+      }
       return;
     }
+
     const texto = pergunta.trim();
     setLoading(true);
     setLoadingMsgIdx(0);
@@ -402,13 +418,10 @@ function PesquisaPage() {
       created_at: new Date().toISOString(),
     };
 
-    // Incrementar contador de uso
-    const novoUsed = queriesUsed + 1;
-    await supabase
-      .from("profiles")
-      .update({ queries_used: novoUsed })
-      .eq("id", user.id);
-    setQueriesUsed(novoUsed);
+    // Registra a consulta nos contadores (total + diário)
+    await supabase.rpc("registrar_consulta", { p_user_id: user.id });
+    setConsultasUsed((u) => u + 1);
+    setRestantesHoje((h) => (h === null ? null : Math.max(0, h - 1)));
 
     setHistorico((prev) => [novo, ...prev]);
     setAtivo(novo);
