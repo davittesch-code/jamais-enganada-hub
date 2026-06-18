@@ -231,9 +231,12 @@ function PesquisaPage() {
   const [whatsappAdm, setWhatsappAdm] = useState("5511999999999");
   const [perfilCtx, setPerfilCtx] = useState<Record<string, string>>({});
   const [areasCriticas, setAreasCriticas] = useState("não identificadas");
-  const [queriesUsed, setQueriesUsed] = useState(0);
-  const [queriesLimit, setQueriesLimit] = useState(5);
+  const [consultasUsed, setConsultasUsed] = useState(0);
+  const [consultasLimit, setConsultasLimit] = useState(17);
+  const [restantesHoje, setRestantesHoje] = useState<number | null>(null);
   const [upsellOpen, setUpsellOpen] = useState(false);
+  const [diarioModal, setDiarioModal] = useState<{ restantes: number } | null>(null);
+  const [planoExpiradoModal, setPlanoExpiradoModal] = useState(false);
   const [whatsappConfirmOpen, setWhatsappConfirmOpen] = useState(false);
   const [perguntaSugeridaBanner, setPerguntaSugeridaBanner] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -249,7 +252,7 @@ function PesquisaPage() {
     }
   }, []);
 
-  const queriesRestantes = Math.max(0, queriesLimit - queriesUsed);
+  const consultasRestantes = Math.max(0, consultasLimit - consultasUsed);
 
 
   // Carga inicial
@@ -268,12 +271,19 @@ function PesquisaPage() {
       // Limites de uso
       const { data: limites } = await supabase
         .from("profiles")
-        .select("queries_used, queries_limit")
+        .select("consultas_used, consultas_limit")
         .eq("id", user.id)
         .single();
       if (limites) {
-        setQueriesUsed(limites.queries_used ?? 0);
-        setQueriesLimit(limites.queries_limit ?? 5);
+        setConsultasUsed(limites.consultas_used ?? 0);
+        setConsultasLimit(limites.consultas_limit ?? 17);
+      }
+
+      // Verifica restantes hoje
+      const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user.id });
+      if (chk && typeof chk === "object") {
+        const c = chk as { restantes_hoje?: number };
+        if (typeof c.restantes_hoje === "number") setRestantesHoje(c.restantes_hoje);
       }
 
 
@@ -351,10 +361,26 @@ function PesquisaPage() {
 
   const handleSubmit = async () => {
     if (!user || !podeEnviar) return;
-    if (queriesRestantes <= 0) {
-      setUpsellOpen(true);
+
+    // Verifica limites antes de chamar a IA
+    const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user.id });
+    const r = (chk ?? {}) as {
+      pode?: boolean;
+      motivo?: string;
+      restantes_hoje?: number;
+      consultas_restantes?: number;
+    };
+    if (!r.pode) {
+      if (r.motivo === "limite_diario") {
+        setDiarioModal({ restantes: r.consultas_restantes ?? 0 });
+      } else if (r.motivo === "plano_expirado") {
+        setPlanoExpiradoModal(true);
+      } else {
+        setUpsellOpen(true);
+      }
       return;
     }
+
     const texto = pergunta.trim();
     setLoading(true);
     setLoadingMsgIdx(0);
@@ -392,13 +418,10 @@ function PesquisaPage() {
       created_at: new Date().toISOString(),
     };
 
-    // Incrementar contador de uso
-    const novoUsed = queriesUsed + 1;
-    await supabase
-      .from("profiles")
-      .update({ queries_used: novoUsed })
-      .eq("id", user.id);
-    setQueriesUsed(novoUsed);
+    // Registra a consulta nos contadores (total + diário)
+    await supabase.rpc("registrar_consulta", { p_user_id: user.id });
+    setConsultasUsed((u) => u + 1);
+    setRestantesHoje((h) => (h === null ? null : Math.max(0, h - 1)));
 
     setHistorico((prev) => [novo, ...prev]);
     setAtivo(novo);
@@ -492,17 +515,20 @@ function PesquisaPage() {
             <div className="rounded-xl bg-white border border-[#E8D0E0] p-4">
               {/* Contador de consultas restantes */}
               <div className="mb-3 flex items-center justify-between gap-3">
-                <span className={`text-xs font-medium ${queriesRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
-                  {queriesRestantes > 0
-                    ? `${queriesRestantes} consulta${queriesRestantes !== 1 ? "s" : ""} restante${queriesRestantes !== 1 ? "s" : ""}`
+                <span className={`text-xs font-medium ${consultasRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
+                  {consultasRestantes > 0
+                    ? `${consultasRestantes} consulta${consultasRestantes !== 1 ? "s" : ""} restante${consultasRestantes !== 1 ? "s" : ""} no seu plano`
                     : "Nenhuma consulta restante"}
+                  {restantesHoje !== null && restantesHoje < 9999 && consultasRestantes > 0 && (
+                    <span className="text-gray-500 font-normal"> · {restantesHoje} disponíve{restantesHoje === 1 ? "l" : "is"} hoje</span>
+                  )}
                 </span>
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: queriesLimit }).map((_, i) => (
+                  {Array.from({ length: Math.min(consultasLimit, 17) }).map((_, i) => (
                     <span
                       key={i}
-                      className="block h-1.5 w-5 rounded-full"
-                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#552736" }}
+                      className="block h-1.5 w-3 rounded-full"
+                      style={{ backgroundColor: i < consultasUsed ? "#E8D0E0" : "#552736" }}
                     />
                   ))}
                 </div>
@@ -656,6 +682,42 @@ function PesquisaPage() {
           toast("Em breve: pagamento integrado! 💜");
         }}
       />
+
+      {diarioModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDiarioModal(null)}>
+          <div className="bg-white rounded-xl w-full max-w-sm p-6 space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="text-4xl">💜</div>
+            <h3 className="font-bold text-[#1A0010]">Você já fez suas consultas de hoje!</h3>
+            <p className="text-sm text-gray-600">
+              Volte amanhã para continuar — você ainda tem <strong>{diarioModal.restantes}</strong> consulta{diarioModal.restantes !== 1 ? "s" : ""} no seu plano.
+              Suas consultas diárias renovam a cada dia na primeira semana.
+            </p>
+            <button
+              onClick={() => setDiarioModal(null)}
+              className="w-full px-4 py-2 bg-[#A8006E] text-white rounded-md text-sm hover:opacity-90"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
+
+      {planoExpiradoModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setPlanoExpiradoModal(false)}>
+          <div className="bg-white rounded-xl w-full max-w-sm p-6 space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-[#1A0010]">Seu plano expirou</h3>
+            <p className="text-sm text-gray-600">
+              Seu plano anual chegou ao fim. Renove para continuar consultando.
+            </p>
+            <button
+              onClick={() => setPlanoExpiradoModal(false)}
+              className="w-full px-4 py-2 bg-[#A8006E] text-white rounded-md text-sm hover:opacity-90"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -233,16 +233,22 @@ export type Database = {
         Row: {
           advogado_id: string | null
           bio: string | null
+          consultas_limit: number
+          consultas_today: number
+          consultas_used: number
           created_at: string
           email: string | null
           escritorio_nome: string | null
           especialidade: string | null
           full_name: string | null
           id: string
+          last_consulta_date: string | null
           oab_number: string | null
           perfil_generations_limit: number
           perfil_generations_used: number
           plan_type: string
+          plano_expira_em: string
+          plataforma_start_date: string
           queries_limit: number
           queries_used: number
           role: string
@@ -252,16 +258,22 @@ export type Database = {
         Insert: {
           advogado_id?: string | null
           bio?: string | null
+          consultas_limit?: number
+          consultas_today?: number
+          consultas_used?: number
           created_at?: string
           email?: string | null
           escritorio_nome?: string | null
           especialidade?: string | null
           full_name?: string | null
           id: string
+          last_consulta_date?: string | null
           oab_number?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
           plan_type?: string
+          plano_expira_em?: string
+          plataforma_start_date?: string
           queries_limit?: number
           queries_used?: number
           role?: string
@@ -271,16 +283,22 @@ export type Database = {
         Update: {
           advogado_id?: string | null
           bio?: string | null
+          consultas_limit?: number
+          consultas_today?: number
+          consultas_used?: number
           created_at?: string
           email?: string | null
           escritorio_nome?: string | null
           especialidade?: string | null
           full_name?: string | null
           id?: string
+          last_consulta_date?: string | null
           oab_number?: string | null
           perfil_generations_limit?: number
           perfil_generations_used?: number
           plan_type?: string
+          plano_expira_em?: string
+          plataforma_start_date?: string
           queries_limit?: number
           queries_used?: number
           role?: string
@@ -396,6 +414,8 @@ export type Database = {
           oab: string
         }[]
       }
+      pode_fazer_consulta: { Args: { p_user_id: string }; Returns: Json }
+      registrar_consulta: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
