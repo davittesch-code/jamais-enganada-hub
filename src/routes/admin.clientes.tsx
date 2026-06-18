@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { MoreVertical, Download, Search as SearchIcon } from "lucide-react";
+import { MoreVertical, Download, Search as SearchIcon, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ClienteAdminDrawer } from "@/components/admin/ClienteAdminDrawer";
+import { NovaClienteModal } from "@/components/admin/NovaClienteModal";
 
 export const Route = createFileRoute("/admin/clientes")({
   component: AdminClientes,
