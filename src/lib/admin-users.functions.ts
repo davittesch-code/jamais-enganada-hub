@@ -33,19 +33,17 @@ export const criarClienteAdmin = createServerFn({ method: "POST" })
     const userId = created.user.id;
 
     // Aguarda o trigger handle_new_user criar o profile (executa imediatamente).
-    const update: Record<string, unknown> = {
-      full_name: data.full_name,
-      advogado_id: data.advogado_id,
-      consultas_limit: 17,
-      perfil_generations_limit: 2,
-      plataforma_start_date: new Date().toISOString(),
-      plano_expira_em: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-    if (data.ativo) update.status = "ativo";
-
     const { error: updErr } = await supabaseAdmin
       .from("profiles")
-      .update(update)
+      .update({
+        full_name: data.full_name,
+        advogado_id: data.advogado_id,
+        consultas_limit: 17,
+        perfil_generations_limit: 2,
+        plataforma_start_date: new Date().toISOString(),
+        plano_expira_em: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        status: data.ativo ? "ativo" : "pendente",
+      })
       .eq("id", userId);
 
     if (updErr) {
