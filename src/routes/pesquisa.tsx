@@ -682,6 +682,42 @@ function PesquisaPage() {
           toast("Em breve: pagamento integrado! 💜");
         }}
       />
+
+      {diarioModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDiarioModal(null)}>
+          <div className="bg-white rounded-xl w-full max-w-sm p-6 space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="text-4xl">💜</div>
+            <h3 className="font-bold text-[#1A0010]">Você já fez suas consultas de hoje!</h3>
+            <p className="text-sm text-gray-600">
+              Volte amanhã para continuar — você ainda tem <strong>{diarioModal.restantes}</strong> consulta{diarioModal.restantes !== 1 ? "s" : ""} no seu plano.
+              Suas consultas diárias renovam a cada dia na primeira semana.
+            </p>
+            <button
+              onClick={() => setDiarioModal(null)}
+              className="w-full px-4 py-2 bg-[#A8006E] text-white rounded-md text-sm hover:opacity-90"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
+
+      {planoExpiradoModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setPlanoExpiradoModal(false)}>
+          <div className="bg-white rounded-xl w-full max-w-sm p-6 space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-[#1A0010]">Seu plano expirou</h3>
+            <p className="text-sm text-gray-600">
+              Seu plano anual chegou ao fim. Renove para continuar consultando.
+            </p>
+            <button
+              onClick={() => setPlanoExpiradoModal(false)}
+              className="w-full px-4 py-2 bg-[#A8006E] text-white rounded-md text-sm hover:opacity-90"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
