@@ -86,6 +86,7 @@ function AdminClientes() {
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todas");
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+  const [novaOpen, setNovaOpen] = useState(false);
   const [drawerCliente, setDrawerCliente] = useState<Cliente | null>(null);
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
   const [notaModal, setNotaModal] = useState<{ cliente: Cliente; nota: string } | null>(null);
