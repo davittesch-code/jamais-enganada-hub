@@ -515,17 +515,20 @@ function PesquisaPage() {
             <div className="rounded-xl bg-white border border-[#E8D0E0] p-4">
               {/* Contador de consultas restantes */}
               <div className="mb-3 flex items-center justify-between gap-3">
-                <span className={`text-xs font-medium ${queriesRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
-                  {queriesRestantes > 0
-                    ? `${queriesRestantes} consulta${queriesRestantes !== 1 ? "s" : ""} restante${queriesRestantes !== 1 ? "s" : ""}`
+                <span className={`text-xs font-medium ${consultasRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
+                  {consultasRestantes > 0
+                    ? `${consultasRestantes} consulta${consultasRestantes !== 1 ? "s" : ""} restante${consultasRestantes !== 1 ? "s" : ""} no seu plano`
                     : "Nenhuma consulta restante"}
+                  {restantesHoje !== null && restantesHoje < 9999 && consultasRestantes > 0 && (
+                    <span className="text-gray-500 font-normal"> · {restantesHoje} disponíve{restantesHoje === 1 ? "l" : "is"} hoje</span>
+                  )}
                 </span>
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: queriesLimit }).map((_, i) => (
+                  {Array.from({ length: Math.min(consultasLimit, 17) }).map((_, i) => (
                     <span
                       key={i}
-                      className="block h-1.5 w-5 rounded-full"
-                      style={{ backgroundColor: i < queriesUsed ? "#E8D0E0" : "#552736" }}
+                      className="block h-1.5 w-3 rounded-full"
+                      style={{ backgroundColor: i < consultasUsed ? "#E8D0E0" : "#552736" }}
                     />
                   ))}
                 </div>
