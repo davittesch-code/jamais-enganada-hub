@@ -1013,5 +1013,6 @@ export function useConsulta() {
     handleReply,
     erroGeracao,
     retryGerar,
+    savedFlash,
   };
 }
