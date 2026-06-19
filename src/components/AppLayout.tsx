@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  Wallet,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +40,7 @@ const navAdmin: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
   { to: "/admin/advogados", label: "Advogados", icon: Scale },
+  { to: "/admin/pagamentos", label: "Pagamentos", icon: Wallet },
   { to: "/admin/suporte", label: "Suporte", icon: Headphones, badgeKey: "suporte" },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];

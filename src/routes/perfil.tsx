@@ -1059,9 +1059,11 @@ function PerfilPage() {
         open={upsellPerfil}
         onClose={() => setUpsellPerfil(false)}
         tipo="perfil"
-        onConfirm={() => {
+        userEmail={user?.email ?? null}
+        userId={user?.id ?? null}
+        onRecargaConfirmada={() => {
           setUpsellPerfil(false);
-          toast("Em breve: pagamento integrado! 💜");
+          toast("Recarga confirmada! Você já pode gerar um novo perfil. 💜");
         }}
       />
       <WhatsAppConsultaModal

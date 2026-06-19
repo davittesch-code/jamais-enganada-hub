@@ -13,16 +13,20 @@ import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CriarSenhaRouteImport } from './routes/criar-senha'
 import { Route as ConsultaRouteImport } from './routes/consulta'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AssessoriaRouteImport } from './routes/assessoria'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminSuporteRouteImport } from './routes/admin.suporte'
+import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminAdvogadosRouteImport } from './routes/admin.advogados'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const PesquisaRoute = PesquisaRouteImport.update({
   id: '/pesquisa',
@@ -44,9 +48,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CriarSenhaRoute = CriarSenhaRouteImport.update({
+  id: '/criar-senha',
+  path: '/criar-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsultaRoute = ConsultaRouteImport.update({
   id: '/consulta',
   path: '/consulta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -79,6 +93,11 @@ const AdminSuporteRoute = AdminSuporteRouteImport.update({
   path: '/suporte',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -94,13 +113,21 @@ const AdminAdvogadosRoute = AdminAdvogadosRouteImport.update({
   path: '/advogados',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
+  '/checkout': typeof CheckoutRoute
   '/consulta': typeof ConsultaRoute
+  '/criar-senha': typeof CriarSenhaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
@@ -108,14 +135,18 @@ export interface FileRoutesByFullPath {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
+  '/checkout': typeof CheckoutRoute
   '/consulta': typeof ConsultaRoute
+  '/criar-senha': typeof CriarSenhaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
@@ -123,8 +154,10 @@ export interface FileRoutesByTo {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -132,7 +165,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/assessoria': typeof AssessoriaRoute
   '/cadastro': typeof CadastroRoute
+  '/checkout': typeof CheckoutRoute
   '/consulta': typeof ConsultaRoute
+  '/criar-senha': typeof CriarSenhaRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
@@ -140,8 +175,10 @@ export interface FileRoutesById {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,7 +187,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/assessoria'
     | '/cadastro'
+    | '/checkout'
     | '/consulta'
+    | '/criar-senha'
     | '/login'
     | '/onboarding'
     | '/perfil'
@@ -158,14 +197,18 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/assessoria'
     | '/cadastro'
+    | '/checkout'
     | '/consulta'
+    | '/criar-senha'
     | '/login'
     | '/onboarding'
     | '/perfil'
@@ -173,15 +216,19 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/assessoria'
     | '/cadastro'
+    | '/checkout'
     | '/consulta'
+    | '/criar-senha'
     | '/login'
     | '/onboarding'
     | '/perfil'
@@ -189,8 +236,10 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -198,11 +247,14 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AssessoriaRoute: typeof AssessoriaRoute
   CadastroRoute: typeof CadastroRoute
+  CheckoutRoute: typeof CheckoutRoute
   ConsultaRoute: typeof ConsultaRoute
+  CriarSenhaRoute: typeof CriarSenhaRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PerfilRoute: typeof PerfilRoute
   PesquisaRoute: typeof PesquisaRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,11 +287,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/criar-senha': {
+      id: '/criar-senha'
+      path: '/criar-senha'
+      fullPath: '/criar-senha'
+      preLoaderRoute: typeof CriarSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/consulta': {
       id: '/consulta'
       path: '/consulta'
       fullPath: '/consulta'
       preLoaderRoute: typeof ConsultaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -284,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSuporteRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pagamentos': {
+      id: '/admin/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/admin/pagamentos'
+      preLoaderRoute: typeof AdminPagamentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/configuracoes': {
       id: '/admin/configuracoes'
       path: '/configuracoes'
@@ -305,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdvogadosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -312,6 +392,7 @@ interface AdminRouteChildren {
   AdminAdvogadosRoute: typeof AdminAdvogadosRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminPagamentosRoute: typeof AdminPagamentosRoute
   AdminSuporteRoute: typeof AdminSuporteRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -320,6 +401,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdvogadosRoute: AdminAdvogadosRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminPagamentosRoute: AdminPagamentosRoute,
   AdminSuporteRoute: AdminSuporteRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -331,11 +413,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AssessoriaRoute: AssessoriaRoute,
   CadastroRoute: CadastroRoute,
+  CheckoutRoute: CheckoutRoute,
   ConsultaRoute: ConsultaRoute,
+  CriarSenhaRoute: CriarSenhaRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PerfilRoute: PerfilRoute,
   PesquisaRoute: PesquisaRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

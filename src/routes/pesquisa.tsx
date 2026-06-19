@@ -677,9 +677,14 @@ function PesquisaPage() {
         open={upsellOpen}
         onClose={() => setUpsellOpen(false)}
         tipo="perguntas"
-        onConfirm={() => {
+        userEmail={user?.email ?? null}
+        userId={user?.id ?? null}
+        onRecargaConfirmada={async () => {
           setUpsellOpen(false);
-          toast("Em breve: pagamento integrado! 💜");
+          toast("Recarga confirmada! +10 consultas e +1 perfil liberados. 💜");
+          // Recarrega perfil/limites
+          const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user!.id });
+          if (chk) console.log("limites atualizados", chk);
         }}
       />
 
