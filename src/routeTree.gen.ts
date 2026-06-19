@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PerfilRouteImport } from './routes/perfil'
@@ -32,6 +33,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrecosRoute = PrecosRouteImport.update({
   id: '/precos',
   path: '/precos',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
+  '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
+  '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
+  '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pesquisa'
     | '/precos'
+    | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pesquisa'
     | '/precos'
+    | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pesquisa'
     | '/precos'
+    | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   PesquisaRoute: typeof PesquisaRoute
   PrecosRoute: typeof PrecosRoute
+  TermosRoute: typeof TermosRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -312,6 +325,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/precos': {
       id: '/precos'
       path: '/precos'
@@ -502,6 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   PesquisaRoute: PesquisaRoute,
   PrecosRoute: PrecosRoute,
+  TermosRoute: TermosRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
