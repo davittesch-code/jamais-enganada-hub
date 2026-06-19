@@ -4,6 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { sofiaSpeak } from "@/lib/sofia.functions";
+import {
+  loadProgresso,
+  markProgressoConcluido,
+  saveProgresso,
+} from "@/components/consulta/progresso";
 
 
 type Sender = "sofia" | "user";
