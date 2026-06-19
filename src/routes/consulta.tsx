@@ -108,6 +108,7 @@ function ConsultaPage() {
     handleReply,
     erroGeracao,
     retryGerar,
+    savedFlash,
   } = useConsulta();
   const bottomRef = useRef<HTMLDivElement>(null);
 
