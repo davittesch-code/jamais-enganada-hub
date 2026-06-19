@@ -4,6 +4,31 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateProfile } from "./profile.functions";
+import { evaluateConsultaBlock } from "./consulta-ai.functions";
+
+// ============ BLOCOS TEMÁTICOS ============
+// Agrupam perguntas para uma única avaliação da IA por bloco (eficiente).
+const BLOCKS: Array<{ id: string; keys: string[] }> = [
+  { id: "relacionamento", keys: ["situacao_relacionamento_detalhe", "regime_bens"] },
+  { id: "filhos", keys: ["filhos_idades", "guarda_situacao"] },
+  { id: "violencia", keys: ["violencia", "violencia_diagnostico"] },
+  { id: "patrimonio", keys: ["imoveis"] },
+  { id: "financeiro", keys: ["financeiro_situacao", "faixa_renda", "profissao", "dividas"] },
+  { id: "empresa", keys: ["empresa_situacao", "empresa_nome", "trabalhou_empresa"] },
+  { id: "heranca", keys: ["heranca"] },
+  { id: "fechamento", keys: ["rede_apoio", "situacao_livre"] },
+];
+const KEY_TO_BLOCK: Record<string, string> = BLOCKS.reduce((acc, b) => {
+  for (const k of b.keys) acc[k] = b.id;
+  return acc;
+}, {} as Record<string, string>);
+
+type BlockDecision = {
+  acao: "perguntar" | "pular" | "adaptar";
+  motivo: string;
+  pergunta_adaptada: string;
+  confirmacao: string;
+};
 
 type Sender = "sofia" | "user";
 
@@ -376,6 +401,12 @@ export function useConsulta() {
   const checkedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  const callEvaluateBlock = useServerFn(evaluateConsultaBlock);
+
+  const blockDecisionsRef = useRef<Map<string, BlockDecision>>(new Map());
+  const evaluatedBlocksRef = useRef<Set<string>>(new Set());
+  const proceedNextRef = useRef<() => void | Promise<void>>(() => {});
+
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
     timeoutsRef.current.push(t);
@@ -399,7 +430,8 @@ export function useConsulta() {
   }, [getCombined]);
 
   const askQuestion = useCallback(
-    (q: ConsultaQuestion) => {
+    (q: ConsultaQuestion, overrideText?: string) => {
+      const text = (overrideText && overrideText.trim()) || q.text;
       setIsTyping(true);
       setCurrentOptions(null);
       setCurrentExplicacao(undefined);
@@ -409,7 +441,7 @@ export function useConsulta() {
       currentKeyRef.current = q.key;
       schedule(() => {
         setIsTyping(false);
-        addMessage("sofia", q.text);
+        addMessage("sofia", text);
         const totalVisible = filterQuestions(getCombined()).length;
         const answered = Object.keys(answersRef.current).length;
         setProgress(Math.min(90, Math.round((answered / Math.max(totalVisible, 1)) * 90)));
@@ -423,7 +455,7 @@ export function useConsulta() {
           setCurrentMultiSelect(false);
         }
         setInputDisabled(false);
-      }, calcTypingDelay(q.text));
+      }, calcTypingDelay(text));
     },
     [addMessage, getCombined, schedule],
   );
@@ -520,7 +552,7 @@ export function useConsulta() {
     void finalize();
   }, [finalize]);
 
-  const proceedNext = useCallback(() => {
+  const proceedNext = useCallback(async () => {
     const next = pickNextQuestion();
     if (!next) {
       const nome = ctxRef.current.nome ?? "amiga";
@@ -544,8 +576,80 @@ export function useConsulta() {
       }, calcPauseDelay());
       return;
     }
-    schedule(() => askQuestion(next), calcPauseDelay());
-  }, [addMessage, askQuestion, finalize, pickNextQuestion, schedule]);
+
+    // Avaliação inteligente: antes de exibir a primeira pergunta do bloco,
+    // chamamos a IA UMA vez com o contexto completo para decidir, para cada
+    // pergunta do bloco, se devemos perguntar / pular / adaptar.
+    const blockId = KEY_TO_BLOCK[next.key];
+    if (blockId && !evaluatedBlocksRef.current.has(blockId)) {
+      evaluatedBlocksRef.current.add(blockId);
+      const blockKeys = BLOCKS.find((b) => b.id === blockId)?.keys ?? [];
+      const ctx = getCombined();
+      const pendingQs = blockKeys
+        .map((k) => CONSULTA_QUESTIONS.find((q) => q.key === k))
+        .filter(
+          (q): q is ConsultaQuestion =>
+            !!q &&
+            !askedKeysRef.current.has(q.key) &&
+            (!q.condicional || q.condicional(ctx)),
+        );
+      if (pendingQs.length > 0) {
+        // Mostra typing enquanto a IA decide (mantém UX viva)
+        setIsTyping(true);
+        try {
+          const sanitizedCtx: Record<string, string> = {};
+          for (const [k, v] of Object.entries(ctx)) {
+            if (typeof v === "string" && v.length > 0) sanitizedCtx[k] = v;
+          }
+          const result = await callEvaluateBlock({
+            data: {
+              contexto: sanitizedCtx,
+              perguntas: pendingQs.map((q) => ({ key: q.key, text: q.text })),
+            },
+          });
+          if (result?.ok && Array.isArray(result.decisoes)) {
+            for (const d of result.decisoes) {
+              blockDecisionsRef.current.set(d.key, d as BlockDecision);
+            }
+          }
+        } catch (e) {
+          console.error("evaluateConsultaBlock call failed", e);
+        }
+        setIsTyping(false);
+      }
+    }
+
+    const decision = blockDecisionsRef.current.get(next.key);
+
+    if (decision?.acao === "pular") {
+      askedKeysRef.current.add(next.key);
+      const motivo = decision.motivo?.trim() || "já informado pelo contexto";
+      // Marca como inferido: não conta no limite (não persistimos em onboarding_responses)
+      // mas mantemos no contexto para o gerador de perfil entender.
+      answersRef.current[next.key] = `[Inferido] ${motivo}`;
+      respostasRef.current.push({
+        question: next.text,
+        answer: `[Inferido do contexto] ${motivo}`,
+      });
+      const conf =
+        decision.confirmacao?.trim() ||
+        "Já tenho essa informação pelo que você me contou. Vou seguir. 💜";
+      setIsTyping(true);
+      schedule(() => {
+        setIsTyping(false);
+        addMessage("sofia", conf);
+        schedule(() => void proceedNextRef.current(), calcPauseDelay());
+      }, calcTypingDelay(conf));
+      return;
+    }
+
+    const overrideText =
+      decision?.acao === "adaptar" ? decision.pergunta_adaptada : undefined;
+    schedule(() => askQuestion(next, overrideText), calcPauseDelay());
+  }, [addMessage, askQuestion, callEvaluateBlock, finalize, getCombined, pickNextQuestion, schedule]);
+
+  // Mantém um ref atualizado para permitir recursão de proceedNext.
+  proceedNextRef.current = proceedNext;
 
   const persistResposta = useCallback(
     async (question: string, answer: string) => {
@@ -676,32 +780,36 @@ export function useConsulta() {
         console.error("localStorage parse failed", e);
       }
 
-      if (!ctx || Object.keys(ctx).length === 0) {
-        try {
-          const { data } = await supabase
-            .from("onboarding_responses")
-            .select("question, answer")
-            .eq("user_id", user.id)
-            .eq("step", "onboarding");
-          if (data) {
-            const map: OnboardingCtx = {};
-            for (const r of data) {
-              const q = (r.question || "").toLowerCase();
-              const a = r.answer ?? undefined;
-              if (q.includes("nome")) map.nome = a;
-              else if (q.includes("anos")) map.idade = a;
-              else if (q.includes("estado") && q.includes("mora")) map.estado = a;
-              else if (q.includes("relacionamento") || q.includes("civil")) map.estado_civil = a;
-              else if (q.includes("filhos")) map.tem_filhos = a;
-              else if (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma")) map.tem_empresa = a;
-              else if (q.includes("bens")) map.tem_bens = a;
-              else if (q.includes("preocup") || q.includes("buscar")) map.motivacao_principal = a;
-            }
-            ctx = map;
+      // SEMPRE buscamos as respostas do onboarding do Supabase para garantir
+      // que o contexto completo (incluindo respostas livres) chegue à IA.
+      try {
+        const { data } = await supabase
+          .from("onboarding_responses")
+          .select("question, answer")
+          .eq("user_id", user.id)
+          .eq("step", "onboarding");
+        if (data) {
+          const map: OnboardingCtx = { ...ctx };
+          for (const r of data) {
+            const q = (r.question || "").toLowerCase();
+            const a = r.answer ?? undefined;
+            if (!a) continue;
+            if (!map.nome && q.includes("nome")) map.nome = a;
+            else if (!map.idade && q.includes("anos")) map.idade = a;
+            else if (!map.estado && q.includes("estado") && q.includes("mora")) map.estado = a;
+            else if (!map.estado_civil && (q.includes("relacionamento") || q.includes("civil"))) map.estado_civil = a;
+            else if (!map.tem_filhos && q.includes("filhos")) map.tem_filhos = a;
+            else if (!map.tem_empresa && (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma"))) map.tem_empresa = a;
+            else if (!map.tem_bens && q.includes("bens")) map.tem_bens = a;
+            else if (!map.motivacao_principal && (q.includes("preocup") || q.includes("buscar"))) map.motivacao_principal = a;
+            // Sempre guardamos a resposta original também (chave = pergunta) para a IA ver tudo.
+            const slug = "onb_" + (r.question || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60);
+            if (slug && !map[slug]) map[slug] = a;
           }
-        } catch (e) {
-          console.error("onboarding fetch failed", e);
+          ctx = map;
         }
+      } catch (e) {
+        console.error("onboarding fetch failed", e);
       }
 
       ctxRef.current = ctx;
