@@ -552,7 +552,7 @@ export function useConsulta() {
     void finalize();
   }, [finalize]);
 
-  const proceedNext = useCallback(() => {
+  const proceedNext = useCallback(async () => {
     const next = pickNextQuestion();
     if (!next) {
       const nome = ctxRef.current.nome ?? "amiga";
@@ -576,8 +576,80 @@ export function useConsulta() {
       }, calcPauseDelay());
       return;
     }
-    schedule(() => askQuestion(next), calcPauseDelay());
-  }, [addMessage, askQuestion, finalize, pickNextQuestion, schedule]);
+
+    // Avaliação inteligente: antes de exibir a primeira pergunta do bloco,
+    // chamamos a IA UMA vez com o contexto completo para decidir, para cada
+    // pergunta do bloco, se devemos perguntar / pular / adaptar.
+    const blockId = KEY_TO_BLOCK[next.key];
+    if (blockId && !evaluatedBlocksRef.current.has(blockId)) {
+      evaluatedBlocksRef.current.add(blockId);
+      const blockKeys = BLOCKS.find((b) => b.id === blockId)?.keys ?? [];
+      const ctx = getCombined();
+      const pendingQs = blockKeys
+        .map((k) => CONSULTA_QUESTIONS.find((q) => q.key === k))
+        .filter(
+          (q): q is ConsultaQuestion =>
+            !!q &&
+            !askedKeysRef.current.has(q.key) &&
+            (!q.condicional || q.condicional(ctx)),
+        );
+      if (pendingQs.length > 0) {
+        // Mostra typing enquanto a IA decide (mantém UX viva)
+        setIsTyping(true);
+        try {
+          const sanitizedCtx: Record<string, string> = {};
+          for (const [k, v] of Object.entries(ctx)) {
+            if (typeof v === "string" && v.length > 0) sanitizedCtx[k] = v;
+          }
+          const result = await callEvaluateBlock({
+            data: {
+              contexto: sanitizedCtx,
+              perguntas: pendingQs.map((q) => ({ key: q.key, text: q.text })),
+            },
+          });
+          if (result?.ok && Array.isArray(result.decisoes)) {
+            for (const d of result.decisoes) {
+              blockDecisionsRef.current.set(d.key, d as BlockDecision);
+            }
+          }
+        } catch (e) {
+          console.error("evaluateConsultaBlock call failed", e);
+        }
+        setIsTyping(false);
+      }
+    }
+
+    const decision = blockDecisionsRef.current.get(next.key);
+
+    if (decision?.acao === "pular") {
+      askedKeysRef.current.add(next.key);
+      const motivo = decision.motivo?.trim() || "já informado pelo contexto";
+      // Marca como inferido: não conta no limite (não persistimos em onboarding_responses)
+      // mas mantemos no contexto para o gerador de perfil entender.
+      answersRef.current[next.key] = `[Inferido] ${motivo}`;
+      respostasRef.current.push({
+        question: next.text,
+        answer: `[Inferido do contexto] ${motivo}`,
+      });
+      const conf =
+        decision.confirmacao?.trim() ||
+        "Já tenho essa informação pelo que você me contou. Vou seguir. 💜";
+      setIsTyping(true);
+      schedule(() => {
+        setIsTyping(false);
+        addMessage("sofia", conf);
+        schedule(() => void proceedNextRef.current(), calcPauseDelay());
+      }, calcTypingDelay(conf));
+      return;
+    }
+
+    const overrideText =
+      decision?.acao === "adaptar" ? decision.pergunta_adaptada : undefined;
+    schedule(() => askQuestion(next, overrideText), calcPauseDelay());
+  }, [addMessage, askQuestion, callEvaluateBlock, finalize, getCombined, pickNextQuestion, schedule]);
+
+  // Mantém um ref atualizado para permitir recursão de proceedNext.
+  proceedNextRef.current = proceedNext;
 
   const persistResposta = useCallback(
     async (question: string, answer: string) => {
