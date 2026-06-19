@@ -822,22 +822,8 @@ export function useConsulta() {
     if (!user || hasStartedRef.current || checkedRef.current) return;
     checkedRef.current = true;
 
-    (async () => {
-      try {
-        const { data: pd } = await supabase
-          .from("profile_data")
-          .select("id")
-          .eq("user_id", user.id)
-          .limit(1);
-        if (pd && pd.length > 0) {
-          navigate({ to: "/perfil" });
-          return;
-        }
-      } catch (e) {
-        console.error("profile_data check failed", e);
-      }
-
-      // RETOMAR consulta salva (se não concluída)
+    void (async () => {
+      // Tenta primeiro retomar progresso salvo (estado B)
       try {
         const progresso = await loadProgresso(user.id, "consulta");
         if (progresso) {
@@ -860,7 +846,6 @@ export function useConsulta() {
           blockDecisionsRef.current = new Map(
             Object.entries(c.blockDecisions ?? {}),
           );
-          // Se ela tinha uma pergunta aberta sem resposta, reapresentamos.
           const openKey = c.currentKey ?? null;
           if (openKey && !answersRef.current[openKey]) {
             askedKeysRef.current.delete(openKey);
@@ -903,109 +888,155 @@ export function useConsulta() {
         console.error("consulta resume from progresso failed", e);
       }
 
-      let ctx: OnboardingCtx = {};
+      // Sem progresso: se já tem profile_data, mostra a tela de entrada (Estado C)
       try {
-        const raw = localStorage.getItem("jamais_onboarding_context");
-        if (raw) ctx = JSON.parse(raw);
-      } catch (e) {
-        console.error("localStorage parse failed", e);
-      }
-
-      // SEMPRE buscamos as respostas do onboarding do Supabase para garantir
-      // que o contexto completo (incluindo respostas livres) chegue à IA.
-      try {
-        const { data } = await supabase
-          .from("onboarding_responses")
-          .select("question, answer")
+        const { data: pd } = await supabase
+          .from("profile_data")
+          .select("id")
           .eq("user_id", user.id)
-          .eq("step", "onboarding");
-        if (data) {
-          const map: OnboardingCtx = { ...ctx };
-          for (const r of data) {
-            const q = (r.question || "").toLowerCase();
-            const a = r.answer ?? undefined;
-            if (!a) continue;
-            if (!map.nome && q.includes("nome")) map.nome = a;
-            else if (!map.idade && q.includes("anos")) map.idade = a;
-            else if (!map.estado && q.includes("estado") && q.includes("mora")) map.estado = a;
-            else if (!map.estado_civil && (q.includes("relacionamento") || q.includes("civil"))) map.estado_civil = a;
-            else if (!map.tem_filhos && q.includes("filhos")) map.tem_filhos = a;
-            else if (!map.tem_empresa && (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma"))) map.tem_empresa = a;
-            else if (!map.tem_bens && q.includes("bens")) map.tem_bens = a;
-            else if (!map.motivacao_principal && (q.includes("preocup") || q.includes("buscar"))) map.motivacao_principal = a;
-            // Sempre guardamos a resposta original também (chave = pergunta) para a IA ver tudo.
-            const slug = "onb_" + (r.question || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60);
-            if (slug && !map[slug]) map[slug] = a;
+          .limit(1);
+        if (pd && pd.length > 0) {
+          const { data: perf } = await supabase
+            .from("profiles")
+            .select("full_name, email, perfil_generations_used, perfil_generations_limit")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (perf) {
+            const full = (perf.full_name as string | null) ?? "";
+            setNomeUsuaria(full.trim().split(/\s+/)[0] || (user.email?.split("@")[0] ?? ""));
+            setUserEmail((perf.email as string | null) ?? user.email ?? "");
+            setPerfilGeracoesUsed(perf.perfil_generations_used ?? 0);
+            setPerfilGeracoesLimit(perf.perfil_generations_limit ?? 2);
+          } else {
+            setUserEmail(user.email ?? "");
           }
-          ctx = map;
-        }
-      } catch (e) {
-        console.error("onboarding fetch failed", e);
-      }
-
-      ctxRef.current = ctx;
-      hasStartedRef.current = true;
-
-      const nome = ctx.nome ?? "amiga";
-
-      try {
-        const { data: prev } = await supabase
-          .from("onboarding_responses")
-          .select("question, answer, created_at")
-          .eq("user_id", user.id)
-          .eq("step", "consulta")
-          .order("created_at", { ascending: true });
-        if (prev && prev.length > 0) {
-          const map = new Map<string, string>();
-          for (const r of prev) {
-            if (r.answer) map.set(r.question, r.answer);
-          }
-          respostasRef.current = Array.from(map.entries()).map(([question, answer]) => ({
-            question,
-            answer,
-          }));
-
-          schedule(
-            () =>
-              addMessage(
-                "sofia",
-                `${nome}, encontrei as respostas que você já tinha me dado. Não precisa preencher de novo — vou direto gerar o seu perfil. 💜`,
-              ),
-            600,
-          );
-          schedule(() => void finalize(), 2200);
+          setEntradaModo(true);
           return;
         }
       } catch (e) {
-        console.error("consulta resume check failed", e);
+        console.error("profile_data check failed", e);
       }
 
-      schedule(
-        () =>
-          addMessage(
-            "sofia",
-            `${nome}, agora vamos mais fundo. Vou te fazer perguntas sobre diferentes áreas da sua vida — família, relacionamento, finanças, empresa e muito mais.`,
-          ),
-        800,
-      );
-      schedule(
-        () =>
-          addMessage(
-            "sofia",
-            "Responde com calma e da forma mais completa que conseguir. Quanto mais você me contar, mais preciso e útil será o seu perfil jurídico. Pode ser?",
-          ),
-        3000,
-      );
-      schedule(() => {
-        setCurrentOptions(["Sim, pode começar! 💜", "Tô pronta!"]);
-        setCurrentMultiSelect(false);
-        setCurrentExplicacao(undefined);
-        setCurrentNaoSeiLabel(undefined);
-        setInputDisabled(false);
-        currentKeyRef.current = "__start__";
-      }, 5500);
+      // Estado A — Primeira consulta
+      await runFreshStart();
     })();
   }, [user, navigate, schedule, addMessage, finalize]);
+
+  // Inicia a consulta do zero (usado tanto na primeira vez quanto ao "refazer")
+  const runFreshStart = useCallback(async () => {
+    if (!user) return;
+    let ctx: OnboardingCtx = {};
+    try {
+      const raw = localStorage.getItem("jamais_onboarding_context");
+      if (raw) ctx = JSON.parse(raw);
+    } catch (e) {
+      console.error("localStorage parse failed", e);
+    }
+
+    try {
+      const { data } = await supabase
+        .from("onboarding_responses")
+        .select("question, answer")
+        .eq("user_id", user.id)
+        .eq("step", "onboarding");
+      if (data) {
+        const map: OnboardingCtx = { ...ctx };
+        for (const r of data) {
+          const q = (r.question || "").toLowerCase();
+          const a = r.answer ?? undefined;
+          if (!a) continue;
+          if (!map.nome && q.includes("nome")) map.nome = a;
+          else if (!map.idade && q.includes("anos")) map.idade = a;
+          else if (!map.estado && q.includes("estado") && q.includes("mora")) map.estado = a;
+          else if (!map.estado_civil && (q.includes("relacionamento") || q.includes("civil"))) map.estado_civil = a;
+          else if (!map.tem_filhos && q.includes("filhos")) map.tem_filhos = a;
+          else if (!map.tem_empresa && (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma"))) map.tem_empresa = a;
+          else if (!map.tem_bens && q.includes("bens")) map.tem_bens = a;
+          else if (!map.motivacao_principal && (q.includes("preocup") || q.includes("buscar"))) map.motivacao_principal = a;
+          const slug = "onb_" + (r.question || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60);
+          if (slug && !map[slug]) map[slug] = a;
+        }
+        ctx = map;
+      }
+    } catch (e) {
+      console.error("onboarding fetch failed", e);
+    }
+
+    ctxRef.current = ctx;
+    hasStartedRef.current = true;
+
+    const nome = ctx.nome ?? "amiga";
+
+    schedule(
+      () =>
+        addMessage(
+          "sofia",
+          `${nome}, agora vamos mais fundo. Vou te fazer perguntas sobre diferentes áreas da sua vida — família, relacionamento, finanças, empresa e muito mais.`,
+        ),
+      800,
+    );
+    schedule(
+      () =>
+        addMessage(
+          "sofia",
+          "Responde com calma e da forma mais completa que conseguir. Quanto mais você me contar, mais preciso e útil será o seu perfil jurídico. Pode ser?",
+        ),
+      3000,
+    );
+    schedule(() => {
+      setCurrentOptions(["Sim, pode começar! 💜", "Tô pronta!"]);
+      setCurrentMultiSelect(false);
+      setCurrentExplicacao(undefined);
+      setCurrentNaoSeiLabel(undefined);
+      setInputDisabled(false);
+      currentKeyRef.current = "__start__";
+    }, 5500);
+  }, [user, schedule, addMessage]);
+
+  // Ação do botão "Conversar com a Sofia novamente" (Estado C)
+  const iniciarNovaConsulta = useCallback(async () => {
+    if (!user) return;
+    if (perfilGeracoesUsed >= perfilGeracoesLimit) {
+      setShowUpsellPerfil(true);
+      return;
+    }
+    // Limpa progresso anterior da consulta. Não tocamos em profile_data agora —
+    // a substituição acontece ao concluir a nova consulta (upsert no finalize).
+    try {
+      await supabase
+        .from("progresso_conversa")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("etapa", "consulta");
+    } catch (e) {
+      console.error("delete progresso failed", e);
+    }
+    try {
+      await supabase
+        .from("onboarding_responses")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("step", "consulta");
+    } catch (e) {
+      console.error("delete onboarding consulta failed", e);
+    }
+
+    // Reset de estado
+    answersRef.current = {};
+    respostasRef.current = [];
+    askedKeysRef.current = new Set();
+    dadosFaltantesRef.current = new Set();
+    evaluatedBlocksRef.current = new Set();
+    blockDecisionsRef.current = new Map();
+    currentKeyRef.current = null;
+    concluidoRef.current = false;
+    setMessages([]);
+    messagesRef.current = [];
+    setProgress(0);
+    setEntradaModo(false);
+
+    await runFreshStart();
+  }, [user, perfilGeracoesUsed, perfilGeracoesLimit, runFreshStart]);
 
   return {
     messages,
