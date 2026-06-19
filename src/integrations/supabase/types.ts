@@ -383,8 +383,6 @@ export type Database = {
           plan_type: string
           plano_expira_em: string
           plataforma_start_date: string
-          queries_limit: number
-          queries_used: number
           role: string
           status: string
           whatsapp: string | null
@@ -408,8 +406,6 @@ export type Database = {
           plan_type?: string
           plano_expira_em?: string
           plataforma_start_date?: string
-          queries_limit?: number
-          queries_used?: number
           role?: string
           status?: string
           whatsapp?: string | null
@@ -433,8 +429,6 @@ export type Database = {
           plan_type?: string
           plano_expira_em?: string
           plataforma_start_date?: string
-          queries_limit?: number
-          queries_used?: number
           role?: string
           status?: string
           whatsapp?: string | null
@@ -556,6 +550,8 @@ export type Database = {
         Returns: {
           advogado_id: string
           advogado_nome: string
+          consultas_limit: number
+          consultas_used: number
           created_at: string
           email: string
           full_name: string
@@ -563,8 +559,7 @@ export type Database = {
           nivel_vulnerabilidade: string
           perfil_generations_limit: number
           perfil_generations_used: number
-          queries_limit: number
-          queries_used: number
+          plano_expira_em: string
           status: string
           tem_perfil: boolean
         }[]

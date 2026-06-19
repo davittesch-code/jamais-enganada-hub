@@ -9,8 +9,8 @@ interface Cliente {
   email: string | null;
   status: string;
   created_at: string;
-  queries_used: number;
-  queries_limit: number;
+  consultas_used: number;
+  consultas_limit: number;
   perfil_generations_used: number;
   perfil_generations_limit: number;
   tem_perfil: boolean;
@@ -71,10 +71,10 @@ export function ClienteAdminDrawer({ cliente, onClose, onUpdated }: Props) {
     onUpdated();
   };
 
-  const adicionarLimite = async (campo: "queries_limit" | "perfil_generations_limit", inc: number) => {
+  const adicionarLimite = async (campo: "consultas_limit" | "perfil_generations_limit", inc: number) => {
     const novoValor =
-      campo === "queries_limit" ? cli.queries_limit + inc : cli.perfil_generations_limit + inc;
-    const update: { queries_limit?: number; perfil_generations_limit?: number } = {};
+      campo === "consultas_limit" ? cli.consultas_limit + inc : cli.perfil_generations_limit + inc;
+    const update: { consultas_limit?: number; perfil_generations_limit?: number } = {};
     update[campo] = novoValor;
     const { error } = await supabase.from("profiles").update(update).eq("id", cliente.id);
     if (error) return toast.error("Falha");
@@ -240,24 +240,24 @@ export function ClienteAdminDrawer({ cliente, onClose, onUpdated }: Props) {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Perguntas</span>
-                  <span className="font-medium">{cli.queries_used}/{cli.queries_limit}</span>
+                  <span className="font-medium">{cli.consultas_used}/{cli.consultas_limit}</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{
-                      width: `${Math.min(100, (cli.queries_used / Math.max(1, cli.queries_limit)) * 100)}%`,
+                      width: `${Math.min(100, (cli.consultas_used / Math.max(1, cli.consultas_limit)) * 100)}%`,
                       background:
-                        cli.queries_used >= cli.queries_limit
+                        cli.consultas_used >= cli.consultas_limit
                           ? "#DC2626"
-                          : cli.queries_used >= 3
+                          : cli.consultas_used >= 3
                           ? "#D97706"
                           : "#16A34A",
                     }}
                   />
                 </div>
                 <button
-                  onClick={() => void adicionarLimite("queries_limit", 5)}
+                  onClick={() => void adicionarLimite("consultas_limit", 5)}
                   className="mt-2 text-xs px-3 py-1.5 border rounded-md hover:bg-gray-50"
                 >
                   +5 perguntas

@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
@@ -13,6 +14,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { initializePaddle, getPaddlePriceId, getPaddleEnvironment } from "@/lib/paddle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { checkEmailStatus, resendInviteEmail } from "@/lib/checkout-helpers.functions";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -39,6 +42,8 @@ function CheckoutPage() {
   const [loadingPay, setLoadingPay] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<{ email: string } | null>(null);
+  const checkEmailStatusFn = useServerFn(checkEmailStatus);
+
 
   useEffect(() => {
     void (async () => {
@@ -65,9 +70,20 @@ function CheckoutPage() {
     }
     setLoadingPay(true);
     try {
+      const emailLimpo = email.trim().toLowerCase();
+
+      // Bloqueio: se o email j\u00e1 tem acesso ativo, manda fazer login.
+      const status = await checkEmailStatusFn({ data: { email: emailLimpo } });
+      if (status.status === "active") {
+        setErro(
+          "Este email j\u00e1 tem acesso ativo \u00e0 plataforma. Fa\u00e7a login para continuar \u2014 se esqueceu a senha, clique em 'N\u00e3o recebi meu email' abaixo.",
+        );
+        setLoadingPay(false);
+        return;
+      }
+
       await initializePaddle();
       const paddlePriceId = await getPaddlePriceId("acesso_jamais_enganada");
-      const emailLimpo = email.trim().toLowerCase();
       window.Paddle.Checkout.open({
         items: [{ priceId: paddlePriceId, quantity: 1 }],
         customer: { email: emailLimpo },
@@ -96,6 +112,7 @@ function CheckoutPage() {
       setLoadingPay(false);
     }
   };
+
 
   if (sucesso) return <SucessoView email={sucesso.email} />;
 
@@ -350,6 +367,20 @@ function CheckoutPage() {
 }
 
 function SucessoView({ email }: { email: string }) {
+  const resendFn = useServerFn(resendInviteEmail);
+  const [reenviado, setReenviado] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
+
+  const reenviar = async () => {
+    setReenviando(true);
+    try {
+      await resendFn({ data: { email } });
+      setReenviado(true);
+    } finally {
+      setReenviando(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 py-12"
@@ -371,7 +402,23 @@ function SucessoView({ email }: { email: string }) {
         >
           Voltar ao início
         </Link>
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          {reenviado ? (
+            <p className="text-sm text-[#0F7B5A]">
+              ✓ Reenviamos o email. Confira sua caixa em alguns minutos.
+            </p>
+          ) : (
+            <button
+              onClick={reenviar}
+              disabled={reenviando}
+              className="text-sm text-[#6B0F4B] underline hover:opacity-80 disabled:opacity-50"
+            >
+              {reenviando ? "Reenviando…" : "Não recebi meu email"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+

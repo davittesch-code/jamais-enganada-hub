@@ -14,8 +14,8 @@ interface Cliente {
   email: string | null;
   status: string;
   created_at: string;
-  queries_used: number;
-  queries_limit: number;
+  consultas_used: number;
+  consultas_limit: number;
   tem_perfil: boolean;
   nivel_vulnerabilidade: string;
   advogado_id: string | null;
@@ -231,7 +231,7 @@ function AdminSuporte() {
                   </div>
                   <div>
                     <div className="text-xs text-gray-500">Perguntas</div>
-                    <div className="font-medium">{sel.queries_used}/{sel.queries_limit}</div>
+                    <div className="font-medium">{sel.consultas_used}/{sel.consultas_limit}</div>
                   </div>
                 </div>
               </div>
