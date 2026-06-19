@@ -118,6 +118,7 @@ function OnboardingPage() {
     showAdvogadaPicker,
     advogadas,
     submitAdvogadaSelection,
+    savedFlash,
   } = useOnboarding();
   const bottomRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
