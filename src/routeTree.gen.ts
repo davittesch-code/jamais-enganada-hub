@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as ReembolsoRouteImport } from './routes/reembolso'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
@@ -37,6 +38,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReembolsoRoute = ReembolsoRouteImport.update({
+  id: '/reembolso',
+  path: '/reembolso',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/pesquisa': typeof PesquisaRoute
   '/precos': typeof PrecosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/termos': typeof TermosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/pesquisa'
     | '/precos'
     | '/privacidade'
+    | '/reembolso'
     | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/pesquisa'
     | '/precos'
     | '/privacidade'
+    | '/reembolso'
     | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/pesquisa'
     | '/precos'
     | '/privacidade'
+    | '/reembolso'
     | '/termos'
     | '/admin/advogados'
     | '/admin/clientes'
@@ -329,6 +341,7 @@ export interface RootRouteChildren {
   PesquisaRoute: typeof PesquisaRoute
   PrecosRoute: typeof PrecosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ReembolsoRoute: typeof ReembolsoRoute
   TermosRoute: typeof TermosRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reembolso': {
+      id: '/reembolso'
+      path: '/reembolso'
+      fullPath: '/reembolso'
+      preLoaderRoute: typeof ReembolsoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -543,6 +563,7 @@ const rootRouteChildren: RootRouteChildren = {
   PesquisaRoute: PesquisaRoute,
   PrecosRoute: PrecosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ReembolsoRoute: ReembolsoRoute,
   TermosRoute: TermosRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
