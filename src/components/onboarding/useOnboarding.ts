@@ -127,6 +127,32 @@ export function useOnboarding() {
     ]);
   }, []);
 
+  // Debounced save do progresso atual para Supabase (~500ms).
+  const scheduleSave = useCallback(() => {
+    if (!user || concluidoRef.current) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      void (async () => {
+        await saveProgresso({
+          userId: user.id,
+          etapa: "onboarding",
+          mensagens: messagesRef.current,
+          contexto: { data: dataRef.current },
+          indiceAtual: currentIndexRef.current,
+        });
+        setSavedFlash(true);
+        if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setSavedFlash(false), 2000);
+      })();
+    }, 500);
+  }, [user]);
+
+  // Sempre que as mensagens mudarem, atualizar o ref e agendar um save.
+  useEffect(() => {
+    messagesRef.current = messages;
+    if (hasStartedRef.current && messages.length > 0) scheduleSave();
+  }, [messages, scheduleSave]);
+
   // Check if already onboarded; if not, run welcome block once
   useEffect(() => {
     if (!user || hasStartedRef.current || checkedExistingRef.current) return;
