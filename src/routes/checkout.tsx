@@ -94,6 +94,7 @@ function CheckoutPage() {
         return;
       }
 
+      try { sessionStorage.setItem("checkout:lastEmail", emailLimpo); } catch { /* ignore */ }
       await initializePaddle();
       const paddlePriceId = await getPaddlePriceId("acesso_jamais_enganada");
       window.Paddle.Checkout.open({
