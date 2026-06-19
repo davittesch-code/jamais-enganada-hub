@@ -22,6 +22,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminSuporteRouteImport } from './routes/admin.suporte'
+import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminAdvogadosRouteImport } from './routes/admin.advogados'
@@ -92,6 +93,11 @@ const AdminSuporteRoute = AdminSuporteRouteImport.update({
   path: '/suporte',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
     | '/api/public/payments/webhook'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin'
     | '/api/public/payments/webhook'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
     | '/api/public/payments/webhook'
@@ -338,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSuporteRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pagamentos': {
+      id: '/admin/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/admin/pagamentos'
+      preLoaderRoute: typeof AdminPagamentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/configuracoes': {
       id: '/admin/configuracoes'
       path: '/configuracoes'
@@ -373,6 +392,7 @@ interface AdminRouteChildren {
   AdminAdvogadosRoute: typeof AdminAdvogadosRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminPagamentosRoute: typeof AdminPagamentosRoute
   AdminSuporteRoute: typeof AdminSuporteRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -381,6 +401,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdvogadosRoute: AdminAdvogadosRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminPagamentosRoute: AdminPagamentosRoute,
   AdminSuporteRoute: AdminSuporteRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
