@@ -6,9 +6,10 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
-  Link,
   Preview,
+  Section,
   Text,
 } from '@react-email/components'
 
@@ -19,37 +20,36 @@ interface SignupEmailProps {
   confirmationUrl: string
 }
 
-export const SignupEmail = ({
-  siteName,
-  siteUrl,
-  recipient,
-  confirmationUrl,
-}: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
+export const SignupEmail = ({ confirmationUrl }: SignupEmailProps) => (
+  <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>Confirme seu email para começar na Jamais Enganada</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email</Heading>
+        <Section style={header}>
+          <Text style={brand}>Jamais Enganada</Text>
+        </Section>
+
+        <Heading style={h1}>Confirme seu email 💜</Heading>
+
         <Text style={text}>
-          Thanks for signing up for{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
-          </Link>
-          !
+          Falta só um passo para você acessar a plataforma{' '}
+          <strong>Jamais Enganada</strong>. Clique no botão abaixo para
+          confirmar seu email:
         </Text>
-        <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Verify Email
-        </Button>
+
+        <Section style={{ textAlign: 'center', margin: '32px 0' }}>
+          <Button style={button} href={confirmationUrl}>
+            Confirmar meu email
+          </Button>
+        </Section>
+
+        <Hr style={hr} />
+
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          Se você não criou esta conta, pode ignorar este email com segurança.
+          <br /><br />
+          Equipe Jamais Enganada
         </Text>
       </Container>
     </Body>
@@ -58,27 +58,52 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
+const main = {
+  backgroundColor: '#ffffff',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+}
+const container = { padding: '24px', maxWidth: '560px', margin: '0 auto' }
+const header = {
+  background: 'linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)',
+  borderRadius: '12px',
+  padding: '24px',
+  textAlign: 'center' as const,
+  marginBottom: '24px',
+}
+const brand = {
+  color: '#ffffff',
   fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontWeight: 600,
+  margin: 0,
+  letterSpacing: '-0.5px',
+}
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 600,
+  color: '#6B0F4B',
+  margin: '8px 0 16px',
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#374151',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#A8006E',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '16px',
+  fontWeight: 600,
+  borderRadius: '10px',
+  padding: '14px 28px',
   textDecoration: 'none',
+  display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const hr = { borderColor: '#F3E8EF', margin: '32px 0 20px' }
+const footer = {
+  fontSize: '12px',
+  color: '#9CA3AF',
+  lineHeight: '1.6',
+  textAlign: 'center' as const,
+  margin: 0,
+}

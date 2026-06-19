@@ -6,9 +6,10 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
-  Link,
   Preview,
+  Section,
   Text,
 } from '@react-email/components'
 
@@ -19,30 +20,52 @@ interface InviteEmailProps {
 }
 
 export const InviteEmail = ({
-  siteName,
-  siteUrl,
   confirmationUrl,
 }: InviteEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>You've been invited to join {siteName}</Preview>
+    <Preview>Seu acesso à Jamais Enganada está pronto. Crie sua senha 💜</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>You've been invited</Heading>
+        <Section style={header}>
+          <Text style={brand}>Jamais Enganada</Text>
+        </Section>
+
+        <Heading style={h1}>Bem-vinda! 💜</Heading>
+
         <Text style={text}>
-          You've been invited to join{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
-          </Link>
-          . Click the button below to accept the invitation and create your
-          account.
+          Seu pagamento foi confirmado e seu acesso à plataforma{' '}
+          <strong>Jamais Enganada</strong> está liberado.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Accept Invitation
-        </Button>
+
+        <Text style={text}>
+          Clique no botão abaixo para criar sua senha e começar sua jornada
+          de autocuidado jurídico:
+        </Text>
+
+        <Section style={{ textAlign: 'center', margin: '32px 0' }}>
+          <Button style={button} href={confirmationUrl}>
+            Criar minha senha →
+          </Button>
+        </Section>
+
+        <Text style={textSmall}>
+          Você terá acesso por <strong>1 ano</strong> a:
+        </Text>
+        <Text style={list}>
+          ✓ Perfil jurídico completo e personalizado<br />
+          ✓ Até 17 consultas com nossa IA<br />
+          ✓ Plano de ação prático para você<br />
+          ✓ Contato direto com uma advogada parceira
+        </Text>
+
+        <Hr style={hr} />
+
         <Text style={footer}>
-          If you weren't expecting this invitation, you can safely ignore this
-          email.
+          Se você não esperava este email, pode ignorá-lo com segurança.
+          <br /><br />
+          Conhecimento é proteção. 💜<br />
+          Equipe Jamais Enganada
         </Text>
       </Container>
     </Body>
@@ -51,27 +74,66 @@ export const InviteEmail = ({
 
 export default InviteEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
+const main = {
+  backgroundColor: '#ffffff',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+}
+const container = { padding: '24px', maxWidth: '560px', margin: '0 auto' }
+const header = {
+  background: 'linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)',
+  borderRadius: '12px',
+  padding: '24px',
+  textAlign: 'center' as const,
+  marginBottom: '24px',
+}
+const brand = {
+  color: '#ffffff',
   fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontWeight: 600,
+  margin: 0,
+  letterSpacing: '-0.5px',
+}
+const h1 = {
+  fontSize: '26px',
+  fontWeight: 600,
+  color: '#6B0F4B',
+  margin: '8px 0 20px',
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#374151',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
+const textSmall = {
+  fontSize: '14px',
+  color: '#6B7280',
+  margin: '24px 0 8px',
+}
+const list = {
+  fontSize: '14px',
+  color: '#374151',
+  lineHeight: '1.9',
+  background: '#FDF6F9',
+  padding: '14px 18px',
+  borderRadius: '10px',
+  margin: '0 0 8px',
+}
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#A8006E',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '16px',
+  fontWeight: 600,
+  borderRadius: '10px',
+  padding: '14px 28px',
   textDecoration: 'none',
+  display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const hr = { borderColor: '#F3E8EF', margin: '32px 0 20px' }
+const footer = {
+  fontSize: '12px',
+  color: '#9CA3AF',
+  lineHeight: '1.6',
+  textAlign: 'center' as const,
+  margin: 0,
+}

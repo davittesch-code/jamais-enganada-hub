@@ -6,8 +6,10 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Preview,
+  Section,
   Text,
 } from '@react-email/components'
 
@@ -16,26 +18,40 @@ interface RecoveryEmailProps {
   confirmationUrl: string
 }
 
-export const RecoveryEmail = ({
-  siteName,
-  confirmationUrl,
-}: RecoveryEmailProps) => (
-  <Html lang="en" dir="ltr">
+export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
+  <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>Redefina sua senha da Jamais Enganada</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
+        <Section style={header}>
+          <Text style={brand}>Jamais Enganada</Text>
+        </Section>
+
+        <Heading style={h1}>Redefinir sua senha</Heading>
+
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
+          Recebemos um pedido para redefinir a senha da sua conta. Clique
+          no botão abaixo para escolher uma nova senha:
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
+
+        <Section style={{ textAlign: 'center', margin: '32px 0' }}>
+          <Button style={button} href={confirmationUrl}>
+            Redefinir minha senha
+          </Button>
+        </Section>
+
+        <Text style={textSmall}>
+          Este link expira em algumas horas, por segurança.
+        </Text>
+
+        <Hr style={hr} />
+
         <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
+          Se você não pediu para redefinir sua senha, pode ignorar este
+          email — sua senha continua a mesma.
+          <br /><br />
+          Equipe Jamais Enganada 💜
         </Text>
       </Container>
     </Body>
@@ -44,26 +60,58 @@ export const RecoveryEmail = ({
 
 export default RecoveryEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
+const main = {
+  backgroundColor: '#ffffff',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+}
+const container = { padding: '24px', maxWidth: '560px', margin: '0 auto' }
+const header = {
+  background: 'linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)',
+  borderRadius: '12px',
+  padding: '24px',
+  textAlign: 'center' as const,
+  marginBottom: '24px',
+}
+const brand = {
+  color: '#ffffff',
   fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontWeight: 600,
+  margin: 0,
+  letterSpacing: '-0.5px',
+}
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 600,
+  color: '#6B0F4B',
+  margin: '8px 0 16px',
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#374151',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
+}
+const textSmall = {
+  fontSize: '13px',
+  color: '#6B7280',
+  textAlign: 'center' as const,
+  margin: '8px 0',
 }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#A8006E',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '16px',
+  fontWeight: 600,
+  borderRadius: '10px',
+  padding: '14px 28px',
   textDecoration: 'none',
+  display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const hr = { borderColor: '#F3E8EF', margin: '32px 0 20px' }
+const footer = {
+  fontSize: '12px',
+  color: '#9CA3AF',
+  lineHeight: '1.6',
+  textAlign: 'center' as const,
+  margin: 0,
+}
