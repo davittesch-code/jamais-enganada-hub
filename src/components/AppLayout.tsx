@@ -32,7 +32,7 @@ type NavItem = {
 };
 
 const navCliente: NavItem[] = [
-  { to: "/consulta", label: "Consulta IA", icon: MessageCircle },
+  { to: "/consulta", label: "Consulta", icon: MessageCircle },
   { to: "/perfil", label: "Meu Perfil", icon: UserCircle },
   { to: "/pesquisa", label: "Tira-dúvidas", icon: Search },
   { to: "/assessoria", label: "Assessoria", icon: Briefcase },
