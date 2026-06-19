@@ -804,6 +804,8 @@ export function useConsulta() {
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
