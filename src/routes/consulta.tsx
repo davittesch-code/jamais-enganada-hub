@@ -7,6 +7,7 @@ import { ChatInput } from "@/components/onboarding/ChatInput";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { QuickReply } from "@/components/consulta/QuickReply";
 import { useConsulta } from "@/components/consulta/useConsulta";
+import { ProgressoSalvoBadge } from "@/components/consulta/ProgressoSalvoBadge";
 
 function ConsultaGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
