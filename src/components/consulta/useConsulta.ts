@@ -4,6 +4,31 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateProfile } from "./profile.functions";
+import { evaluateConsultaBlock } from "./consulta-ai.functions";
+
+// ============ BLOCOS TEMÁTICOS ============
+// Agrupam perguntas para uma única avaliação da IA por bloco (eficiente).
+const BLOCKS: Array<{ id: string; keys: string[] }> = [
+  { id: "relacionamento", keys: ["situacao_relacionamento_detalhe", "regime_bens"] },
+  { id: "filhos", keys: ["filhos_idades", "guarda_situacao"] },
+  { id: "violencia", keys: ["violencia", "violencia_diagnostico"] },
+  { id: "patrimonio", keys: ["imoveis"] },
+  { id: "financeiro", keys: ["financeiro_situacao", "faixa_renda", "profissao", "dividas"] },
+  { id: "empresa", keys: ["empresa_situacao", "empresa_nome", "trabalhou_empresa"] },
+  { id: "heranca", keys: ["heranca"] },
+  { id: "fechamento", keys: ["rede_apoio", "situacao_livre"] },
+];
+const KEY_TO_BLOCK: Record<string, string> = BLOCKS.reduce((acc, b) => {
+  for (const k of b.keys) acc[k] = b.id;
+  return acc;
+}, {} as Record<string, string>);
+
+type BlockDecision = {
+  acao: "perguntar" | "pular" | "adaptar";
+  motivo: string;
+  pergunta_adaptada: string;
+  confirmacao: string;
+};
 
 type Sender = "sofia" | "user";
 
