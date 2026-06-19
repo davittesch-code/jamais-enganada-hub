@@ -37,22 +37,35 @@ async function processCompletedTransaction(data: any, env: PaddleEnv) {
   let statusPagamento = "completo";
 
   if (tipoProduto === "acesso") {
-    const redirectTo =
-      (process.env.SITE_URL ?? "https://jamaisenganada.com.br") + "/criar-senha";
+    // 1) Tenta achar a usu\u00e1ria por profile.email (cobre renova\u00e7\u00f5es sem
+    //    disparar email de convite novamente).
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .ilike("email", email)
+      .maybeSingle();
 
-    const { data: invited, error: inviteErr } =
-      await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { full_name: nome ?? "" },
-        redirectTo,
-      });
-
-    if (inviteErr) {
-      const { data: list } = await supabaseAdmin.auth.admin.listUsers();
-      const found = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-      userId = found?.id ?? null;
+    if (existingProfile?.id) {
+      userId = existingProfile.id;
     } else {
-      userId = invited.user?.id ?? null;
+      // 2) N\u00e3o existe: convida e dispara o email de cria\u00e7\u00e3o de senha.
+      const redirectTo =
+        (process.env.SITE_URL ?? "https://jamaisenganada.com.br") + "/criar-senha";
+      const { data: invited, error: inviteErr } =
+        await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+          data: { full_name: nome ?? "" },
+          redirectTo,
+        });
+      if (!inviteErr) {
+        userId = invited.user?.id ?? null;
+      } else {
+        // Fallback final (race condition rara): busca via Auth Admin.
+        const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
+        const found = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+        userId = found?.id ?? null;
+      }
     }
+
 
     if (userId) {
       // Renova/cria entitlement. Se j\u00e1 existir expira_em no futuro,
