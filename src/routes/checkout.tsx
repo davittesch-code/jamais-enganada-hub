@@ -114,13 +114,8 @@ function CheckoutPage() {
           variant: "one-page",
           // Remove PayPal — não é usado no Brasil. Pix e Boleto aparecem
           // automaticamente para clientes em BR com preço em BRL.
-          allowedPaymentMethods: [
-            "card",
-            "apple_pay",
-            "google_pay",
-desconto: undefined,
-          ].filter((v): v is string => typeof v === "string") as any,
-        },
+          allowedPaymentMethods: ["card", "apple_pay", "google_pay"],
+        } as any,
         eventCallback: (event: any) => {
           if (event?.name === "checkout.completed") {
             setSucesso({ email: emailLimpo });
