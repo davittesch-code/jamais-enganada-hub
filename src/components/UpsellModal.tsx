@@ -1,14 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Search, Scale, Check } from "lucide-react";
+import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 
 interface UpsellModalProps {
   open: boolean;
   onClose: () => void;
   tipo: "perguntas" | "perfil";
-  onConfirm: () => void;
+  userEmail: string | null;
+  userId: string | null;
+  onRecargaConfirmada?: () => void | Promise<void>;
 }
 
-export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps) {
+export function UpsellModal({
+  open,
+  onClose,
+  tipo,
+  userEmail,
+  userId,
+  onRecargaConfirmada,
+}: UpsellModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -16,11 +29,49 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    void initializePaddle().catch(() => {});
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
   }, [open, onClose]);
+
+  const handlePagar = async () => {
+    if (!userEmail) {
+      setErro("Sessão expirada. Faça login novamente.");
+      return;
+    }
+    setErro(null);
+    setLoading(true);
+    try {
+      await initializePaddle();
+      const paddlePriceId = await getPaddlePriceId("recarga_jamais_enganada");
+      window.Paddle.Checkout.open({
+        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        customer: { email: userEmail },
+        customData: {
+          email: userEmail,
+          user_id: userId,
+          tipo_produto: "recarga",
+        },
+        settings: {
+          displayMode: "overlay",
+          locale: "pt-BR",
+          allowLogout: false,
+          variant: "one-page",
+        },
+        eventCallback: (event: any) => {
+          if (event?.name === "checkout.completed") {
+            void onRecargaConfirmada?.();
+          }
+        },
+      });
+    } catch (e: any) {
+      setErro(e?.message ?? "Não foi possível abrir o checkout.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!open) return null;
 
@@ -34,8 +85,8 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
     : "Adquira o pacote extra para refazer seu perfil.";
 
   const beneficios = [
-    "5 novas consultas jurídicas personalizadas",
-    "Refaça seu perfil com novas informações",
+    "+10 novas consultas jurídicas personalizadas",
+    "+1 nova geração de perfil",
     "Respostas baseadas na lei brasileira",
   ];
 
@@ -75,9 +126,9 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
             background: "linear-gradient(135deg, #6B0F4B 0%, #552736 100%)",
           }}
         >
-          <p className="text-sm font-semibold mb-2">✨ Pacote Extra</p>
+          <p className="text-sm font-semibold mb-2">✨ Recarga Jamais Enganada</p>
           <ul className="text-sm space-y-1 mb-3 opacity-95">
-            <li>+ 5 perguntas jurídicas</li>
+            <li>+ 10 consultas jurídicas</li>
             <li>+ 1 geração de perfil</li>
           </ul>
           <div className="flex items-baseline gap-2">
@@ -95,12 +146,17 @@ export function UpsellModal({ open, onClose, tipo, onConfirm }: UpsellModalProps
           ))}
         </ul>
 
+        {erro && (
+          <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md mb-3">{erro}</div>
+        )}
+
         <button
-          onClick={onConfirm}
-          className="w-full text-white font-semibold py-3 rounded-md hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#552736" }}
+          onClick={handlePagar}
+          disabled={loading}
+          className="w-full text-white font-semibold py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+          style={{ backgroundColor: "#A8006E" }}
         >
-          Quero continuar por R$ 29,90
+          {loading ? "Abrindo checkout…" : "Quero continuar por R$ 29,90"}
         </button>
 
         <button
