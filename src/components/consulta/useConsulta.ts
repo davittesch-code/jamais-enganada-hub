@@ -5,6 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateProfile } from "./profile.functions";
 import { evaluateConsultaBlock } from "./consulta-ai.functions";
+import {
+  loadProgresso,
+  markProgressoConcluido,
+  saveProgresso,
+} from "./progresso";
 
 // ============ BLOCOS TEMÁTICOS ============
 // Agrupam perguntas para uma única avaliação da IA por bloco (eficiente).
