@@ -102,12 +102,17 @@ export function useOnboarding() {
   const [inputDisabled, setInputDisabled] = useState(true);
   const [showAdvogadaPicker, setShowAdvogadaPicker] = useState(false);
   const [advogadas, setAdvogadas] = useState<AdvogadaOpt[]>([]);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const currentIndexRef = useRef(-1);
   const dataRef = useRef<OnboardingData>({});
   const hasStartedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const checkedExistingRef = useRef(false);
+  const messagesRef = useRef<Message[]>([]);
+  const concluidoRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
