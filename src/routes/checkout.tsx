@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
@@ -13,6 +14,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { initializePaddle, getPaddlePriceId, getPaddleEnvironment } from "@/lib/paddle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { checkEmailStatus, resendInviteEmail } from "@/lib/checkout-helpers.functions";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
