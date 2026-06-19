@@ -430,7 +430,8 @@ export function useConsulta() {
   }, [getCombined]);
 
   const askQuestion = useCallback(
-    (q: ConsultaQuestion) => {
+    (q: ConsultaQuestion, overrideText?: string) => {
+      const text = (overrideText && overrideText.trim()) || q.text;
       setIsTyping(true);
       setCurrentOptions(null);
       setCurrentExplicacao(undefined);
@@ -440,7 +441,7 @@ export function useConsulta() {
       currentKeyRef.current = q.key;
       schedule(() => {
         setIsTyping(false);
-        addMessage("sofia", q.text);
+        addMessage("sofia", text);
         const totalVisible = filterQuestions(getCombined()).length;
         const answered = Object.keys(answersRef.current).length;
         setProgress(Math.min(90, Math.round((answered / Math.max(totalVisible, 1)) * 90)));
@@ -454,7 +455,7 @@ export function useConsulta() {
           setCurrentMultiSelect(false);
         }
         setInputDisabled(false);
-      }, calcTypingDelay(q.text));
+      }, calcTypingDelay(text));
     },
     [addMessage, getCombined, schedule],
   );
