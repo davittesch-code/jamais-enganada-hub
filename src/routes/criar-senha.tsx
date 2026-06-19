@@ -75,11 +75,56 @@ function CriarSenhaPage() {
           </p>
 
           {!pronta ? (
-            <div className="text-sm bg-orange-50 text-orange-800 px-4 py-3 rounded-lg">
-              Validando seu link de acesso… Se você abriu este link diretamente,
-              verifique seu email e clique no botão "Criar minha senha".
+            <div className="space-y-4">
+              <div className="text-sm bg-orange-50 text-orange-800 px-4 py-3 rounded-lg">
+                Validando seu link de acesso… Se você abriu este link diretamente,
+                verifique seu email e clique no botão "Criar minha senha".
+              </div>
+              <div className="border-t border-gray-100 pt-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  Não recebeu o email ou o link expirou? Digite seu email que reenviamos:
+                </p>
+                {reenviado ? (
+                  <p className="text-sm text-[#0F7B5A]">
+                    ✓ Enviamos um novo link. Confira sua caixa em alguns minutos.
+                  </p>
+                ) : (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!reenvioEmail.trim()) return;
+                      setReenviando(true);
+                      try {
+                        await resendFn({ data: { email: reenvioEmail.trim() } });
+                        setReenviado(true);
+                      } finally {
+                        setReenviando(false);
+                      }
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="email"
+                      required
+                      value={reenvioEmail}
+                      onChange={(e) => setReenvioEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={reenviando}
+                      className="px-4 py-2 text-sm font-semibold text-white rounded-lg disabled:opacity-50"
+                      style={{ backgroundColor: "#A8006E" }}
+                    >
+                      {reenviando ? "…" : "Reenviar"}
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           ) : (
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5">Nova senha</label>
