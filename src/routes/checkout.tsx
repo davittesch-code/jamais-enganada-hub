@@ -42,6 +42,8 @@ function CheckoutPage() {
   const [loadingPay, setLoadingPay] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<{ email: string } | null>(null);
+  const checkEmailStatusFn = useServerFn(checkEmailStatus);
+
 
   useEffect(() => {
     void (async () => {
