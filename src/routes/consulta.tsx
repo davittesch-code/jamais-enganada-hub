@@ -169,6 +169,7 @@ function ConsultaPage() {
 
       {isGenerating && !erroGeracao && <LoadingOverlay text={loadingText} />}
       {erroGeracao && <ErrorOverlay onRetry={retryGerar} />}
+      <ProgressoSalvoBadge visible={savedFlash} />
     </div>
   );
 }
