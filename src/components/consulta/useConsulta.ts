@@ -780,32 +780,36 @@ export function useConsulta() {
         console.error("localStorage parse failed", e);
       }
 
-      if (!ctx || Object.keys(ctx).length === 0) {
-        try {
-          const { data } = await supabase
-            .from("onboarding_responses")
-            .select("question, answer")
-            .eq("user_id", user.id)
-            .eq("step", "onboarding");
-          if (data) {
-            const map: OnboardingCtx = {};
-            for (const r of data) {
-              const q = (r.question || "").toLowerCase();
-              const a = r.answer ?? undefined;
-              if (q.includes("nome")) map.nome = a;
-              else if (q.includes("anos")) map.idade = a;
-              else if (q.includes("estado") && q.includes("mora")) map.estado = a;
-              else if (q.includes("relacionamento") || q.includes("civil")) map.estado_civil = a;
-              else if (q.includes("filhos")) map.tem_filhos = a;
-              else if (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma")) map.tem_empresa = a;
-              else if (q.includes("bens")) map.tem_bens = a;
-              else if (q.includes("preocup") || q.includes("buscar")) map.motivacao_principal = a;
-            }
-            ctx = map;
+      // SEMPRE buscamos as respostas do onboarding do Supabase para garantir
+      // que o contexto completo (incluindo respostas livres) chegue à IA.
+      try {
+        const { data } = await supabase
+          .from("onboarding_responses")
+          .select("question, answer")
+          .eq("user_id", user.id)
+          .eq("step", "onboarding");
+        if (data) {
+          const map: OnboardingCtx = { ...ctx };
+          for (const r of data) {
+            const q = (r.question || "").toLowerCase();
+            const a = r.answer ?? undefined;
+            if (!a) continue;
+            if (!map.nome && q.includes("nome")) map.nome = a;
+            else if (!map.idade && q.includes("anos")) map.idade = a;
+            else if (!map.estado && q.includes("estado") && q.includes("mora")) map.estado = a;
+            else if (!map.estado_civil && (q.includes("relacionamento") || q.includes("civil"))) map.estado_civil = a;
+            else if (!map.tem_filhos && q.includes("filhos")) map.tem_filhos = a;
+            else if (!map.tem_empresa && (q.includes("negócio") || q.includes("empresa") || q.includes("autônoma"))) map.tem_empresa = a;
+            else if (!map.tem_bens && q.includes("bens")) map.tem_bens = a;
+            else if (!map.motivacao_principal && (q.includes("preocup") || q.includes("buscar"))) map.motivacao_principal = a;
+            // Sempre guardamos a resposta original também (chave = pergunta) para a IA ver tudo.
+            const slug = "onb_" + (r.question || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60);
+            if (slug && !map[slug]) map[slug] = a;
           }
-        } catch (e) {
-          console.error("onboarding fetch failed", e);
+          ctx = map;
         }
+      } catch (e) {
+        console.error("onboarding fetch failed", e);
       }
 
       ctxRef.current = ctx;
