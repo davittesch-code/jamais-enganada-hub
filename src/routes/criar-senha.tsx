@@ -16,6 +16,11 @@ function CriarSenhaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [pronta, setPronta] = useState(false);
+  const resendFn = useServerFn(resendInviteEmail);
+  const [reenvioEmail, setReenvioEmail] = useState("");
+  const [reenviando, setReenviando] = useState(false);
+  const [reenviado, setReenviado] = useState(false);
+
 
   // O link de convite do Supabase já restaura a sessão automaticamente (detectSessionInUrl).
   // Aguardamos a sessão ficar disponível antes de liberar o formulário.
