@@ -4,6 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { sofiaSpeak } from "@/lib/sofia.functions";
+import {
+  loadProgresso,
+  markProgressoConcluido,
+  saveProgresso,
+} from "@/components/consulta/progresso";
 
 
 type Sender = "sofia" | "user";
@@ -97,12 +102,17 @@ export function useOnboarding() {
   const [inputDisabled, setInputDisabled] = useState(true);
   const [showAdvogadaPicker, setShowAdvogadaPicker] = useState(false);
   const [advogadas, setAdvogadas] = useState<AdvogadaOpt[]>([]);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const currentIndexRef = useRef(-1);
   const dataRef = useRef<OnboardingData>({});
   const hasStartedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const checkedExistingRef = useRef(false);
+  const messagesRef = useRef<Message[]>([]);
+  const concluidoRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
@@ -116,6 +126,32 @@ export function useOnboarding() {
       { id: uid(), sender, text, timestamp: new Date() },
     ]);
   }, []);
+
+  // Debounced save do progresso atual para Supabase (~500ms).
+  const scheduleSave = useCallback(() => {
+    if (!user || concluidoRef.current) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      void (async () => {
+        await saveProgresso({
+          userId: user.id,
+          etapa: "onboarding",
+          mensagens: messagesRef.current,
+          contexto: { data: dataRef.current },
+          indiceAtual: currentIndexRef.current,
+        });
+        setSavedFlash(true);
+        if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setSavedFlash(false), 2000);
+      })();
+    }, 500);
+  }, [user]);
+
+  // Sempre que as mensagens mudarem, atualizar o ref e agendar um save.
+  useEffect(() => {
+    messagesRef.current = messages;
+    if (hasStartedRef.current && messages.length > 0) scheduleSave();
+  }, [messages, scheduleSave]);
 
   // Check if already onboarded; if not, run welcome block once
   useEffect(() => {
@@ -131,6 +167,80 @@ export function useOnboarding() {
           .limit(1);
         if (pd && pd.length > 0) {
           navigate({ to: "/perfil" });
+          return;
+        }
+
+        // RETOMAR onboarding salvo (se não concluído)
+        const progresso = await loadProgresso(user.id, "onboarding");
+        if (progresso) {
+          const ctxData =
+            ((progresso.contexto as { data?: OnboardingData } | null) ?? {}).data ??
+            {};
+          dataRef.current = ctxData;
+          setOnboardingData(ctxData);
+          currentIndexRef.current = progresso.indice_atual ?? 0;
+
+          const restored: Message[] = Array.isArray(progresso.mensagens)
+            ? (progresso.mensagens as Message[]).map((m) => ({
+                id: String(m.id ?? uid()),
+                sender: m.sender,
+                text: String(m.text ?? ""),
+                timestamp: new Date(
+                  (m.timestamp as unknown as string) ?? Date.now(),
+                ),
+              }))
+            : [];
+          setMessages(restored);
+          messagesRef.current = restored;
+          setProgress(Math.round((currentIndexRef.current / 8) * 88));
+          hasStartedRef.current = true;
+
+          schedule(() => {
+            setIsTyping(true);
+            schedule(() => {
+              setIsTyping(false);
+              addMessage(
+                "sofia",
+                "Que bom te ver de novo! 💜 Vamos continuar de onde paramos.",
+              );
+              const idx = currentIndexRef.current;
+              if (idx >= 0 && idx < QUESTIONS.length) {
+                schedule(() => {
+                  setIsTyping(true);
+                  const nextText = QUESTIONS[idx].text;
+                  schedule(() => {
+                    setIsTyping(false);
+                    addMessage("sofia", nextText);
+                    setInputDisabled(false);
+                  }, calcTypingDelay(nextText));
+                }, calcPauseDelay());
+              } else {
+                // Estávamos na etapa do advogada picker
+                schedule(() => {
+                  void (async () => {
+                    setIsTyping(true);
+                    try {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const { data } = await (supabase as any).rpc(
+                        "list_advogadas_publicas",
+                      );
+                      setAdvogadas((data as unknown as AdvogadaOpt[]) ?? []);
+                    } catch (e) {
+                      console.error("advogadas fetch failed", e);
+                    }
+                    setIsTyping(false);
+                    const nome = dataRef.current.nome ?? "";
+                    addMessage(
+                      "sofia",
+                      `${nome}, quase pronto! Uma última coisa: você tem uma advogada de confiança cadastrada na plataforma? Selecione abaixo para vincular sua assessoria:`,
+                    );
+                    setProgress(95);
+                    setShowAdvogadaPicker(true);
+                  })();
+                }, calcPauseDelay());
+              }
+            }, 1200);
+          }, 400);
           return;
         }
 
@@ -193,6 +303,8 @@ export function useOnboarding() {
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
@@ -232,6 +344,25 @@ export function useOnboarding() {
       setIsComplete(true);
       setProgress(100);
       setInputDisabled(true);
+
+      // Marca progresso como concluído (não será retomado novamente)
+      concluidoRef.current = true;
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (user) {
+        try {
+          await saveProgresso({
+            userId: user.id,
+            etapa: "onboarding",
+            mensagens: messagesRef.current,
+            contexto: { data: dataRef.current },
+            indiceAtual: currentIndexRef.current,
+            concluido: true,
+          });
+          await markProgressoConcluido(user.id, "onboarding");
+        } catch (e) {
+          console.error("mark onboarding concluido failed", e);
+        }
+      }
 
       schedule(() => {
         addMessage(
@@ -378,5 +509,6 @@ export function useOnboarding() {
     showAdvogadaPicker,
     advogadas,
     submitAdvogadaSelection,
+    savedFlash,
   };
 }

@@ -7,6 +7,7 @@ import { ChatInput } from "@/components/onboarding/ChatInput";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { useOnboarding } from "@/components/onboarding/useOnboarding";
 import { AdvogadaPicker } from "@/components/onboarding/AdvogadaPicker";
+import { ProgressoSalvoBadge } from "@/components/consulta/ProgressoSalvoBadge";
 
 function OnboardingGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -117,6 +118,7 @@ function OnboardingPage() {
     showAdvogadaPicker,
     advogadas,
     submitAdvogadaSelection,
+    savedFlash,
   } = useOnboarding();
   const bottomRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -182,6 +184,7 @@ function OnboardingPage() {
           />
         </div>
       </div>
+      <ProgressoSalvoBadge visible={savedFlash} />
     </div>
   );
 }

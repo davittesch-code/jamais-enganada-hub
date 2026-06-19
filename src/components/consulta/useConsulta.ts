@@ -5,6 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateProfile } from "./profile.functions";
 import { evaluateConsultaBlock } from "./consulta-ai.functions";
+import {
+  loadProgresso,
+  markProgressoConcluido,
+  saveProgresso,
+} from "./progresso";
 
 // ============ BLOCOS TEMÁTICOS ============
 // Agrupam perguntas para uma única avaliação da IA por bloco (eficiente).
@@ -406,6 +411,11 @@ export function useConsulta() {
   const blockDecisionsRef = useRef<Map<string, BlockDecision>>(new Map());
   const evaluatedBlocksRef = useRef<Set<string>>(new Set());
   const proceedNextRef = useRef<() => void | Promise<void>>(() => {});
+  const messagesRef = useRef<Message[]>([]);
+  const concluidoRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
@@ -416,6 +426,42 @@ export function useConsulta() {
   const addMessage = useCallback((sender: Sender, text: string) => {
     setMessages((prev) => [...prev, { id: uid(), sender, text, timestamp: new Date() }]);
   }, []);
+
+  // Debounced save do progresso da consulta (~500ms).
+  const scheduleSave = useCallback(() => {
+    if (!user || concluidoRef.current) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      void (async () => {
+        const contexto = {
+          ctx: ctxRef.current,
+          answers: answersRef.current,
+          respostas: respostasRef.current,
+          askedKeys: Array.from(askedKeysRef.current),
+          dadosFaltantes: Array.from(dadosFaltantesRef.current),
+          currentKey: currentKeyRef.current,
+          evaluatedBlocks: Array.from(evaluatedBlocksRef.current),
+          blockDecisions: Object.fromEntries(blockDecisionsRef.current),
+        };
+        await saveProgresso({
+          userId: user.id,
+          etapa: "consulta",
+          mensagens: messagesRef.current,
+          contexto,
+          indiceAtual: respostasRef.current.length,
+        });
+        setSavedFlash(true);
+        if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setSavedFlash(false), 2000);
+      })();
+    }, 500);
+  }, [user]);
+
+  // Sincroniza messagesRef e dispara save sempre que as mensagens mudam.
+  useEffect(() => {
+    messagesRef.current = messages;
+    if (hasStartedRef.current && messages.length > 0) scheduleSave();
+  }, [messages, scheduleSave]);
 
   const getCombined = useCallback((): CombinedData => {
     return { ...ctxRef.current, ...answersRef.current };
@@ -541,6 +587,15 @@ export function useConsulta() {
         .eq("id", user.id);
     } catch (e) {
       console.error("Falha ao incrementar perfil_generations_used", e);
+    }
+
+    // Marca progresso da consulta como concluído
+    concluidoRef.current = true;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    try {
+      await markProgressoConcluido(user.id, "consulta");
+    } catch (e) {
+      console.error("mark consulta concluido failed", e);
     }
 
     setProgress(100);
@@ -749,6 +804,8 @@ export function useConsulta() {
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
@@ -770,6 +827,72 @@ export function useConsulta() {
         }
       } catch (e) {
         console.error("profile_data check failed", e);
+      }
+
+      // RETOMAR consulta salva (se não concluída)
+      try {
+        const progresso = await loadProgresso(user.id, "consulta");
+        if (progresso) {
+          const c = (progresso.contexto ?? {}) as {
+            ctx?: OnboardingCtx;
+            answers?: Answers;
+            respostas?: { question: string; answer: string }[];
+            askedKeys?: string[];
+            dadosFaltantes?: string[];
+            currentKey?: string | null;
+            evaluatedBlocks?: string[];
+            blockDecisions?: Record<string, BlockDecision>;
+          };
+          ctxRef.current = c.ctx ?? {};
+          answersRef.current = c.answers ?? {};
+          respostasRef.current = c.respostas ?? [];
+          askedKeysRef.current = new Set(c.askedKeys ?? []);
+          dadosFaltantesRef.current = new Set(c.dadosFaltantes ?? []);
+          evaluatedBlocksRef.current = new Set(c.evaluatedBlocks ?? []);
+          blockDecisionsRef.current = new Map(
+            Object.entries(c.blockDecisions ?? {}),
+          );
+          // Se ela tinha uma pergunta aberta sem resposta, reapresentamos.
+          const openKey = c.currentKey ?? null;
+          if (openKey && !answersRef.current[openKey]) {
+            askedKeysRef.current.delete(openKey);
+          }
+
+          const restored: Message[] = Array.isArray(progresso.mensagens)
+            ? (progresso.mensagens as Message[]).map((m) => ({
+                id: String(m.id ?? uid()),
+                sender: m.sender,
+                text: String(m.text ?? ""),
+                timestamp: new Date(
+                  (m.timestamp as unknown as string) ?? Date.now(),
+                ),
+              }))
+            : [];
+          setMessages(restored);
+          messagesRef.current = restored;
+          hasStartedRef.current = true;
+
+          const totalVisible = filterQuestions(getCombined()).length;
+          const answered = Object.keys(answersRef.current).length;
+          setProgress(
+            Math.min(90, Math.round((answered / Math.max(totalVisible, 1)) * 90)),
+          );
+
+          schedule(() => {
+            setIsTyping(true);
+            schedule(() => {
+              setIsTyping(false);
+              addMessage(
+                "sofia",
+                "Bem-vinda de volta! Vamos continuar montando o seu perfil de onde paramos. 💜",
+              );
+              schedule(() => void proceedNextRef.current(), calcPauseDelay());
+            }, 1200);
+          }, 400);
+          return;
+        }
+      } catch (e) {
+        console.error("consulta resume from progresso failed", e);
       }
 
       let ctx: OnboardingCtx = {};
@@ -890,5 +1013,6 @@ export function useConsulta() {
     handleReply,
     erroGeracao,
     retryGerar,
+    savedFlash,
   };
 }
