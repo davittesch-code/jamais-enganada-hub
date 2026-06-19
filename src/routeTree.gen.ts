@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -31,6 +32,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
+const PrecosRoute = PrecosRouteImport.update({
+  id: '/precos',
+  path: '/precos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PesquisaRoute = PesquisaRouteImport.update({
   id: '/pesquisa',
   path: '/pesquisa',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
+  '/precos': typeof PrecosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
+  '/precos': typeof PrecosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/pesquisa': typeof PesquisaRoute
+  '/precos': typeof PrecosRoute
   '/admin/advogados': typeof AdminAdvogadosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/pesquisa'
+    | '/precos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/pesquisa'
+    | '/precos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/pesquisa'
+    | '/precos'
     | '/admin/advogados'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PerfilRoute: typeof PerfilRoute
   PesquisaRoute: typeof PesquisaRoute
+  PrecosRoute: typeof PrecosRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -299,6 +312,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/precos': {
+      id: '/precos'
+      path: '/precos'
+      fullPath: '/precos'
+      preLoaderRoute: typeof PrecosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pesquisa': {
       id: '/pesquisa'
       path: '/pesquisa'
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PerfilRoute: PerfilRoute,
   PesquisaRoute: PesquisaRoute,
+  PrecosRoute: PrecosRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
@@ -489,13 +510,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
