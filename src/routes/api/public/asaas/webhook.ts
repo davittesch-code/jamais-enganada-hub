@@ -55,7 +55,6 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
   const { data: existente } = await supabaseAdmin
     .from("pagamentos")
     .select("id")
-    // @ts-expect-error new column not yet in generated types
     .eq("asaas_payment_id", payment.id)
     .maybeSingle();
   if (existente) {
@@ -118,7 +117,6 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
           plataforma_start_date: new Date().toISOString(),
           plano_expira_em: new Date(base + ONE_YEAR_MS).toISOString(),
           plan_type: "base",
-          // @ts-expect-error new columns not yet in generated types
           cpf: ref.cpf ?? undefined,
           telefone: ref.telefone ?? undefined,
         } as any)
@@ -162,7 +160,6 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
     environment:
       (process.env.ASAAS_API_URL ?? "").includes("sandbox") ? "sandbox" : "live",
     metadata: { asaas: payment, externalReference: ref } as any,
-    // @ts-expect-error new columns not yet in generated types
     asaas_payment_id: payment.id,
     forma_pagamento: forma,
     parcelas: payment.installmentCount ?? 1,
@@ -174,7 +171,6 @@ async function processPaymentRefunded(payment: AsaasWebhookEvent["payment"]) {
   const { data: pagamento } = await supabaseAdmin
     .from("pagamentos")
     .select("id, user_id, produto, status")
-    // @ts-expect-error new column
     .eq("asaas_payment_id", payment.id)
     .maybeSingle();
 

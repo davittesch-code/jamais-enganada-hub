@@ -13,7 +13,10 @@ type Pagamento = {
   produto: string;
   valor: number;
   status: string;
+  asaas_payment_id: string | null;
   paddle_transaction_id: string | null;
+  forma_pagamento: string | null;
+  parcelas: number | null;
   created_at: string;
   environment: string;
 };
@@ -24,6 +27,14 @@ type Stats = {
   total_recargas: number;
   total_geral: number;
 };
+
+function formaLabel(p: Pagamento) {
+  if (!p.forma_pagamento) return p.paddle_transaction_id ? "Paddle (legado)" : "—";
+  if (p.forma_pagamento === "PIX") return "Pix";
+  if (p.forma_pagamento === "CREDIT_CARD")
+    return p.parcelas && p.parcelas > 1 ? `Cartão ${p.parcelas}x` : "Cartão à vista";
+  return p.forma_pagamento;
+}
 
 function AdminPagamentosPage() {
   const [rows, setRows] = useState<Pagamento[]>([]);
@@ -36,7 +47,9 @@ function AdminPagamentosPage() {
       const [{ data: pagamentos }, { data: s }] = await Promise.all([
         supabase
           .from("pagamentos")
-          .select("id,email,produto,valor,status,paddle_transaction_id,created_at,environment")
+          .select(
+            "id,email,produto,valor,status,asaas_payment_id,paddle_transaction_id,forma_pagamento,parcelas,created_at,environment",
+          )
           .order("created_at", { ascending: false })
           .limit(200),
         supabase.rpc("get_pagamentos_stats"),
@@ -52,32 +65,15 @@ function AdminPagamentosPage() {
       <header className="mb-8">
         <h1 className="font-display text-3xl font-semibold text-[#6B0F4B]">Pagamentos</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Histórico de transações processadas pelo gateway de pagamentos.
+          Histórico de transações via Asaas (Pix e cartão).
         </p>
       </header>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          icon={<TrendingUp className="w-5 h-5" />}
-          label="Total recebido"
-          value={stats ? `R$ ${Number(stats.total_recebido).toFixed(2)}` : "—"}
-        />
-        <StatCard
-          icon={<ShoppingBag className="w-5 h-5" />}
-          label="Acessos vendidos"
-          value={stats ? String(stats.total_acessos) : "—"}
-        />
-        <StatCard
-          icon={<RotateCw className="w-5 h-5" />}
-          label="Recargas"
-          value={stats ? String(stats.total_recargas) : "—"}
-        />
-        <StatCard
-          icon={<Wallet className="w-5 h-5" />}
-          label="Total de transações"
-          value={stats ? String(stats.total_geral) : "—"}
-        />
+        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Total recebido" value={stats ? `R$ ${Number(stats.total_recebido).toFixed(2)}` : "—"} />
+        <StatCard icon={<ShoppingBag className="w-5 h-5" />} label="Acessos vendidos" value={stats ? String(stats.total_acessos) : "—"} />
+        <StatCard icon={<RotateCw className="w-5 h-5" />} label="Recargas" value={stats ? String(stats.total_recargas) : "—"} />
+        <StatCard icon={<Wallet className="w-5 h-5" />} label="Total de transações" value={stats ? String(stats.total_geral) : "—"} />
       </div>
 
       <div className="bg-card border rounded-xl overflow-hidden">
@@ -87,6 +83,7 @@ function AdminPagamentosPage() {
               <th className="px-4 py-3 font-semibold">Email</th>
               <th className="px-4 py-3 font-semibold">Produto</th>
               <th className="px-4 py-3 font-semibold">Valor</th>
+              <th className="px-4 py-3 font-semibold">Forma</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 font-semibold">Ambiente</th>
               <th className="px-4 py-3 font-semibold">Data</th>
@@ -95,13 +92,13 @@ function AdminPagamentosPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   Carregando…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   Nenhum pagamento registrado ainda.
                 </td>
               </tr>
@@ -111,12 +108,15 @@ function AdminPagamentosPage() {
                   <td className="px-4 py-3">{r.email}</td>
                   <td className="px-4 py-3 capitalize">{r.produto}</td>
                   <td className="px-4 py-3">R$ {Number(r.valor).toFixed(2)}</td>
+                  <td className="px-4 py-3 text-xs">{formaLabel(r)}</td>
                   <td className="px-4 py-3">
                     <span
                       className={
                         r.status === "completo"
                           ? "inline-block px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs"
-                          : "inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs"
+                          : r.status === "reembolsado"
+                            ? "inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs"
+                            : "inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs"
                       }
                     >
                       {r.status}
@@ -138,15 +138,7 @@ function AdminPagamentosPage() {
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="bg-card border rounded-xl p-4">
       <div className="flex items-center gap-2 text-[#A8006E] mb-2">

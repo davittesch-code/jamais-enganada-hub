@@ -1,21 +1,17 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Sparkles,
   HelpCircle,
   CheckCircle2,
-  ShieldCheck,
   CreditCard,
   RotateCcw,
   Heart,
   Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { initializePaddle, getPaddlePriceId, getPaddleEnvironment } from "@/lib/paddle";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { checkEmailStatus, resendInviteEmail } from "@/lib/checkout-helpers.functions";
-
+import { AsaasPaymentForm } from "@/components/checkout/AsaasPaymentForm";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -33,36 +29,38 @@ export const Route = createFileRoute("/checkout")({
 
 type AdvogadaOpt = { id: string; nome: string; oab: string | null; especialidade: string | null };
 
+function maskCPF(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+function maskPhone(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 10)
+    return d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
+  return d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+}
+
 function CheckoutPage() {
   const [advogadas, setAdvogadas] = useState<AdvogadaOpt[]>([]);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [confEmail, setConfEmail] = useState("");
-  const [advId, setAdvId] = useState<string>("");
-  const [loadingPay, setLoadingPay] = useState(false);
+  const [cpf, setCpf] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [advId, setAdvId] = useState("");
   const [erro, setErro] = useState<string | null>(null);
-  const [sucesso, setSucesso] = useState<{ email: string } | null>(null);
+  const [etapa, setEtapa] = useState<"dados" | "pagamento" | "sucesso">("dados");
+  const [verificando, setVerificando] = useState(false);
   const checkEmailStatusFn = useServerFn(checkEmailStatus);
-
 
   useEffect(() => {
     void (async () => {
       const { data } = await supabase.rpc("list_advogadas_publicas");
       if (data) setAdvogadas(data as AdvogadaOpt[]);
     })();
-    void initializePaddle().catch((e) => console.error("Paddle init falhou", e));
-
-    // Se o Paddle redirecionou via successUrl, recuperamos o email salvo e
-    // mostramos a tela de sucesso (o eventCallback se perde no reload).
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("status") === "sucesso") {
-        const savedEmail = sessionStorage.getItem("checkout:lastEmail") ?? "";
-        setSucesso({ email: savedEmail });
-      }
-    } catch {
-      /* ignore */
-    }
   }, []);
 
   const validar = () => {
@@ -70,72 +68,43 @@ function CheckoutPage() {
     if (!email.trim()) return "Informe seu email.";
     if (email.trim().toLowerCase() !== confEmail.trim().toLowerCase())
       return "Os emails não coincidem.";
+    if (cpf.replace(/\D/g, "").length !== 11) return "Informe um CPF válido.";
+    if (telefone.replace(/\D/g, "").length < 10) return "Informe um celular válido.";
     return null;
   };
 
-  const abrirCheckout = async () => {
+  const avancarParaPagamento = async () => {
     setErro(null);
     const v = validar();
-    if (v) {
-      setErro(v);
-      return;
-    }
-    setLoadingPay(true);
+    if (v) return setErro(v);
+
+    setVerificando(true);
     try {
       const emailLimpo = email.trim().toLowerCase();
-
-      // Bloqueio: se o email j\u00e1 tem acesso ativo, manda fazer login.
       const status = await checkEmailStatusFn({ data: { email: emailLimpo } });
       if (status.status === "active") {
         setErro(
-          "Este email j\u00e1 tem acesso ativo \u00e0 plataforma. Fa\u00e7a login para continuar \u2014 se esqueceu a senha, clique em 'N\u00e3o recebi meu email' abaixo.",
+          "Este email já tem acesso ativo. Faça login para continuar — se esqueceu a senha, clique em 'Não recebi meu email' depois.",
         );
-        setLoadingPay(false);
         return;
       }
-
-      try { sessionStorage.setItem("checkout:lastEmail", emailLimpo); } catch { /* ignore */ }
-      await initializePaddle();
-      const paddlePriceId = await getPaddlePriceId("acesso_jamais_enganada");
-      window.Paddle.Checkout.open({
-        items: [{ priceId: paddlePriceId, quantity: 1 }],
-        customer: { email: emailLimpo },
-        customData: {
-          nome: nome.trim(),
-          email: emailLimpo,
-          advogada_id: advId || null,
-          tipo_produto: "acesso",
-        },
-        settings: {
-          displayMode: "overlay",
-          locale: "pt-BR",
-          successUrl: `${window.location.origin}/checkout?status=sucesso`,
-          allowLogout: false,
-          variant: "one-page",
-          // Remove PayPal — não é usado no Brasil. Pix e Boleto aparecem
-          // automaticamente para clientes em BR com preço em BRL.
-          allowedPaymentMethods: ["card", "apple_pay", "google_pay"],
-        } as any,
-        eventCallback: (event: any) => {
-          if (event?.name === "checkout.completed") {
-            setSucesso({ email: emailLimpo });
-          }
-        },
-      });
+      try {
+        sessionStorage.setItem("checkout:lastEmail", emailLimpo);
+      } catch {
+        /* ignore */
+      }
+      setEtapa("pagamento");
     } catch (e: any) {
-      setErro(e?.message ?? "Não foi possível abrir o checkout.");
+      setErro(e?.message ?? "Erro ao validar email.");
     } finally {
-      setLoadingPay(false);
+      setVerificando(false);
     }
   };
 
-
-  if (sucesso) return <SucessoView email={sucesso.email} />;
+  if (etapa === "sucesso") return <SucessoView email={email.trim().toLowerCase()} />;
 
   return (
     <div className="min-h-screen bg-white">
-      <PaymentTestModeBanner />
-
       {/* Hero */}
       <section
         className="px-6 py-16 md:py-24"
@@ -230,10 +199,10 @@ function CheckoutPage() {
             <div className="p-8">
               <div className="text-center mb-6">
                 <div className="text-5xl md:text-6xl font-bold text-[#6B0F4B] font-display">
-                  3x R$ 32,67
+                  3x R$ 32,63
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  ou <strong>R$ 97,90</strong> à vista no Pix ou boleto
+                  ou <strong>R$ 97,90</strong> à vista no Pix
                 </p>
                 <span className="inline-block mt-3 text-xs font-semibold bg-[#FDF6F9] text-[#A8006E] px-3 py-1 rounded-full">
                   ✓ Pagamento único · Sem mensalidade
@@ -254,79 +223,121 @@ function CheckoutPage() {
                 ))}
               </ul>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    Nome completo*
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">Email*</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    Confirmar email*
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={confEmail}
-                    onChange={(e) => setConfEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    Tem uma advogada de preferência? (opcional)
-                  </label>
-                  <select
-                    value={advId}
-                    onChange={(e) => setAdvId(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E] bg-white"
-                  >
-                    <option value="">Escolher depois</option>
-                    {advogadas.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.nome}
-                        {a.especialidade ? ` — ${a.especialidade}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              {etapa === "dados" ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-gray-700">
+                      Nome completo*
+                    </label>
+                    <input
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5 text-gray-700">CPF*</label>
+                      <input
+                        inputMode="numeric"
+                        value={cpf}
+                        onChange={(e) => setCpf(maskCPF(e.target.value))}
+                        placeholder="000.000.000-00"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5 text-gray-700">
+                        Celular*
+                      </label>
+                      <input
+                        inputMode="tel"
+                        value={telefone}
+                        onChange={(e) => setTelefone(maskPhone(e.target.value))}
+                        placeholder="(00) 00000-0000"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-gray-700">Email*</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-gray-700">
+                      Confirmar email*
+                    </label>
+                    <input
+                      type="email"
+                      value={confEmail}
+                      onChange={(e) => setConfEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-gray-700">
+                      Tem uma advogada de preferência? (opcional)
+                    </label>
+                    <select
+                      value={advId}
+                      onChange={(e) => setAdvId(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E] bg-white"
+                    >
+                      <option value="">Escolher depois</option>
+                      {advogadas.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                          {a.especialidade ? ` — ${a.especialidade}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {erro && (
-                <div className="mt-4 text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md">
-                  {erro}
+                  {erro && (
+                    <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md">
+                      {erro}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={avancarParaPagamento}
+                    disabled={verificando}
+                    className="w-full text-white font-semibold py-4 rounded-lg hover:opacity-90 transition disabled:opacity-50 text-lg shadow-lg"
+                    style={{ backgroundColor: "#A8006E" }}
+                  >
+                    {verificando ? "Verificando…" : "Continuar para pagamento →"}
+                  </button>
+
+                  <p className="text-center text-xs text-gray-500">
+                    Após o pagamento você receberá um email para criar sua senha.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setEtapa("dados")}
+                    className="text-xs text-gray-500 hover:text-[#6B0F4B] underline"
+                  >
+                    ← Editar meus dados
+                  </button>
+                  <AsaasPaymentForm
+                    tipo="acesso"
+                    dados={{
+                      nome: nome.trim(),
+                      email: email.trim().toLowerCase(),
+                      cpf,
+                      telefone,
+                      advogada_id: advId || null,
+                    }}
+                    onConfirmado={() => setEtapa("sucesso")}
+                  />
                 </div>
               )}
-
-              <button
-                onClick={abrirCheckout}
-                disabled={loadingPay}
-                className="mt-6 w-full text-white font-semibold py-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-lg shadow-lg"
-                style={{ backgroundColor: "#A8006E" }}
-              >
-                {loadingPay ? "Abrindo checkout…" : "Pagar e criar minha conta →"}
-              </button>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Após o pagamento você receberá um email para criar sua senha.
-              </p>
             </div>
           </div>
 
@@ -338,7 +349,7 @@ function CheckoutPage() {
             </div>
             <div className="flex flex-col items-center gap-2 text-gray-600">
               <CreditCard className="w-5 h-5 text-[#A8006E]" />
-              Pix, cartão ou boleto
+              Pix ou cartão em até 3x
             </div>
             <div className="flex flex-col items-center gap-2 text-gray-600">
               <RotateCcw className="w-5 h-5 text-[#A8006E]" />
@@ -437,4 +448,3 @@ function SucessoView({ email }: { email: string }) {
     </div>
   );
 }
-

@@ -34,6 +34,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
@@ -162,6 +163,11 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
+  id: '/api/public/asaas/webhook',
+  path: '/api/public/asaas/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/suporte': typeof AdminSuporteRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
+    | '/api/public/asaas/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin'
+    | '/api/public/asaas/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/pagamentos'
     | '/admin/suporte'
     | '/admin/'
+    | '/api/public/asaas/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -343,6 +355,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   ReembolsoRoute: typeof ReembolsoRoute
   TermosRoute: typeof TermosRoute
+  ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -526,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/asaas/webhook': {
+      id: '/api/public/asaas/webhook'
+      path: '/api/public/asaas/webhook'
+      fullPath: '/api/public/asaas/webhook'
+      preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -565,6 +585,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   ReembolsoRoute: ReembolsoRoute,
   TermosRoute: TermosRoute,
+  ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
