@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/Logo";
 
 interface ChatBubbleProps {
   sender: "sofia" | "user";
@@ -20,28 +21,26 @@ export function ChatBubble({ sender, message }: ChatBubbleProps) {
       style={{
         opacity: shown ? 1 : 0,
         transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: "opacity 150ms ease-out, transform 150ms ease-out",
+        transition: "opacity 180ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       {isSofia ? (
         <div className="flex items-start gap-2 max-w-[85%] sm:max-w-[75%]">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0"
-            style={{ background: "#F3E8F0" }}
-            aria-hidden
-          >
-            💜
-          </div>
+          <LogoMark size={36} variant="default" />
           <div className="flex flex-col">
-            <span className="text-xs font-medium mb-1" style={{ color: "#6B0F4B" }}>
+            <span
+              className="text-xs font-medium mb-1 font-display italic"
+              style={{ color: "var(--vinho-profundo)" }}
+            >
               Sofia
             </span>
             <div
               className="px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words"
               style={{
-                background: "#6B0F4B",
-                color: "#FFFFFF",
+                background: "var(--vinho-profundo)",
+                color: "#FBF7F4",
                 borderRadius: "18px 18px 18px 4px",
+                boxShadow: "var(--elevacao-1)",
               }}
             >
               {message}
@@ -53,8 +52,8 @@ export function ChatBubble({ sender, message }: ChatBubbleProps) {
           <div
             className="px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words"
             style={{
-              background: "#F3E8F0",
-              color: "#1A0010",
+              background: "var(--rosa-suave)",
+              color: "var(--texto-principal)",
               borderRadius: "18px 18px 4px 18px",
             }}
           >
