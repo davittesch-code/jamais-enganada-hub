@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 
 /**
- * Banner exibido para clientes quando o acesso est\u00e1 prestes a expirar
- * ou j\u00e1 expirou. CTA reabre o checkout do produto "acesso_jamais_enganada".
+ * Banner exibido para clientes quando o acesso está prestes a expirar
+ * ou já expirou. CTA leva para /checkout (Asaas).
  */
 export function RenovacaoBanner() {
   const { user, profile } = useAuth();
   const [expiraEm, setExpiraEm] = useState<Date | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user || profile?.role !== "cliente") return;
@@ -37,34 +36,6 @@ export function RenovacaoBanner() {
   const proximo = diasRestantes > 0 && diasRestantes <= 14;
   if (!expirado && !proximo) return null;
 
-  const renovar = async () => {
-    if (!user?.email) return;
-    setLoading(true);
-    try {
-      await initializePaddle();
-      const priceId = await getPaddlePriceId("acesso_jamais_enganada");
-      window.Paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: { email: user.email },
-        customData: {
-          email: user.email,
-          user_id: user.id,
-          nome: profile?.full_name ?? "",
-          tipo_produto: "acesso",
-        },
-        settings: {
-          displayMode: "overlay",
-          locale: "pt-BR",
-          successUrl: `${window.location.origin}/perfil?renovado=1`,
-          allowLogout: false,
-          variant: "one-page",
-        },
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div
       className={`w-full px-4 py-3 text-sm flex items-center justify-center gap-3 ${
@@ -79,14 +50,13 @@ export function RenovacaoBanner() {
           ? "Seu acesso expirou. Renove para continuar consultando."
           : `Seu acesso expira em ${diasRestantes} dia${diasRestantes === 1 ? "" : "s"}.`}
       </span>
-      <button
-        onClick={renovar}
-        disabled={loading}
-        className="ml-2 rounded-md px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+      <Link
+        to="/checkout"
+        className="ml-2 rounded-md px-3 py-1 text-xs font-semibold text-white"
         style={{ backgroundColor: "#A8006E" }}
       >
-        {loading ? "Abrindo…" : "Renovar acesso"}
-      </button>
+        Renovar acesso
+      </Link>
     </div>
   );
 }
