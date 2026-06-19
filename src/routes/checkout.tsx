@@ -367,6 +367,20 @@ function CheckoutPage() {
 }
 
 function SucessoView({ email }: { email: string }) {
+  const resendFn = useServerFn(resendInviteEmail);
+  const [reenviado, setReenviado] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
+
+  const reenviar = async () => {
+    setReenviando(true);
+    try {
+      await resendFn({ data: { email } });
+      setReenviado(true);
+    } finally {
+      setReenviando(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 py-12"
@@ -388,7 +402,23 @@ function SucessoView({ email }: { email: string }) {
         >
           Voltar ao início
         </Link>
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          {reenviado ? (
+            <p className="text-sm text-[#0F7B5A]">
+              ✓ Reenviamos o email. Confira sua caixa em alguns minutos.
+            </p>
+          ) : (
+            <button
+              onClick={reenviar}
+              disabled={reenviando}
+              className="text-sm text-[#6B0F4B] underline hover:opacity-80 disabled:opacity-50"
+            >
+              {reenviando ? "Reenviando…" : "Não recebi meu email"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
