@@ -343,6 +343,25 @@ export function useOnboarding() {
       setProgress(100);
       setInputDisabled(true);
 
+      // Marca progresso como concluído (não será retomado novamente)
+      concluidoRef.current = true;
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (user) {
+        try {
+          await saveProgresso({
+            userId: user.id,
+            etapa: "onboarding",
+            mensagens: messagesRef.current,
+            contexto: { data: dataRef.current },
+            indiceAtual: currentIndexRef.current,
+            concluido: true,
+          });
+          await markProgressoConcluido(user.id, "onboarding");
+        } catch (e) {
+          console.error("mark onboarding concluido failed", e);
+        }
+      }
+
       schedule(() => {
         addMessage(
           "sofia",
