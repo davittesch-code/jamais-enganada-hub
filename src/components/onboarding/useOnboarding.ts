@@ -170,6 +170,80 @@ export function useOnboarding() {
           return;
         }
 
+        // RETOMAR onboarding salvo (se não concluído)
+        const progresso = await loadProgresso(user.id, "onboarding");
+        if (progresso) {
+          const ctxData =
+            ((progresso.contexto as { data?: OnboardingData } | null) ?? {}).data ??
+            {};
+          dataRef.current = ctxData;
+          setOnboardingData(ctxData);
+          currentIndexRef.current = progresso.indice_atual ?? 0;
+
+          const restored: Message[] = Array.isArray(progresso.mensagens)
+            ? (progresso.mensagens as Message[]).map((m) => ({
+                id: String(m.id ?? uid()),
+                sender: m.sender,
+                text: String(m.text ?? ""),
+                timestamp: new Date(
+                  (m.timestamp as unknown as string) ?? Date.now(),
+                ),
+              }))
+            : [];
+          setMessages(restored);
+          messagesRef.current = restored;
+          setProgress(Math.round((currentIndexRef.current / 8) * 88));
+          hasStartedRef.current = true;
+
+          schedule(() => {
+            setIsTyping(true);
+            schedule(() => {
+              setIsTyping(false);
+              addMessage(
+                "sofia",
+                "Que bom te ver de novo! 💜 Vamos continuar de onde paramos.",
+              );
+              const idx = currentIndexRef.current;
+              if (idx >= 0 && idx < QUESTIONS.length) {
+                schedule(() => {
+                  setIsTyping(true);
+                  const nextText = QUESTIONS[idx].text;
+                  schedule(() => {
+                    setIsTyping(false);
+                    addMessage("sofia", nextText);
+                    setInputDisabled(false);
+                  }, calcTypingDelay(nextText));
+                }, calcPauseDelay());
+              } else {
+                // Estávamos na etapa do advogada picker
+                schedule(() => {
+                  void (async () => {
+                    setIsTyping(true);
+                    try {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const { data } = await (supabase as any).rpc(
+                        "list_advogadas_publicas",
+                      );
+                      setAdvogadas((data as unknown as AdvogadaOpt[]) ?? []);
+                    } catch (e) {
+                      console.error("advogadas fetch failed", e);
+                    }
+                    setIsTyping(false);
+                    const nome = dataRef.current.nome ?? "";
+                    addMessage(
+                      "sofia",
+                      `${nome}, quase pronto! Uma última coisa: você tem uma advogada de confiança cadastrada na plataforma? Selecione abaixo para vincular sua assessoria:`,
+                    );
+                    setProgress(95);
+                    setShowAdvogadaPicker(true);
+                  })();
+                }, calcPauseDelay());
+              }
+            }, 1200);
+          }, 400);
+          return;
+        }
+
         const { data: or } = await supabase
           .from("onboarding_responses")
           .select("id")
