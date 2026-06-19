@@ -62,10 +62,12 @@ function PrivacidadePage() {
               dispositivo, tipo de navegador, páginas acessadas, logs de erro.
             </li>
             <li>
-              <strong>Dados de pagamento:</strong> são coletados e processados
-              diretamente pela Paddle. Recebemos apenas confirmação de pagamento
-              e dados mínimos para emissão de recibos.
+              <strong>Dados de pagamento:</strong> CPF, telefone e dados de
+              cartão são coletados e processados diretamente pela Asaas.
+              Recebemos apenas confirmação de pagamento e dados mínimos para
+              emissão de recibos.
             </li>
+
           </ul>
         </Section>
 
@@ -106,10 +108,12 @@ function PrivacidadePage() {
         <Section title="5. Com quem compartilhamos">
           <ul className="list-disc pl-5 space-y-1.5">
             <li>
-              <strong>Paddle.com</strong> — nosso revendedor oficial (Merchant
-              of Record), responsável pelo processamento de pagamentos,
-              faturamento, tributos, reembolsos e prevenção a fraudes.
+              <strong>Asaas</strong> — instituição de pagamento brasileira
+              autorizada pelo Banco Central, responsável pelo processamento de
+              pagamentos (Pix e cartão), tokenização de cartão, prevenção a
+              fraudes e emissão de comprovantes.
             </li>
+
             <li>
               <strong>Provedores de infraestrutura</strong> — serviços de
               hospedagem, banco de dados, autenticação e e-mail transacional,

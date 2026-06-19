@@ -135,30 +135,22 @@ function TermosPage() {
 
         <Section title="8. Pagamentos">
           <p>
-            Nosso processo de pedidos é conduzido pelo nosso revendedor online
-            <strong> Paddle.com</strong>. A Paddle.com é o <em>Merchant of Record</em>{" "}
-            (revendedor oficial) de todos os nossos pedidos. A Paddle realiza
-            todo o atendimento de pedidos relacionados a faturamento, impostos,
-            cobrança e devoluções.
+            Os pagamentos são processados pela <strong>Asaas</strong>, instituição
+            de pagamento brasileira autorizada pelo Banco Central, que oferece
+            Pix e cartão de crédito (em até 3x). A cobrança é emitida por{" "}
+            <strong>Juliana Fais Sociedade Individual de Advocacia</strong>,
+            inscrita no CNPJ 61.844.690/0001-50, responsável legal pela venda.
           </p>
           <p className="mt-3">
-            Os termos de pagamento, faturamento, tributos, cancelamento e
-            reembolso aplicáveis estão descritos nos{" "}
-            <a
-              href="https://www.paddle.com/legal/checkout-buyer-terms"
-              target="_blank"
-              rel="noreferrer"
-              className="underline text-[#A8006E]"
-            >
-              Termos de Compra da Paddle
-            </a>
-            . Consulte também nossa{" "}
+            Dados de cartão são tokenizados diretamente pela Asaas e não são
+            armazenados em nossos servidores. Consulte nossa{" "}
             <Link to="/reembolso" className="underline text-[#A8006E]">
               Política de Reembolso
-            </Link>
-            .
+            </Link>{" "}
+            para condições de cancelamento e estorno.
           </p>
         </Section>
+
 
         <Section title="9. Suspensão e encerramento">
           <p>

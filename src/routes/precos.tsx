@@ -83,7 +83,7 @@ function PrecosPage() {
           <div className="mt-10 pt-6 border-t border-gray-100 grid sm:grid-cols-2 gap-4 text-sm text-gray-600">
             <div className="flex items-start gap-2">
               <CreditCard className="w-4 h-4 mt-0.5 text-[#A8006E]" />
-              <span>Cartão (até 3x), Pix ou boleto à vista</span>
+              <span>Cartão (até 3x) ou Pix à vista</span>
             </div>
             <div className="flex items-start gap-2">
               <Shield className="w-4 h-4 mt-0.5 text-[#A8006E]" />
@@ -93,8 +93,8 @@ function PrecosPage() {
         </div>
 
         <p className="max-w-2xl mx-auto mt-6 text-center text-xs text-gray-500">
-          Pagamento processado por Paddle.com, nosso revendedor oficial e Merchant
-          of Record. Veja os{" "}
+          Pagamento processado pela Asaas (Pix e cartão). Veja os{" "}
+
           <Link to="/termos" className="underline">
             Termos
           </Link>
