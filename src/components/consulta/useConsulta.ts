@@ -427,6 +427,42 @@ export function useConsulta() {
     setMessages((prev) => [...prev, { id: uid(), sender, text, timestamp: new Date() }]);
   }, []);
 
+  // Debounced save do progresso da consulta (~500ms).
+  const scheduleSave = useCallback(() => {
+    if (!user || concluidoRef.current) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      void (async () => {
+        const contexto = {
+          ctx: ctxRef.current,
+          answers: answersRef.current,
+          respostas: respostasRef.current,
+          askedKeys: Array.from(askedKeysRef.current),
+          dadosFaltantes: Array.from(dadosFaltantesRef.current),
+          currentKey: currentKeyRef.current,
+          evaluatedBlocks: Array.from(evaluatedBlocksRef.current),
+          blockDecisions: Object.fromEntries(blockDecisionsRef.current),
+        };
+        await saveProgresso({
+          userId: user.id,
+          etapa: "consulta",
+          mensagens: messagesRef.current,
+          contexto,
+          indiceAtual: respostasRef.current.length,
+        });
+        setSavedFlash(true);
+        if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setSavedFlash(false), 2000);
+      })();
+    }, 500);
+  }, [user]);
+
+  // Sincroniza messagesRef e dispara save sempre que as mensagens mudam.
+  useEffect(() => {
+    messagesRef.current = messages;
+    if (hasStartedRef.current && messages.length > 0) scheduleSave();
+  }, [messages, scheduleSave]);
+
   const getCombined = useCallback((): CombinedData => {
     return { ...ctxRef.current, ...answersRef.current };
   }, []);
