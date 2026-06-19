@@ -818,6 +818,72 @@ export function useConsulta() {
         console.error("profile_data check failed", e);
       }
 
+      // RETOMAR consulta salva (se não concluída)
+      try {
+        const progresso = await loadProgresso(user.id, "consulta");
+        if (progresso) {
+          const c = (progresso.contexto ?? {}) as {
+            ctx?: OnboardingCtx;
+            answers?: Answers;
+            respostas?: { question: string; answer: string }[];
+            askedKeys?: string[];
+            dadosFaltantes?: string[];
+            currentKey?: string | null;
+            evaluatedBlocks?: string[];
+            blockDecisions?: Record<string, BlockDecision>;
+          };
+          ctxRef.current = c.ctx ?? {};
+          answersRef.current = c.answers ?? {};
+          respostasRef.current = c.respostas ?? [];
+          askedKeysRef.current = new Set(c.askedKeys ?? []);
+          dadosFaltantesRef.current = new Set(c.dadosFaltantes ?? []);
+          evaluatedBlocksRef.current = new Set(c.evaluatedBlocks ?? []);
+          blockDecisionsRef.current = new Map(
+            Object.entries(c.blockDecisions ?? {}),
+          );
+          // Se ela tinha uma pergunta aberta sem resposta, reapresentamos.
+          const openKey = c.currentKey ?? null;
+          if (openKey && !answersRef.current[openKey]) {
+            askedKeysRef.current.delete(openKey);
+          }
+
+          const restored: Message[] = Array.isArray(progresso.mensagens)
+            ? (progresso.mensagens as Message[]).map((m) => ({
+                id: String(m.id ?? uid()),
+                sender: m.sender,
+                text: String(m.text ?? ""),
+                timestamp: new Date(
+                  (m.timestamp as unknown as string) ?? Date.now(),
+                ),
+              }))
+            : [];
+          setMessages(restored);
+          messagesRef.current = restored;
+          hasStartedRef.current = true;
+
+          const totalVisible = filterQuestions(getCombined()).length;
+          const answered = Object.keys(answersRef.current).length;
+          setProgress(
+            Math.min(90, Math.round((answered / Math.max(totalVisible, 1)) * 90)),
+          );
+
+          schedule(() => {
+            setIsTyping(true);
+            schedule(() => {
+              setIsTyping(false);
+              addMessage(
+                "sofia",
+                "Bem-vinda de volta! Vamos continuar montando o seu perfil de onde paramos. 💜",
+              );
+              schedule(() => void proceedNextRef.current(), calcPauseDelay());
+            }, 1200);
+          }, 400);
+          return;
+        }
+      } catch (e) {
+        console.error("consulta resume from progresso failed", e);
+      }
+
       let ctx: OnboardingCtx = {};
       try {
         const raw = localStorage.getItem("jamais_onboarding_context");
