@@ -12,12 +12,12 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Confirme seu email — Jamais Enganada',
+  invite: 'Seu acesso à Jamais Enganada está pronto 💜',
+  magiclink: 'Seu link de acesso — Jamais Enganada',
+  recovery: 'Redefina sua senha — Jamais Enganada',
+  email_change: 'Confirme seu novo email — Jamais Enganada',
+  reauthentication: 'Seu código de verificação — Jamais Enganada',
 }
 
 // Template mapping
@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "jamais-enganada-hub"
+const SITE_NAME = "Jamais Enganada"
 const SENDER_DOMAIN = "notify.jamaisenganada.com.br"
 const ROOT_DOMAIN = "jamaisenganada.com.br"
 const FROM_DOMAIN = "jamaisenganada.com.br"
@@ -134,7 +134,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
         // Build template props from payload.data (HookData structure)
         const templateProps = {
           siteName: SITE_NAME,
-          siteUrl: `https://${ROOT_DOMAIN}`,
+          siteUrl: `https://jamaisenganada.com.br`,
           recipient: payload.data.email,
           confirmationUrl: payload.data.url,
           token: payload.data.token,
