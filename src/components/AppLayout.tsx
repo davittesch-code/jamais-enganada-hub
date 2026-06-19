@@ -17,6 +17,7 @@ import {
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { RenovacaoBanner } from "@/components/RenovacaoBanner";
+import { Logo } from "@/components/Logo";
 
 const ROLE_LABEL: Record<AppRole, string> = {
   cliente: "Cliente",
@@ -89,8 +90,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         <div className="flex items-center justify-between px-4 py-5 border-b">
           {open && (
-            <Link to="/" className="font-display text-lg font-semibold text-primary">
-              Jamais Enganada
+            <Link to="/" className="inline-flex items-center">
+              <Logo size="sm" />
             </Link>
           )}
           <button
