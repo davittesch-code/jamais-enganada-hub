@@ -17,6 +17,8 @@ function CriarSenhaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [pronta, setPronta] = useState(false);
+  const [showSenha, setShowSenha] = useState(false);
+  const [showConfirmar, setShowConfirmar] = useState(false);
   const resendFn = useServerFn(resendInviteEmail);
   const [reenvioEmail, setReenvioEmail] = useState("");
   const [reenviando, setReenviando] = useState(false);
