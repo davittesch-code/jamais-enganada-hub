@@ -401,11 +401,15 @@ export function useConsulta() {
   const checkedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const schedule = useCallback((fn: () => void, ms: number) => {
-    const t = setTimeout(fn, ms);
-    timeoutsRef.current.push(t);
-    return t;
-  }, []);
+  const callGenerate = useServerFn(generateProfile);
+  const callEvaluateBlock = useServerFn(evaluateConsultaBlock);
+
+  // ... (other refs above)
+  const blockDecisionsRef = useRef<Map<string, BlockDecision>>(new Map());
+  const evaluatedBlocksRef = useRef<Set<string>>(new Set());
+  const proceedNextRef = useRef<() => void | Promise<void>>(() => {});
+  const timeoutsRef2: typeof timeoutsRef | undefined = undefined;
+  void timeoutsRef2;
 
   const addMessage = useCallback((sender: Sender, text: string) => {
     setMessages((prev) => [...prev, { id: uid(), sender, text, timestamp: new Date() }]);
