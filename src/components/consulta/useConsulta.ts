@@ -396,6 +396,14 @@ export function useConsulta() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [erroGeracao, setErroGeracao] = useState(false);
 
+  // Estado C: tela de entrada para quem já tem profile_data e nenhum progresso ativo
+  const [entradaModo, setEntradaModo] = useState(false);
+  const [perfilGeracoesUsed, setPerfilGeracoesUsed] = useState(0);
+  const [perfilGeracoesLimit, setPerfilGeracoesLimit] = useState(2);
+  const [nomeUsuaria, setNomeUsuaria] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [showUpsellPerfil, setShowUpsellPerfil] = useState(false);
+
   const ctxRef = useRef<OnboardingCtx>({});
   const answersRef = useRef<Answers>({});
   const respostasRef = useRef<{ question: string; answer: string }[]>([]);
