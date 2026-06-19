@@ -16,8 +16,8 @@ interface Cliente {
   email: string | null;
   status: string;
   created_at: string;
-  queries_used: number;
-  queries_limit: number;
+  consultas_used: number;
+  consultas_limit: number;
   perfil_generations_used: number;
   perfil_generations_limit: number;
   tem_perfil: boolean;
@@ -179,7 +179,7 @@ function AdminClientes() {
           `"${c.advogado_nome}"`,
           c.tem_perfil ? "sim" : "nao",
           c.nivel_vulnerabilidade,
-          `${c.queries_used}/${c.queries_limit}`,
+          `${c.consultas_used}/${c.consultas_limit}`,
         ].join(",")
       ),
     ].join("\n");
@@ -308,7 +308,7 @@ function AdminClientes() {
                     </td>
                     <td className="px-3 py-3"><VulnBadge nivel={c.nivel_vulnerabilidade} /></td>
                     <td className="px-3 py-3 text-xs text-gray-500">
-                      {c.queries_used}/{c.queries_limit}
+                      {c.consultas_used}/{c.consultas_limit}
                     </td>
                     <td className="px-3 py-3 text-xs text-gray-500">
                       {new Date(c.created_at).toLocaleDateString("pt-BR")}
