@@ -153,11 +153,11 @@ function CriarSenhaPage() {
                 <input
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres com letras e números"
                 />
               </div>
               <div>
@@ -170,12 +170,27 @@ function CriarSenhaPage() {
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
                 />
               </div>
+
+              <ul className="text-xs space-y-1 bg-[#FDF6F9] rounded-lg p-3">
+                {regras.map((r) => (
+                  <li
+                    key={r.txt}
+                    className={r.ok ? "text-[#0F7B5A]" : "text-gray-500"}
+                  >
+                    {r.ok ? "✓" : "○"} {r.txt}
+                  </li>
+                ))}
+                <li className="text-gray-500">
+                  ○ Evite senhas óbvias ou que você já usa em outros sites
+                </li>
+              </ul>
+
               {erro && (
                 <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md">{erro}</div>
               )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || !senhaValida}
                 className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: "#A8006E" }}
               >
