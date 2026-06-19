@@ -443,6 +443,47 @@ export type Database = {
           },
         ]
       }
+      progresso_conversa: {
+        Row: {
+          concluido: boolean
+          contexto: Json
+          etapa: string
+          id: string
+          indice_atual: number
+          mensagens: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concluido?: boolean
+          contexto?: Json
+          etapa: string
+          id?: string
+          indice_atual?: number
+          mensagens?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          concluido?: boolean
+          contexto?: Json
+          etapa?: string
+          id?: string
+          indice_atual?: number
+          mensagens?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progresso_conversa_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       queries: {
         Row: {
           answer: string | null
