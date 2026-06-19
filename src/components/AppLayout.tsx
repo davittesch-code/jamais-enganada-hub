@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { RenovacaoBanner } from "@/components/RenovacaoBanner";
 
 const ROLE_LABEL: Record<AppRole, string> = {
   cliente: "Cliente",
@@ -174,7 +175,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0">{children}</main>
+      <main className="flex-1 min-w-0">
+        <RenovacaoBanner />
+        {children}
+      </main>
     </div>
   );
 }
