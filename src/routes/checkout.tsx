@@ -51,6 +51,18 @@ function CheckoutPage() {
       if (data) setAdvogadas(data as AdvogadaOpt[]);
     })();
     void initializePaddle().catch((e) => console.error("Paddle init falhou", e));
+
+    // Se o Paddle redirecionou via successUrl, recuperamos o email salvo e
+    // mostramos a tela de sucesso (o eventCallback se perde no reload).
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("status") === "sucesso") {
+        const savedEmail = sessionStorage.getItem("checkout:lastEmail") ?? "";
+        setSucesso({ email: savedEmail });
+      }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const validar = () => {
@@ -82,6 +94,7 @@ function CheckoutPage() {
         return;
       }
 
+      try { sessionStorage.setItem("checkout:lastEmail", emailLimpo); } catch { /* ignore */ }
       await initializePaddle();
       const paddlePriceId = await getPaddlePriceId("acesso_jamais_enganada");
       window.Paddle.Checkout.open({

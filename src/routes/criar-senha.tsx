@@ -39,16 +39,38 @@ function CriarSenhaPage() {
     };
   }, []);
 
+  // Regras de senha — refletem a configuração do backend (mínimo 8 caracteres,
+  // letras + números; senhas vazadas são bloqueadas pelo Supabase via HIBP).
+  const regras = [
+    { ok: senha.length >= 8, txt: "Pelo menos 8 caracteres" },
+    { ok: /[A-Za-z]/.test(senha), txt: "Pelo menos 1 letra" },
+    { ok: /[0-9]/.test(senha), txt: "Pelo menos 1 número" },
+    { ok: senha.length > 0 && senha === confirmar, txt: "As duas senhas coincidem" },
+  ];
+  const senhaValida = regras.every((r) => r.ok);
+
+  const traduzirErro = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.includes("pwned") || m.includes("compromised") || m.includes("data breach"))
+      return "Essa senha já apareceu em vazamentos de dados públicos. Por segurança, escolha uma senha diferente — combine letras, números e algo único só seu.";
+    if (m.includes("weak") || m.includes("strength"))
+      return "Senha muito fraca. Use pelo menos 8 caracteres misturando letras e números.";
+    if (m.includes("at least") && m.includes("character"))
+      return "A senha precisa ter pelo menos 8 caracteres.";
+    if (m.includes("should be different") || m.includes("same as the old"))
+      return "A nova senha precisa ser diferente da anterior.";
+    return msg;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro(null);
-    if (senha.length < 6) return setErro("A senha precisa ter pelo menos 6 caracteres.");
-    if (senha !== confirmar) return setErro("As senhas não coincidem.");
+    if (!senhaValida) return setErro("Sua senha ainda não cumpre todos os requisitos abaixo.");
     setSubmitting(true);
     const { error } = await supabase.auth.updateUser({ password: senha });
     setSubmitting(false);
     if (error) {
-      setErro(error.message);
+      setErro(traduzirErro(error.message));
       return;
     }
     navigate({ to: "/onboarding" });
@@ -131,11 +153,11 @@ function CriarSenhaPage() {
                 <input
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres com letras e números"
                 />
               </div>
               <div>
@@ -148,12 +170,27 @@ function CriarSenhaPage() {
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
                 />
               </div>
+
+              <ul className="text-xs space-y-1 bg-[#FDF6F9] rounded-lg p-3">
+                {regras.map((r) => (
+                  <li
+                    key={r.txt}
+                    className={r.ok ? "text-[#0F7B5A]" : "text-gray-500"}
+                  >
+                    {r.ok ? "✓" : "○"} {r.txt}
+                  </li>
+                ))}
+                <li className="text-gray-500">
+                  ○ Evite senhas óbvias ou que você já usa em outros sites
+                </li>
+              </ul>
+
               {erro && (
                 <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md">{erro}</div>
               )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || !senhaValida}
                 className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: "#A8006E" }}
               >
