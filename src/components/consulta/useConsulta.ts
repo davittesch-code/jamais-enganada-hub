@@ -1053,5 +1053,14 @@ export function useConsulta() {
     erroGeracao,
     retryGerar,
     savedFlash,
+    entradaModo,
+    nomeUsuaria,
+    userEmail,
+    userId: user?.id ?? "",
+    perfilGeracoesUsed,
+    perfilGeracoesLimit,
+    showUpsellPerfil,
+    setShowUpsellPerfil,
+    iniciarNovaConsulta,
   };
 }
