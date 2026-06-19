@@ -303,6 +303,8 @@ export function useOnboarding() {
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
