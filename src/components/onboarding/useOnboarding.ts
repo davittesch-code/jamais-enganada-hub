@@ -509,5 +509,6 @@ export function useOnboarding() {
     showAdvogadaPicker,
     advogadas,
     submitAdvogadaSelection,
+    savedFlash,
   };
 }
