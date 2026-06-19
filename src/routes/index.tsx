@@ -28,7 +28,7 @@ function Landing() {
               Entrar
             </Link>
             <Link
-              to="/cadastro"
+              to="/checkout"
               className="text-sm font-medium bg-primary text-primary-foreground px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-[var(--shadow-elegant)]"
             >
               Quero meu perfil jurídico
@@ -58,7 +58,7 @@ function Landing() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/cadastro"
+              to="/checkout"
               className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 rounded-full font-medium hover:opacity-90 transition-opacity shadow-[var(--shadow-elegant)]"
             >
               Quero meu perfil jurídico <ArrowRight className="w-4 h-4" />

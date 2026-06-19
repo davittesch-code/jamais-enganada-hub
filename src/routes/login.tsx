@@ -313,7 +313,7 @@ function LoginPage() {
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
               <Link
-                to="/cadastro"
+                to="/checkout"
                 className="text-sm text-[#552736] hover:text-[#6B0F4B] font-medium hover:underline"
               >
                 Ainda não tenho acesso
