@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Scale } from "lucide-react";
+import { Scale, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -141,6 +141,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (loading || !user || !profile) return;
@@ -283,15 +284,25 @@ function LoginPage() {
                 >
                   Senha
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-[#552736]"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               {error && (
                 <div className="text-sm text-[#A8002B] bg-[#FEE2E2] px-3 py-2 rounded-md">
