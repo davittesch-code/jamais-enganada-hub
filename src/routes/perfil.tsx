@@ -339,6 +339,9 @@ function PerfilPage() {
   const radarData = Object.entries(displayData.radar_scores).map(([area, score]) => ({
     area: TRADUCAO_AREAS[area as AreaKey] ?? area,
     score: Number(score) || 0,
+    zonaOk: 100,
+    zonaAtencao: 69,
+    zonaCritica: 39,
   }));
 
   const areasList = (Object.entries(displayData.areas) as [AreaKey, AreaInfo][])
@@ -440,32 +443,41 @@ function PerfilPage() {
                 {/* Zona OK 70-100 (verde claro) — fundo mais externo */}
                 <Radar
                   name="zona-ok"
-                  dataKey={() => 100}
+                  dataKey="zonaOk"
                   fill="#DCFCE7"
                   fillOpacity={0.35}
                   stroke="none"
                   isAnimationActive={false}
                   legendType="none"
+                  tooltipType="none"
+                  activeDot={false}
+                  dot={false}
                 />
                 {/* Zona Atenção 40-69 (amarela) */}
                 <Radar
                   name="zona-atencao"
-                  dataKey={() => 69}
+                  dataKey="zonaAtencao"
                   fill="#FEF9C3"
                   fillOpacity={0.45}
                   stroke="none"
                   isAnimationActive={false}
                   legendType="none"
+                  tooltipType="none"
+                  activeDot={false}
+                  dot={false}
                 />
                 {/* Zona Crítica 0-39 (vermelha) — fundo mais interno */}
                 <Radar
                   name="zona-critica"
-                  dataKey={() => 39}
+                  dataKey="zonaCritica"
                   fill="#FEE2E2"
                   fillOpacity={0.55}
                   stroke="none"
                   isAnimationActive={false}
                   legendType="none"
+                  tooltipType="none"
+                  activeDot={false}
+                  dot={false}
                 />
                 <PolarAngleAxis
                   dataKey="area"
@@ -505,19 +517,30 @@ function PerfilPage() {
                     const { active, payload } = props as any;
                     if (!active || !payload?.length) return null;
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const real = (payload as any[]).find((p) => typeof p.value === "number" && p.payload?.area);
+                    const real = (payload as any[]).find((p) => p.dataKey === "score");
                     if (!real) return null;
                     const score = Number(real.value);
+                    const area = real.payload?.area;
                     const status =
-                      score >= 70 ? "✓ Tranquila" : score >= 40 ? "⚠ Atenção" : "⚡ Crítica";
+                      score >= 70 ? "✓ Tranquila" : score >= 40 ? "⚠ Requer atenção" : "⚡ Situação crítica";
                     const color =
                       score >= 70 ? "#16A34A" : score >= 40 ? "#D97706" : "#DC2626";
                     return (
-                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                        <p className="font-bold text-sm" style={{ color }}>
-                          {real.payload.area}: {score}/100
+                      <div
+                        style={{
+                          background: "#fff",
+                          border: "1px solid #E8D0E0",
+                          borderRadius: 12,
+                          padding: "10px 14px",
+                          boxShadow: "0 4px 12px rgba(107,15,75,0.12)",
+                        }}
+                      >
+                        <p style={{ fontWeight: 600, fontSize: 14, color, margin: 0 }}>
+                          {area}: {score}/100
                         </p>
-                        <p className="text-xs text-gray-500">{status}</p>
+                        <p style={{ fontSize: 12, color: "#6B5560", margin: "4px 0 0" }}>
+                          {status}
+                        </p>
                       </div>
                     );
                   }}
