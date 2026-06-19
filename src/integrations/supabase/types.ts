@@ -224,36 +224,45 @@ export type Database = {
       }
       pagamentos: {
         Row: {
+          asaas_payment_id: string | null
           created_at: string
           email: string
           environment: string
+          forma_pagamento: string | null
           id: string
           metadata: Json | null
           paddle_transaction_id: string | null
+          parcelas: number | null
           produto: string
           status: string
           user_id: string | null
           valor: number
         }
         Insert: {
+          asaas_payment_id?: string | null
           created_at?: string
           email: string
           environment?: string
+          forma_pagamento?: string | null
           id?: string
           metadata?: Json | null
           paddle_transaction_id?: string | null
+          parcelas?: number | null
           produto: string
           status?: string
           user_id?: string | null
           valor: number
         }
         Update: {
+          asaas_payment_id?: string | null
           created_at?: string
           email?: string
           environment?: string
+          forma_pagamento?: string | null
           id?: string
           metadata?: Json | null
           paddle_transaction_id?: string | null
+          parcelas?: number | null
           produto?: string
           status?: string
           user_id?: string | null
@@ -370,6 +379,7 @@ export type Database = {
           consultas_limit: number
           consultas_today: number
           consultas_used: number
+          cpf: string | null
           created_at: string
           email: string | null
           escritorio_nome: string | null
@@ -385,6 +395,7 @@ export type Database = {
           plataforma_start_date: string
           role: string
           status: string
+          telefone: string | null
           whatsapp: string | null
         }
         Insert: {
@@ -393,6 +404,7 @@ export type Database = {
           consultas_limit?: number
           consultas_today?: number
           consultas_used?: number
+          cpf?: string | null
           created_at?: string
           email?: string | null
           escritorio_nome?: string | null
@@ -408,6 +420,7 @@ export type Database = {
           plataforma_start_date?: string
           role?: string
           status?: string
+          telefone?: string | null
           whatsapp?: string | null
         }
         Update: {
@@ -416,6 +429,7 @@ export type Database = {
           consultas_limit?: number
           consultas_today?: number
           consultas_used?: number
+          cpf?: string | null
           created_at?: string
           email?: string | null
           escritorio_nome?: string | null
@@ -431,6 +445,7 @@ export type Database = {
           plataforma_start_date?: string
           role?: string
           status?: string
+          telefone?: string | null
           whatsapp?: string | null
         }
         Relationships: [

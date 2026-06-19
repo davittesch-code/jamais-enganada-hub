@@ -45,50 +45,28 @@ function ReembolsoPage() {
 
         <Section title="2. Como solicitar o reembolso">
           <p>
-            Nosso processo de pedidos é conduzido pelo nosso revendedor online{" "}
-            <strong>Paddle.com</strong>, que atua como{" "}
-            <em>Merchant of Record</em> de todas as nossas transações. Os
-            reembolsos são processados por meio da Paddle.
+            Os pagamentos são processados pela <strong>Asaas</strong>,
+            instituição de pagamento autorizada pelo Banco Central. Para
+            solicitar o reembolso, entre em contato com nosso suporte por
+            email — responderemos em até 2 dias úteis e processaremos o
+            estorno diretamente pela Asaas.
           </p>
-          <p className="mt-3">Para solicitar, você pode:</p>
-          <ul className="list-disc pl-5 space-y-1.5 mt-2">
-            <li>
-              Acessar{" "}
-              <a
-                href="https://paddle.net"
-                target="_blank"
-                rel="noreferrer"
-                className="underline text-[#A8006E]"
-              >
-                paddle.net
-              </a>{" "}
-              com o e-mail utilizado na compra e solicitar o reembolso pelo
-              portal da Paddle; ou
-            </li>
-            <li>
-              Entrar em contato com nosso suporte (item 5) que encaminharemos
-              sua solicitação à Paddle.
-            </li>
-          </ul>
         </Section>
 
         <Section title="3. Prazo de devolução">
           <p>
-            Após aprovado o reembolso, o estorno é processado pela Paddle e o
+            Após aprovado o reembolso, o estorno é processado pela Asaas e o
             prazo para o crédito retornar ao seu meio de pagamento depende da
             sua instituição financeira:
           </p>
           <ul className="list-disc pl-5 space-y-1.5 mt-2">
             <li>
+              <strong>Pix:</strong> em geral, em até 7 dias úteis na conta de
+              origem;
+            </li>
+            <li>
               <strong>Cartão de crédito:</strong> em geral, de 5 a 30 dias,
-              podendo aparecer na fatura seguinte;
-            </li>
-            <li>
-              <strong>Pix:</strong> em geral, em até 7 dias úteis;
-            </li>
-            <li>
-              <strong>Boleto:</strong> em geral, em até 10 dias úteis, mediante
-              indicação de conta bancária para devolução.
+              podendo aparecer na fatura seguinte.
             </li>
           </ul>
         </Section>
@@ -96,18 +74,11 @@ function ReembolsoPage() {
         <Section title="4. Após o prazo de 14 dias">
           <p>
             Passado o prazo de garantia, eventuais pedidos de reembolso serão
-            analisados pela Paddle conforme sua{" "}
-            <a
-              href="https://www.paddle.com/legal/refund-policy"
-              target="_blank"
-              rel="noreferrer"
-              className="underline text-[#A8006E]"
-            >
-              política oficial de reembolso
-            </a>
-            , bem como conforme a legislação consumerista aplicável.
+            analisados caso a caso, conforme a legislação consumerista
+            aplicável (Código de Defesa do Consumidor).
           </p>
         </Section>
+
 
         <Section title="5. Contato">
           <p>

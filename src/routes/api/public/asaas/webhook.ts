@@ -1,44 +1,72 @@
+// Asaas webhook receiver.
+// Configure in Asaas: Configurações → Integrações → Webhooks
+// URL: https://jamaisenganada.com.br/api/public/asaas/webhook
+// Token: o mesmo valor de ASAAS_WEBHOOK_TOKEN
+// Eventos: PAYMENT_CONFIRMED, PAYMENT_RECEIVED, PAYMENT_REFUNDED
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyWebhook, EventName, type PaddleEnv } from "@/lib/paddle.server";
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
-async function processCompletedTransaction(data: any, env: PaddleEnv) {
+type AsaasWebhookEvent = {
+  event: string;
+  payment: {
+    id: string;
+    status: string;
+    value: number;
+    netValue?: number;
+    billingType: string;
+    installmentCount?: number;
+    externalReference?: string | null;
+  };
+};
+
+type ExternalRef = {
+  nome?: string;
+  email?: string;
+  cpf?: string;
+  telefone?: string;
+  tipo_produto?: "acesso" | "recarga";
+  advogada_id?: string | null;
+};
+
+function parseExternalRef(raw: string | null | undefined): ExternalRef {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as ExternalRef;
+  } catch {
+    return {};
+  }
+}
+
+async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const ref = parseExternalRef(payment.externalReference);
+  const email = ref.email?.toLowerCase();
+  const nome = ref.nome;
+  const tipo = ref.tipo_produto;
+  const advogadaId = ref.advogada_id ?? null;
 
-  const customData = data.customData ?? {};
-  const tipoProduto: string | undefined = customData.tipo_produto;
-  const email: string | undefined = customData.email;
-  const nome: string | undefined = customData.nome;
-  const advogadaId: string | null = customData.advogada_id ?? null;
-  const transactionId: string = data.id;
-  const valorCents = Number(
-    data.details?.totals?.total ?? data.items?.[0]?.price?.unitPrice?.amount ?? 0,
-  );
-  const valor = valorCents / 100;
-
-  if (!email) {
-    console.warn("[paddle-webhook] sem email no customData", { transactionId });
+  if (!email || !tipo) {
+    console.warn("[asaas-webhook] externalReference incompleto", { id: payment.id });
     return;
   }
 
-  // Idempot\u00eancia
+  // Idempotência
   const { data: existente } = await supabaseAdmin
     .from("pagamentos")
     .select("id")
-    .eq("paddle_transaction_id", transactionId)
+    .eq("asaas_payment_id", payment.id)
     .maybeSingle();
   if (existente) {
-    console.log("[paddle-webhook] j\u00e1 processado", { transactionId });
+    console.log("[asaas-webhook] já processado", payment.id);
     return;
   }
 
   let userId: string | null = null;
   let statusPagamento = "completo";
+  const forma = payment.billingType === "PIX" ? "PIX" : "CREDIT_CARD";
 
-  if (tipoProduto === "acesso") {
-    // 1) Tenta achar a usu\u00e1ria por profile.email (cobre renova\u00e7\u00f5es sem
-    //    disparar email de convite novamente).
+  if (tipo === "acesso") {
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
       .select("id")
@@ -48,7 +76,6 @@ async function processCompletedTransaction(data: any, env: PaddleEnv) {
     if (existingProfile?.id) {
       userId = existingProfile.id;
     } else {
-      // 2) N\u00e3o existe: convida e dispara o email de cria\u00e7\u00e3o de senha.
       const redirectTo =
         (process.env.SITE_URL ?? "https://jamaisenganada.com.br") + "/criar-senha";
       const { data: invited, error: inviteErr } =
@@ -59,17 +86,15 @@ async function processCompletedTransaction(data: any, env: PaddleEnv) {
       if (!inviteErr) {
         userId = invited.user?.id ?? null;
       } else {
-        // Fallback final (race condition rara): busca via Auth Admin.
         const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
-        const found = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+        const found = list?.users.find(
+          (u) => u.email?.toLowerCase() === email.toLowerCase(),
+        );
         userId = found?.id ?? null;
       }
     }
 
-
     if (userId) {
-      // Renova/cria entitlement. Se j\u00e1 existir expira_em no futuro,
-      // soma 1 ano em cima da data atual; sen\u00e3o, conta a partir de agora.
       const { data: existing } = await supabaseAdmin
         .from("profiles")
         .select("plano_expira_em, consultas_limit, perfil_generations_limit")
@@ -92,20 +117,21 @@ async function processCompletedTransaction(data: any, env: PaddleEnv) {
           plataforma_start_date: new Date().toISOString(),
           plano_expira_em: new Date(base + ONE_YEAR_MS).toISOString(),
           plan_type: "base",
-        })
+          cpf: ref.cpf ?? undefined,
+          telefone: ref.telefone ?? undefined,
+        } as any)
         .eq("id", userId);
     }
-  } else if (tipoProduto === "recarga") {
+  } else if (tipo === "recarga") {
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("id, consultas_limit, perfil_generations_limit, plano_expira_em")
-      .eq("email", email)
+      .ilike("email", email)
       .maybeSingle();
 
     if (!profile) {
-      // Recarga sem conta: registra como \u00f3rf\u00e3o e n\u00e3o credita.
       statusPagamento = "orfao_recarga";
-      console.warn("[paddle-webhook] recarga sem profile", { email, transactionId });
+      console.warn("[asaas-webhook] recarga sem profile", { email });
     } else {
       userId = profile.id;
       const base =
@@ -128,32 +154,24 @@ async function processCompletedTransaction(data: any, env: PaddleEnv) {
   await supabaseAdmin.from("pagamentos").insert({
     email,
     user_id: userId,
-    produto: tipoProduto ?? "desconhecido",
-    valor,
-    paddle_transaction_id: transactionId,
+    produto: tipo,
+    valor: payment.value,
     status: statusPagamento,
-    environment: env,
-    metadata: { customData, items: data.items },
-  });
+    environment:
+      (process.env.ASAAS_API_URL ?? "").includes("sandbox") ? "sandbox" : "live",
+    metadata: { asaas: payment, externalReference: ref } as any,
+    asaas_payment_id: payment.id,
+    forma_pagamento: forma,
+    parcelas: payment.installmentCount ?? 1,
+  } as any);
 }
 
-/**
- * Refund: revoga acesso (acesso) ou subtrai cr\u00e9ditos (recarga),
- * conforme decis\u00e3o de neg\u00f3cio "revogar tudo".
- */
-async function processAdjustmentCreated(data: any, env: PaddleEnv) {
-  if (data.action !== "refund") {
-    console.log("[paddle-webhook] adjustment ignorado", data.action);
-    return;
-  }
+async function processPaymentRefunded(payment: AsaasWebhookEvent["payment"]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const transactionId: string | undefined = data.transactionId;
-  if (!transactionId) return;
-
   const { data: pagamento } = await supabaseAdmin
     .from("pagamentos")
     .select("id, user_id, produto, status")
-    .eq("paddle_transaction_id", transactionId)
+    .eq("asaas_payment_id", payment.id)
     .maybeSingle();
 
   if (!pagamento || pagamento.status === "reembolsado") return;
@@ -178,7 +196,10 @@ async function processAdjustmentCreated(data: any, env: PaddleEnv) {
           .from("profiles")
           .update({
             consultas_limit: Math.max(0, (profile.consultas_limit ?? 0) - 10),
-            perfil_generations_limit: Math.max(0, (profile.perfil_generations_limit ?? 0) - 1),
+            perfil_generations_limit: Math.max(
+              0,
+              (profile.perfil_generations_limit ?? 0) - 1,
+            ),
           })
           .eq("id", pagamento.user_id);
       }
@@ -187,35 +208,44 @@ async function processAdjustmentCreated(data: any, env: PaddleEnv) {
 
   await supabaseAdmin
     .from("pagamentos")
-    .update({
-      status: "reembolsado",
-      metadata: { ...((pagamento as any).metadata ?? {}), refund: data, refund_env: env },
-    })
+    .update({ status: "reembolsado" })
     .eq("id", pagamento.id);
 }
 
-export const Route = createFileRoute("/api/public/payments/webhook")({
+export const Route = createFileRoute("/api/public/asaas/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const url = new URL(request.url);
-        const env = (url.searchParams.get("env") ?? "sandbox") as PaddleEnv;
+        const expected = process.env.ASAAS_WEBHOOK_TOKEN;
+        const provided = request.headers.get("asaas-access-token");
+        if (!expected || provided !== expected) {
+          console.warn("[asaas-webhook] token inválido");
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        let body: AsaasWebhookEvent;
         try {
-          const event = await verifyWebhook(request, env);
-          switch (event.eventType) {
-            case EventName.TransactionCompleted:
-              await processCompletedTransaction(event.data, env);
+          body = (await request.json()) as AsaasWebhookEvent;
+        } catch {
+          return new Response("Bad JSON", { status: 400 });
+        }
+
+        try {
+          switch (body.event) {
+            case "PAYMENT_CONFIRMED":
+            case "PAYMENT_RECEIVED":
+              await processPaymentConfirmed(body.payment);
               break;
-            case EventName.AdjustmentCreated:
-              await processAdjustmentCreated(event.data, env);
+            case "PAYMENT_REFUNDED":
+              await processPaymentRefunded(body.payment);
               break;
             default:
-              console.log("[paddle-webhook] evento ignorado", event.eventType);
+              console.log("[asaas-webhook] evento ignorado", body.event);
           }
           return Response.json({ received: true });
         } catch (e) {
-          console.error("[paddle-webhook] erro", e);
-          return new Response("Webhook error", { status: 400 });
+          console.error("[asaas-webhook] erro", e);
+          return new Response("Webhook error", { status: 500 });
         }
       },
     },
