@@ -406,6 +406,11 @@ export function useConsulta() {
   const blockDecisionsRef = useRef<Map<string, BlockDecision>>(new Map());
   const evaluatedBlocksRef = useRef<Set<string>>(new Set());
   const proceedNextRef = useRef<() => void | Promise<void>>(() => {});
+  const messagesRef = useRef<Message[]>([]);
+  const concluidoRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
