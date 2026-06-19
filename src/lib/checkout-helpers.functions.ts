@@ -49,18 +49,23 @@ export const resendInviteEmail = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (profile?.id) {
-      // Usu\u00e1ria j\u00e1 existe \u2014 manda magic link para reset/cria\u00e7\u00e3o de senha.
-      await supabaseAdmin.auth.admin.generateLink({
-        type: "recovery",
-        email: data.email,
-        options: { redirectTo: `${siteUrl}/criar-senha` },
+      // Usu\u00e1ria j\u00e1 existe \u2014 envia email de recupera\u00e7\u00e3o de senha (cobre o caso
+      // de quem n\u00e3o achou o convite original ou esqueceu a senha).
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabasePublic = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_PUBLISHABLE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } },
+      );
+      await supabasePublic.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${siteUrl}/criar-senha`,
       });
     } else {
-      // Sem profile: pode ser que o pagamento ainda n\u00e3o foi processado \u2014
-      // tentamos um convite. Se j\u00e1 existir no auth, n\u00e3o faz mal.
+      // Sem profile: tenta convite. Se j\u00e1 existir no auth, n\u00e3o faz mal.
       await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
         redirectTo: `${siteUrl}/criar-senha`,
       });
     }
     return { ok: true as const };
   });
+
