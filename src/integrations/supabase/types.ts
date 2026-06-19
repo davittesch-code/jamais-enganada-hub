@@ -135,6 +135,53 @@ export type Database = {
           },
         ]
       }
+      pagamentos: {
+        Row: {
+          created_at: string
+          email: string
+          environment: string
+          id: string
+          metadata: Json | null
+          paddle_transaction_id: string | null
+          produto: string
+          status: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          environment?: string
+          id?: string
+          metadata?: Json | null
+          paddle_transaction_id?: string | null
+          produto: string
+          status?: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          environment?: string
+          id?: string
+          metadata?: Json | null
+          paddle_transaction_id?: string | null
+          produto?: string
+          status?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_data: {
         Row: {
           areas: Json | null
@@ -404,6 +451,7 @@ export type Database = {
         }[]
       }
       get_my_advogado_contact: { Args: never; Returns: Json }
+      get_pagamentos_stats: { Args: never; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       list_advogadas_publicas: {
         Args: never
