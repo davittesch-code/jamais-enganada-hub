@@ -68,9 +68,20 @@ function CheckoutPage() {
     }
     setLoadingPay(true);
     try {
+      const emailLimpo = email.trim().toLowerCase();
+
+      // Bloqueio: se o email j\u00e1 tem acesso ativo, manda fazer login.
+      const status = await checkEmailStatusFn({ data: { email: emailLimpo } });
+      if (status.status === "active") {
+        setErro(
+          "Este email j\u00e1 tem acesso ativo \u00e0 plataforma. Fa\u00e7a login para continuar \u2014 se esqueceu a senha, clique em 'N\u00e3o recebi meu email' abaixo.",
+        );
+        setLoadingPay(false);
+        return;
+      }
+
       await initializePaddle();
       const paddlePriceId = await getPaddlePriceId("acesso_jamais_enganada");
-      const emailLimpo = email.trim().toLowerCase();
       window.Paddle.Checkout.open({
         items: [{ priceId: paddlePriceId, quantity: 1 }],
         customer: { email: emailLimpo },
@@ -99,6 +110,7 @@ function CheckoutPage() {
       setLoadingPay(false);
     }
   };
+
 
   if (sucesso) return <SucessoView email={sucesso.email} />;
 
