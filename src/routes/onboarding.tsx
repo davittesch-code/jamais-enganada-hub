@@ -184,6 +184,7 @@ function OnboardingPage() {
           />
         </div>
       </div>
+      <ProgressoSalvoBadge visible={savedFlash} />
     </div>
   );
 }
