@@ -589,6 +589,15 @@ export function useConsulta() {
       console.error("Falha ao incrementar perfil_generations_used", e);
     }
 
+    // Marca progresso da consulta como concluído
+    concluidoRef.current = true;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    try {
+      await markProgressoConcluido(user.id, "consulta");
+    } catch (e) {
+      console.error("mark consulta concluido failed", e);
+    }
+
     setProgress(100);
     navigate({ to: "/perfil" });
   }, [callGenerate, navigate, user]);
