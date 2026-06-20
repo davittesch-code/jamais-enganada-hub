@@ -55,6 +55,27 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
     return;
   }
 
+  // Ativação idempotente da conta (status = 'ativo'). Roda sempre que o
+  // pagamento for confirmado/recebido, mesmo que o restante já tenha sido
+  // processado anteriormente. Erros aqui não interrompem o webhook.
+  try {
+    const { error: ativErr } = await supabaseAdmin
+      .from("profiles")
+      .update({ status: "ativo" })
+      .ilike("email", email)
+      .neq("status", "ativo");
+    if (ativErr) {
+      console.error("[asaas-webhook] falha ao ativar conta", {
+        email,
+        error: ativErr.message,
+      });
+    }
+  } catch (e) {
+    console.error("[asaas-webhook] exceção ao ativar conta", { email, e });
+  }
+
+
+
   // Idempotência
   const { data: existente } = await supabaseAdmin
     .from("pagamentos")
