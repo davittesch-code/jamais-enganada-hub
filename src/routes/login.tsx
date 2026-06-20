@@ -224,7 +224,7 @@ function LoginPage() {
 
       {/* LADO DIREITO — Login */}
       <div
-        className="flex-1 flex items-center justify-center px-6 py-12 lg:h-screen relative overflow-hidden"
+        className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 lg:h-screen relative overflow-hidden safe-pt safe-pb"
         style={{
           background:
             "linear-gradient(135deg, #6B0F4B 0%, #552736 60%, #3F1C28 100%)",
@@ -251,7 +251,7 @@ function LoginPage() {
             </Link>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-8 border border-white/20">
+          <div className="bg-white rounded-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-6 sm:p-8 border border-white/20">
             <h2 className="font-display text-2xl font-bold text-[#6B0F4B] mb-1">
               Bem-vinda de volta
             </h2>
@@ -271,9 +271,15 @@ function LoginPage() {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
+                  className="w-full px-4 py-3 text-base rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
+                  style={{ fontSize: "16px" }}
                   placeholder="seu@email.com"
                 />
               </div>
@@ -289,18 +295,20 @@ function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
+                    className="w-full px-4 py-3 pr-12 text-base rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#552736] focus:border-transparent transition"
+                    style={{ fontSize: "16px" }}
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-[#552736]"
+                    className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-gray-500 hover:text-[#552736]"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
