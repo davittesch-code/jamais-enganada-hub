@@ -51,7 +51,7 @@ export const PRECOS = {
 
 export type TipoProduto = keyof typeof PRECOS;
 
-function normalizeExternalReference(reference: string): TipoProduto {
+function normalizeExternalReference(reference: string, value: number): TipoProduto {
   if (reference === "acesso" || reference === "recarga") return reference;
 
   try {
@@ -62,6 +62,9 @@ function normalizeExternalReference(reference: string): TipoProduto {
   } catch {
     // Se não for JSON, cai no erro explícito abaixo.
   }
+
+  if (value === PRECOS.acesso) return "acesso";
+  if (value === PRECOS.recarga) return "recarga";
 
   throw new Error("externalReference inválido para cobrança Asaas");
 }
@@ -156,7 +159,7 @@ export async function createPixPayment(input: CreatePixPaymentInput): Promise<As
       value: input.value,
       dueDate: today,
       description: input.description,
-      externalReference: normalizeExternalReference(input.externalReference),
+      externalReference: normalizeExternalReference(input.externalReference, input.value),
     }),
   });
 }
@@ -200,7 +203,7 @@ export async function createCardPayment(input: CreateCardPaymentInput): Promise<
     value: input.value,
     dueDate: today,
     description: input.description,
-    externalReference: normalizeExternalReference(input.externalReference),
+    externalReference: normalizeExternalReference(input.externalReference, input.value),
     creditCard: {
       holderName: input.card.holderName,
       number: input.card.number.replace(/\s/g, ""),
