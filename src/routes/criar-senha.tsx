@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resendInviteEmail } from "@/lib/checkout-helpers.functions";
+import {
+  registrarConsentimento,
+  DOC_VERSAO_TERMOS,
+  DOC_VERSAO_PRIVACIDADE,
+} from "@/lib/consentimentos.functions";
 
 
 export const Route = createFileRoute("/criar-senha")({
@@ -19,7 +24,9 @@ function CriarSenhaPage() {
   const [pronta, setPronta] = useState(false);
   const [showSenha, setShowSenha] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
+  const [aceito, setAceito] = useState(false);
   const resendFn = useServerFn(resendInviteEmail);
+  const registrarConsentimentoFn = useServerFn(registrarConsentimento);
   const [reenvioEmail, setReenvioEmail] = useState("");
   const [reenviando, setReenviando] = useState(false);
   const [reenviado, setReenviado] = useState(false);
@@ -69,13 +76,29 @@ function CriarSenhaPage() {
     e.preventDefault();
     setErro(null);
     if (!senhaValida) return setErro("Sua senha ainda não cumpre todos os requisitos abaixo.");
+    if (!aceito)
+      return setErro("Para continuar, você precisa aceitar os Termos de Uso e a Política de Privacidade.");
     setSubmitting(true);
     const { error } = await supabase.auth.updateUser({ password: senha });
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       setErro(traduzirErro(error.message));
       return;
     }
+    try {
+      await registrarConsentimentoFn({
+        data: {
+          documentos: [
+            { documento: "termos", versao: DOC_VERSAO_TERMOS },
+            { documento: "privacidade", versao: DOC_VERSAO_PRIVACIDADE },
+          ],
+        },
+      });
+    } catch (err) {
+      // Não bloqueia a continuação — registramos no console para diagnóstico.
+      console.error("Falha ao registrar consentimento", err);
+    }
+    setSubmitting(false);
     navigate({ to: "/onboarding" });
   };
 
@@ -218,12 +241,43 @@ function CriarSenhaPage() {
                 </li>
               </ul>
 
+              <label className="flex items-start gap-2 text-sm text-gray-700 select-none">
+                <input
+                  type="checkbox"
+                  checked={aceito}
+                  onChange={(e) => setAceito(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-300 accent-[#A8006E]"
+                  required
+                />
+                <span>
+                  Li e concordo com os{" "}
+                  <Link
+                    to="/termos"
+                    target="_blank"
+                    className="underline font-medium"
+                    style={{ color: "#6B0F4B" }}
+                  >
+                    Termos de Uso
+                  </Link>{" "}
+                  e com a{" "}
+                  <Link
+                    to="/privacidade"
+                    target="_blank"
+                    className="underline font-medium"
+                    style={{ color: "#6B0F4B" }}
+                  >
+                    Política de Privacidade
+                  </Link>
+                  .
+                </span>
+              </label>
+
               {erro && (
                 <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md">{erro}</div>
               )}
               <button
                 type="submit"
-                disabled={submitting || !senhaValida}
+                disabled={submitting || !senhaValida || !aceito}
                 className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: "#A8006E" }}
               >
@@ -232,6 +286,14 @@ function CriarSenhaPage() {
             </form>
           )}
         </div>
+
+        <p className="text-xs text-white/80 text-center mt-6">
+          Conhecimento é proteção. 💜
+        </p>
+      </div>
+    </div>
+  );
+}
 
         <p className="text-xs text-white/80 text-center mt-6">
           Conhecimento é proteção. 💜
