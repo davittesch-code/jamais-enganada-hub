@@ -44,6 +44,31 @@ export interface AsaasPixQrCode {
   expirationDate: string;
 }
 
+export const PRECOS = {
+  acesso: 97.9,
+  recarga: 29.9,
+} as const;
+
+export type TipoProduto = keyof typeof PRECOS;
+
+function normalizeExternalReference(reference: string, value: number): TipoProduto {
+  if (reference === "acesso" || reference === "recarga") return reference;
+
+  try {
+    const parsed = JSON.parse(reference);
+    const candidate = Array.isArray(parsed) ? parsed[0] : parsed;
+    const tipo = candidate?.tipo_produto ?? candidate?.tipoProduto;
+    if (tipo === "acesso" || tipo === "recarga") return tipo;
+  } catch {
+    // Se não for JSON, cai no erro explícito abaixo.
+  }
+
+  if (value === PRECOS.acesso) return "acesso";
+  if (value === PRECOS.recarga) return "recarga";
+
+  throw new Error("externalReference inválido para cobrança Asaas");
+}
+
 function getEnv(key: string): string {
   const v = process.env[key];
   if (!v) throw new Error(`${key} não configurado`);
@@ -121,7 +146,7 @@ export interface CreatePixPaymentInput {
   customerId: string;
   value: number;
   description: string;
-  externalReference: string;
+  externalReference: TipoProduto;
 }
 
 export async function createPixPayment(input: CreatePixPaymentInput): Promise<AsaasPayment> {
@@ -134,7 +159,7 @@ export async function createPixPayment(input: CreatePixPaymentInput): Promise<As
       value: input.value,
       dueDate: today,
       description: input.description,
-      externalReference: input.externalReference,
+      externalReference: normalizeExternalReference(input.externalReference, input.value),
     }),
   });
 }
@@ -148,7 +173,7 @@ export interface CreateCardPaymentInput {
   value: number;
   installmentCount: number;
   description: string;
-  externalReference: string;
+  externalReference: TipoProduto;
   card: {
     holderName: string;
     number: string;
@@ -178,7 +203,7 @@ export async function createCardPayment(input: CreateCardPaymentInput): Promise<
     value: input.value,
     dueDate: today,
     description: input.description,
-    externalReference: input.externalReference,
+    externalReference: normalizeExternalReference(input.externalReference, input.value),
     creditCard: {
       holderName: input.card.holderName,
       number: input.card.number.replace(/\s/g, ""),
@@ -213,9 +238,3 @@ export async function getPayment(paymentId: string): Promise<AsaasPayment> {
   return asaasRequest<AsaasPayment>(`/payments/${paymentId}`);
 }
 
-export const PRECOS = {
-  acesso: 97.9,
-  recarga: 29.9,
-} as const;
-
-export type TipoProduto = keyof typeof PRECOS;
