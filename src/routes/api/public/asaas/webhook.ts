@@ -121,8 +121,8 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
           plataforma_start_date: new Date().toISOString(),
           plano_expira_em: new Date(base + ONE_YEAR_MS).toISOString(),
           plan_type: "base",
-          cpf: ref.cpf ?? undefined,
-          telefone: ref.telefone ?? undefined,
+          cpf: ref?.cpf ?? undefined,
+          telefone: ref?.telefone ?? undefined,
         } as any)
         .eq("id", userId);
     }
