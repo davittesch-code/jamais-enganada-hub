@@ -95,7 +95,7 @@ export function QuickReply({
       type="button"
       disabled={disabled || picked !== null}
       onClick={handleNaoSei}
-      className="px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-60 inline-flex items-center gap-1"
+      className="px-4 min-h-[44px] rounded-full text-sm font-medium transition-all disabled:opacity-60 inline-flex items-center gap-1.5 active:scale-[0.98]"
       style={{
         borderWidth: 1,
         borderStyle: "dashed",
@@ -112,7 +112,7 @@ export function QuickReply({
 
   if (!multiSelect) {
     return (
-      <div className="px-4 py-3 bg-transparent">
+      <div className="px-3 sm:px-4 py-3 bg-transparent">
         {(explicacao || showNaoSei) && (
           <div className="mb-2 flex items-center justify-end">{helpButton}</div>
         )}
@@ -127,7 +127,7 @@ export function QuickReply({
                 type="button"
                 disabled={isDisabled}
                 onClick={() => handleSingle(opt)}
-                className="px-4 py-2 rounded-full text-sm font-medium border transition-all disabled:opacity-60"
+                className="px-4 min-h-[44px] rounded-full text-sm font-medium border transition-all disabled:opacity-60 active:scale-[0.98]"
                 style={{
                   borderColor: "#552736",
                   background: isPicked ? "#552736" : "#FFFFFF",
@@ -146,7 +146,7 @@ export function QuickReply({
   }
 
   return (
-    <div className="px-4 py-3 bg-transparent">
+    <div className="px-3 sm:px-4 py-3 bg-transparent">
       {(explicacao || showNaoSei) && (
         <div className="mb-2 flex items-center justify-end">{helpButton}</div>
       )}
@@ -160,7 +160,7 @@ export function QuickReply({
               type="button"
               disabled={disabled}
               onClick={() => toggle(opt)}
-              className="px-4 py-2 rounded-full text-sm font-medium border transition-all disabled:opacity-60"
+              className="px-4 min-h-[44px] rounded-full text-sm font-medium border transition-all disabled:opacity-60 active:scale-[0.98]"
               style={{
                 borderColor: "#A8006E",
                 background: isSel ? "#A8006E" : "#FFFFFF",
@@ -175,7 +175,7 @@ export function QuickReply({
         {naoSeiChip}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-gray-500">
           {selected.length} selecionado{selected.length === 1 ? "" : "s"}
         </span>
         {selected.length > 0 && (
@@ -183,7 +183,7 @@ export function QuickReply({
             type="button"
             onClick={confirmMulti}
             disabled={disabled}
-            className="px-5 py-2 rounded-full text-sm font-semibold text-white transition-all disabled:opacity-60"
+            className="px-5 min-h-[44px] rounded-full text-sm font-semibold text-white transition-all disabled:opacity-60 active:scale-[0.98]"
             style={{ background: "#A8006E" }}
           >
             {confirmLabel}
