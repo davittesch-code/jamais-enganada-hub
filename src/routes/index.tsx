@@ -560,6 +560,16 @@ function Landing() {
                   Entrar
                 </Link>
               </li>
+              <li>
+                <Link to="/termos" className="hover:underline">
+                  Termos de Uso
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacidade" className="hover:underline">
+                  Política de Privacidade
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
