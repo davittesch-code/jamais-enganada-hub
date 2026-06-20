@@ -13,7 +13,14 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/login" />;
-  if (profile?.role !== "admin") return <Navigate to="/perfil" />;
+  if (!profile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-muted-foreground">Carregando…</div>
+      </div>
+    );
+  }
+  if (profile.role !== "admin") return <Navigate to="/consulta" />;
   return <AppLayout>{children}</AppLayout>;
 }
 
