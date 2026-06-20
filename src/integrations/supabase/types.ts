@@ -139,6 +139,36 @@ export type Database = {
         }
         Relationships: []
       }
+      consentimentos: {
+        Row: {
+          created_at: string
+          documento: string
+          id: string
+          ip: string | null
+          user_agent: string | null
+          user_id: string
+          versao: string
+        }
+        Insert: {
+          created_at?: string
+          documento: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id: string
+          versao: string
+        }
+        Update: {
+          created_at?: string
+          documento?: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id?: string
+          versao?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
