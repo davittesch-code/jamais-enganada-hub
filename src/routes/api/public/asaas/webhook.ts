@@ -163,11 +163,18 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
     status: statusPagamento,
     environment:
       (process.env.ASAAS_API_URL ?? "").includes("sandbox") ? "sandbox" : "live",
-    metadata: { asaas: payment, externalReference: ref } as any,
+    metadata: { asaas: payment, cadastro_pendente_id: ref?.id ?? null } as any,
     asaas_payment_id: payment.id,
     forma_pagamento: forma,
     parcelas: payment.installmentCount ?? 1,
   } as any);
+
+  if (ref?.id) {
+    await supabaseAdmin
+      .from("cadastros_pendentes" as any)
+      .update({ processado: true })
+      .eq("id", ref.id);
+  }
 }
 
 async function processPaymentRefunded(payment: AsaasWebhookEvent["payment"]) {
