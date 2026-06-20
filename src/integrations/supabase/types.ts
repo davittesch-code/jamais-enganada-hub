@@ -79,6 +79,45 @@ export type Database = {
         }
         Relationships: []
       }
+      cadastros_pendentes: {
+        Row: {
+          advogada_id: string | null
+          asaas_payment_id: string | null
+          cpf: string | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          processado: boolean | null
+          telefone: string | null
+          tipo_produto: string
+        }
+        Insert: {
+          advogada_id?: string | null
+          asaas_payment_id?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          processado?: boolean | null
+          telefone?: string | null
+          tipo_produto: string
+        }
+        Update: {
+          advogada_id?: string | null
+          asaas_payment_id?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          processado?: boolean | null
+          telefone?: string | null
+          tipo_produto?: string
+        }
+        Relationships: []
+      }
       configuracoes: {
         Row: {
           chave: string

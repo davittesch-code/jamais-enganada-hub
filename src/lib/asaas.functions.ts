@@ -59,14 +59,28 @@ export const criarCobranca = createServerFn({ method: "POST" })
         ? "Acesso Jamais Enganada — 1 ano"
         : "Recarga Jamais Enganada — +10 consultas, +1 perfil";
 
-    const externalReference = JSON.stringify({
-      nome: data.nome,
-      email: data.email,
-      cpf: data.cpf.replace(/\D/g, ""),
-      telefone: data.telefone.replace(/\D/g, ""),
-      tipo_produto: data.tipo_produto,
-      advogada_id: data.advogada_id ?? null,
-    });
+    // externalReference do Asaas tem limite de 100 chars; usamos apenas o
+    // tipo do produto e guardamos os dados completos em cadastros_pendentes.
+    const externalReference = data.tipo_produto;
+
+    async function salvarCadastroPendente(asaasPaymentId: string) {
+      const { supabaseAdmin } = await import(
+        "@/integrations/supabase/client.server"
+      );
+      await supabaseAdmin.from("cadastros_pendentes" as any).upsert(
+        {
+          asaas_payment_id: asaasPaymentId,
+          nome: data.nome,
+          email: data.email,
+          cpf: data.cpf.replace(/\D/g, ""),
+          telefone: data.telefone.replace(/\D/g, ""),
+          advogada_id: data.advogada_id ?? null,
+          tipo_produto: data.tipo_produto,
+          processado: false,
+        },
+        { onConflict: "asaas_payment_id" },
+      );
+    }
 
     if (data.formaPagamento === "PIX") {
       const payment = await createPixPayment({
@@ -75,6 +89,7 @@ export const criarCobranca = createServerFn({ method: "POST" })
         description,
         externalReference,
       });
+      await salvarCadastroPendente(payment.id);
       const qr = await getPixQrCode(payment.id);
       return {
         kind: "pix" as const,
@@ -113,6 +128,7 @@ export const criarCobranca = createServerFn({ method: "POST" })
       },
       remoteIp,
     });
+    await salvarCadastroPendente(payment.id);
 
     return {
       kind: "card" as const,

@@ -20,34 +20,38 @@ type AsaasWebhookEvent = {
   };
 };
 
-type ExternalRef = {
-  nome?: string;
-  email?: string;
-  cpf?: string;
-  telefone?: string;
-  tipo_produto?: "acesso" | "recarga";
-  advogada_id?: string | null;
+type CadastroPendente = {
+  id: string;
+  nome: string;
+  email: string;
+  cpf: string | null;
+  telefone: string | null;
+  tipo_produto: "acesso" | "recarga";
+  advogada_id: string | null;
+  processado: boolean;
 };
-
-function parseExternalRef(raw: string | null | undefined): ExternalRef {
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw) as ExternalRef;
-  } catch {
-    return {};
-  }
-}
 
 async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const ref = parseExternalRef(payment.externalReference);
-  const email = ref.email?.toLowerCase();
-  const nome = ref.nome;
-  const tipo = ref.tipo_produto;
-  const advogadaId = ref.advogada_id ?? null;
+
+  const { data: pendente } = await supabaseAdmin
+    .from("cadastros_pendentes" as any)
+    .select("id, nome, email, cpf, telefone, tipo_produto, advogada_id, processado")
+    .eq("asaas_payment_id", payment.id)
+    .maybeSingle();
+
+  const ref = (pendente ?? null) as CadastroPendente | null;
+  const email = ref?.email?.toLowerCase();
+  const nome = ref?.nome;
+  const tipo = (ref?.tipo_produto ??
+    (payment.externalReference as "acesso" | "recarga" | undefined)) as
+    | "acesso"
+    | "recarga"
+    | undefined;
+  const advogadaId = ref?.advogada_id ?? null;
 
   if (!email || !tipo) {
-    console.warn("[asaas-webhook] externalReference incompleto", { id: payment.id });
+    console.warn("[asaas-webhook] cadastro_pendente ausente", { id: payment.id });
     return;
   }
 
@@ -117,8 +121,8 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
           plataforma_start_date: new Date().toISOString(),
           plano_expira_em: new Date(base + ONE_YEAR_MS).toISOString(),
           plan_type: "base",
-          cpf: ref.cpf ?? undefined,
-          telefone: ref.telefone ?? undefined,
+          cpf: ref?.cpf ?? undefined,
+          telefone: ref?.telefone ?? undefined,
         } as any)
         .eq("id", userId);
     }
@@ -159,11 +163,18 @@ async function processPaymentConfirmed(payment: AsaasWebhookEvent["payment"]) {
     status: statusPagamento,
     environment:
       (process.env.ASAAS_API_URL ?? "").includes("sandbox") ? "sandbox" : "live",
-    metadata: { asaas: payment, externalReference: ref } as any,
+    metadata: { asaas: payment, cadastro_pendente_id: ref?.id ?? null } as any,
     asaas_payment_id: payment.id,
     forma_pagamento: forma,
     parcelas: payment.installmentCount ?? 1,
   } as any);
+
+  if (ref?.id) {
+    await supabaseAdmin
+      .from("cadastros_pendentes" as any)
+      .update({ processado: true })
+      .eq("id", ref.id);
+  }
 }
 
 async function processPaymentRefunded(payment: AsaasWebhookEvent["payment"]) {
