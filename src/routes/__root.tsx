@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../contexts/AuthContext";
 import { Toaster } from "../components/ui/sonner";
+import { CookieBanner } from "../components/CookieBanner";
 
 function NotFoundComponent() {
   return (
@@ -128,6 +129,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster />
+        <CookieBanner />
       </AuthProvider>
     </QueryClientProvider>
   );
