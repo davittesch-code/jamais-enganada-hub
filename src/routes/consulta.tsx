@@ -22,7 +22,7 @@ import {
 import { MessageCircle, RotateCcw } from "lucide-react";
 
 function ConsultaGuard({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
 
@@ -31,8 +31,15 @@ function ConsultaGuard({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !loading && !user) navigate({ to: "/login" });
-  }, [mounted, loading, user, navigate]);
+    if (!mounted || loading) return;
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (profile?.role === "admin") {
+      navigate({ to: "/admin" });
+    }
+  }, [mounted, loading, user, profile, navigate]);
 
   if (!mounted || loading) {
     return (
@@ -44,7 +51,7 @@ function ConsultaGuard({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  if (!user) return null;
+  if (!user || profile?.role === "admin") return null;
   return <>{children}</>;
 }
 
