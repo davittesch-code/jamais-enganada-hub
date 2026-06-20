@@ -295,10 +295,3 @@ function CriarSenhaPage() {
   );
 }
 
-        <p className="text-xs text-white/80 text-center mt-6">
-          Conhecimento é proteção. 💜
-        </p>
-      </div>
-    </div>
-  );
-}
