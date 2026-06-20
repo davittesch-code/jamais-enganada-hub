@@ -157,19 +157,51 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Evita scroll horizontal em qualquer tela */
+    overflow-x: hidden;
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     font-weight: 500;
   }
+  /* iOS Safari aplica zoom automático em qualquer input com font-size < 16px
+     ao ganhar foco. Garantir 16px em mobile evita esse zoom indesejado. */
+  @media (max-width: 640px) {
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
+  /* Botões e links com toque confortável (≥ 44px) em mobile */
+  button, [role="button"], a {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* === Safe area utilities (iPhone notch / home indicator) === */
+@utility safe-pt {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+@utility safe-pb {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+@utility safe-pl {
+  padding-left: max(env(safe-area-inset-left), 0px);
+}
+@utility safe-pr {
+  padding-right: max(env(safe-area-inset-right), 0px);
+}
+@utility safe-px {
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
 }
 
 /* === Componentes utilit\u00e1rios === */
@@ -252,7 +284,7 @@
   height: 48px;
   padding: 0 16px;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 16px;
   color: var(--texto-principal);
   transition: border-color 180ms ease, box-shadow 180ms ease;
   width: 100%;
@@ -260,6 +292,9 @@
     outline: none;
     border-color: var(--magenta-acao);
     box-shadow: 0 0 0 4px rgba(168, 0, 110, 0.12);
+  }
+  @media (min-width: 640px) {
+    font-size: 0.95rem;
   }
 }
 

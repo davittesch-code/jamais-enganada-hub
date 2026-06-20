@@ -81,17 +81,17 @@ function CriarSenhaPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 py-12"
+      className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 safe-pt safe-pb"
       style={{ background: "linear-gradient(135deg, #6B0F4B 0%, #A8006E 100%)" }}
     >
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="font-display text-3xl font-semibold text-white">
+        <div className="text-center mb-6 sm:mb-8">
+          <Link to="/" className="font-display text-2xl sm:text-3xl font-semibold text-white">
             Jamais Enganada
           </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
           <h1 className="font-display text-2xl font-semibold mb-2 text-[#6B0F4B]">
             Bem-vinda! 💜
           </h1>
@@ -131,15 +131,21 @@ function CriarSenhaPage() {
                     <input
                       type="email"
                       required
+                      autoComplete="email"
+                      inputMode="email"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={reenvioEmail}
                       onChange={(e) => setReenvioEmail(e.target.value)}
                       placeholder="seu@email.com"
-                      className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                      className="flex-1 px-3 py-3 text-base rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                      style={{ fontSize: "16px" }}
                     />
                     <button
                       type="submit"
                       disabled={reenviando}
-                      className="px-4 py-2 text-sm font-semibold text-white rounded-lg disabled:opacity-50"
+                      className="px-4 min-h-[44px] text-sm font-semibold text-white rounded-lg disabled:opacity-50 active:scale-[0.98]"
                       style={{ backgroundColor: "#A8006E" }}
                     >
                       {reenviando ? "…" : "Reenviar"}
@@ -158,18 +164,20 @@ function CriarSenhaPage() {
                     type={showSenha ? "text" : "password"}
                     required
                     minLength={8}
+                    autoComplete="new-password"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
-                    placeholder="Mínimo 8 caracteres com letras e números"
+                    className="w-full px-4 py-3 pr-12 text-base rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    style={{ fontSize: "16px" }}
+                    placeholder="Mínimo 8 caracteres"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSenha((v) => !v)}
                     aria-label={showSenha ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-[#6B0F4B]"
+                    className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-gray-500 hover:text-[#6B0F4B]"
                   >
-                    {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showSenha ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
@@ -179,17 +187,19 @@ function CriarSenhaPage() {
                   <input
                     type={showConfirmar ? "text" : "password"}
                     required
+                    autoComplete="new-password"
                     value={confirmar}
                     onChange={(e) => setConfirmar(e.target.value)}
-                    className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    className="w-full px-4 py-3 pr-12 text-base rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#A8006E]"
+                    style={{ fontSize: "16px" }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmar((v) => !v)}
                     aria-label={showConfirmar ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-[#6B0F4B]"
+                    className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-gray-500 hover:text-[#6B0F4B]"
                   >
-                    {showConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showConfirmar ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>

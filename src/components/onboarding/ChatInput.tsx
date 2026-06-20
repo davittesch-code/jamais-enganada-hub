@@ -37,7 +37,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-2 px-4 py-3 border-t bg-white"
+      className="flex items-end gap-2 px-3 sm:px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t bg-white"
       style={{ borderColor: "#F3E8F0" }}
     >
       <textarea
@@ -47,14 +47,18 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        placeholder="Digite sua resposta... (Shift+Enter para nova linha)"
-        className="flex-1 px-4 py-2.5 rounded-2xl border bg-white text-sm focus:outline-none focus:ring-2 disabled:opacity-50 leading-snug"
+        placeholder="Digite sua resposta..."
+        autoComplete="off"
+        autoCorrect="on"
+        autoCapitalize="sentences"
+        className="flex-1 px-4 py-3 rounded-2xl border bg-white text-base focus:outline-none focus:ring-2 disabled:opacity-50 leading-snug"
         style={{
           borderColor: "#F3E8F0",
           color: "#1A0010",
           resize: "none",
           overflowY: "hidden",
           maxHeight: 120,
+          fontSize: "16px",
         }}
         aria-label="Sua resposta"
       />
@@ -62,10 +66,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         type="submit"
         disabled={disabled || !value.trim()}
         aria-label="Enviar"
-        className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white transition-opacity disabled:opacity-40"
+        className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-white transition-opacity disabled:opacity-40 active:scale-95"
         style={{ background: "#552736" }}
       >
-        <Send className="w-4 h-4" />
+        <Send className="w-5 h-5" />
       </button>
     </form>
   );

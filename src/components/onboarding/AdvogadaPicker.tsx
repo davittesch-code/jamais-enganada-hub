@@ -57,22 +57,22 @@ export function AdvogadaPicker({ advogadas, onSubmit }: Props) {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-5">
-        <button
-          type="button"
-          onClick={() => onSubmit(null)}
-          className="text-sm text-gray-500 hover:text-gray-700 underline underline-offset-2"
-        >
-          Continuar sem advogada
-        </button>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 mt-5">
         <button
           type="button"
           disabled={!selected}
           onClick={() => selected && onSubmit(selected)}
-          className="px-6 py-2.5 rounded-full text-sm font-medium text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+          className="order-1 sm:order-2 px-6 min-h-[48px] rounded-full text-base sm:text-sm font-semibold text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
           style={{ background: "#552736" }}
         >
           Confirmar seleção
+        </button>
+        <button
+          type="button"
+          onClick={() => onSubmit(null)}
+          className="order-2 sm:order-1 text-sm text-gray-600 hover:text-gray-800 underline underline-offset-2 min-h-[44px]"
+        >
+          Continuar sem advogada
         </button>
       </div>
     </div>
