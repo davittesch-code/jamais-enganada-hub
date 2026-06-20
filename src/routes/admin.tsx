@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 
 export function AdminGuard({ children }: { children: ReactNode }) {
   const { user, profile, loading } = useAuth();
-  if (loading) {
+  if (loading || (user && !profile)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-muted-foreground">Carregando…</div>
@@ -13,7 +13,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/login" />;
-  if (profile?.role !== "admin") return <Navigate to="/perfil" />;
+  if (profile.role !== "admin") return <Navigate to="/consulta" />;
   return <AppLayout>{children}</AppLayout>;
 }
 
