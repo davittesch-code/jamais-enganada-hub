@@ -66,7 +66,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#6B0F4B" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "Jamais Enganada — Autocuidado jurídico para mulheres" },
       { name: "description", content: "Conheça seus direitos. Proteja sua vida. Plataforma jurídica de autocuidado para mulheres." },
       { name: "application-name", content: "Jamais Enganada" },
