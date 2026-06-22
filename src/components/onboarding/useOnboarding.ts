@@ -113,6 +113,8 @@ export function useOnboarding() {
   const concluidoRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasUserRepliedRef = useRef(false);
+  const lastSofiaTextRef = useRef<{ text: string; at: number } | null>(null);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
@@ -121,6 +123,15 @@ export function useOnboarding() {
   }, []);
 
   const addMessage = useCallback((sender: Sender, text: string) => {
+    // Dedup: não enfileirar mensagem idêntica da Sofia se a anterior idêntica
+    // foi enviada há menos de 8s (proteção contra duplicação de inicialização).
+    if (sender === "sofia") {
+      const last = lastSofiaTextRef.current;
+      if (last && last.text === text && Date.now() - last.at < 8000) {
+        return;
+      }
+      lastSofiaTextRef.current = { text, at: Date.now() };
+    }
     setMessages((prev) => [
       ...prev,
       { id: uid(), sender, text, timestamp: new Date() },
@@ -128,8 +139,12 @@ export function useOnboarding() {
   }, []);
 
   // Debounced save do progresso atual para Supabase (~500ms).
+  // IMPORTANTE: só persiste depois que a usuária respondeu pelo menos uma vez,
+  // para que o fluxo de boas-vindas não vire "progresso" e dispare o fluxo
+  // de "retomar" em um remount (StrictMode, HMR, troca de rota etc.).
   const scheduleSave = useCallback(() => {
     if (!user || concluidoRef.current) return;
+    if (!hasUserRepliedRef.current) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       void (async () => {
@@ -192,8 +207,25 @@ export function useOnboarding() {
             : [];
           setMessages(restored);
           messagesRef.current = restored;
+          // Semeia o dedup com a última fala da Sofia restaurada.
+          const lastSofia = [...restored].reverse().find((m) => m.sender === "sofia");
+          if (lastSofia) {
+            lastSofiaTextRef.current = { text: lastSofia.text, at: Date.now() };
+          }
           setProgress(Math.round((currentIndexRef.current / 8) * 88));
           hasStartedRef.current = true;
+          // Já existe progresso salvo → considera que a usuária já interagiu.
+          hasUserRepliedRef.current = true;
+
+          const idx = currentIndexRef.current;
+          const currentQuestionText =
+            idx >= 0 && idx < QUESTIONS.length ? QUESTIONS[idx].text : null;
+          // Se a última fala da Sofia já é exatamente a pergunta atual,
+          // não precisamos reenviar saudação nem re-perguntar — só reabilitar input.
+          if (currentQuestionText && lastSofia && lastSofia.text === currentQuestionText) {
+            setInputDisabled(false);
+            return;
+          }
 
           schedule(() => {
             setIsTyping(true);
@@ -203,16 +235,14 @@ export function useOnboarding() {
                 "sofia",
                 "Que bom te ver de novo! 💜 Vamos continuar de onde paramos.",
               );
-              const idx = currentIndexRef.current;
-              if (idx >= 0 && idx < QUESTIONS.length) {
+              if (currentQuestionText) {
                 schedule(() => {
                   setIsTyping(true);
-                  const nextText = QUESTIONS[idx].text;
                   schedule(() => {
                     setIsTyping(false);
-                    addMessage("sofia", nextText);
+                    addMessage("sofia", currentQuestionText);
                     setInputDisabled(false);
-                  }, calcTypingDelay(nextText));
+                  }, calcTypingDelay(currentQuestionText));
                 }, calcPauseDelay());
               } else {
                 // Estávamos na etapa do advogada picker
@@ -385,7 +415,9 @@ export function useOnboarding() {
       if (index < 0 || index > 7 || inputDisabled) return;
 
       setInputDisabled(true);
+      hasUserRepliedRef.current = true;
       addMessage("user", text);
+
 
       const question = QUESTIONS[index];
       const newData = { ...dataRef.current, [question.key]: text };
