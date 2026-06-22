@@ -4,8 +4,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const DOC_VERSAO_TERMOS = "2026-06-19";
 export const DOC_VERSAO_PRIVACIDADE = "2026-06-19";
+export const DOC_VERSAO_AVISO_INFORMATIVO = "2026-06-22";
 
-type Documento = "termos" | "privacidade" | "cookies";
+type Documento = "termos" | "privacidade" | "cookies" | "aviso_informativo";
 
 function getClientIp(req: Request): string | null {
   const h = req.headers;
