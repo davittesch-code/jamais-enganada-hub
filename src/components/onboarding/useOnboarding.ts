@@ -123,6 +123,15 @@ export function useOnboarding() {
   }, []);
 
   const addMessage = useCallback((sender: Sender, text: string) => {
+    // Dedup: não enfileirar mensagem idêntica da Sofia se a anterior idêntica
+    // foi enviada há menos de 8s (proteção contra duplicação de inicialização).
+    if (sender === "sofia") {
+      const last = lastSofiaTextRef.current;
+      if (last && last.text === text && Date.now() - last.at < 8000) {
+        return;
+      }
+      lastSofiaTextRef.current = { text, at: Date.now() };
+    }
     setMessages((prev) => [
       ...prev,
       { id: uid(), sender, text, timestamp: new Date() },
@@ -130,8 +139,12 @@ export function useOnboarding() {
   }, []);
 
   // Debounced save do progresso atual para Supabase (~500ms).
+  // IMPORTANTE: só persiste depois que a usuária respondeu pelo menos uma vez,
+  // para que o fluxo de boas-vindas não vire "progresso" e dispare o fluxo
+  // de "retomar" em um remount (StrictMode, HMR, troca de rota etc.).
   const scheduleSave = useCallback(() => {
     if (!user || concluidoRef.current) return;
+    if (!hasUserRepliedRef.current) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       void (async () => {
