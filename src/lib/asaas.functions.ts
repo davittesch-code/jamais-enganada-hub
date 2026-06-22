@@ -57,7 +57,7 @@ export const criarCobranca = createServerFn({ method: "POST" })
     const description =
       data.tipo_produto === "acesso"
         ? "Acesso Jamais Enganada — 1 ano"
-        : "Recarga Jamais Enganada — +10 consultas, +1 perfil";
+        : "Recarga Jamais Enganada — +10 tira-dúvidas, +1 perfil";
 
     // externalReference do Asaas tem limite de 100 chars; usamos apenas o
     // tipo do produto e guardamos os dados completos em cadastros_pendentes.

@@ -395,7 +395,7 @@ function PesquisaPage() {
       setLoading(false);
       const msg =
         result.error === "rate_limit"
-          ? "Muitas consultas em pouco tempo. Tente novamente em instantes."
+          ? "Muitos tira-dúvidas em pouco tempo. Tente novamente em instantes."
           : result.error === "payment_required"
           ? "Limite de créditos atingido. Avise a administradora."
           : "Não consegui processar agora. Tente novamente.";
@@ -444,7 +444,7 @@ function PesquisaPage() {
   const executeWhatsApp = () => {
     const nome = profile?.full_name?.split(" ")[0] ?? "cliente";
     const mensagem = encodeURIComponent(
-      `Olá! Sou ${nome}, cliente da Jamais Enganada. Fiz uma consulta no Tira-dúvidas e gostaria de conversar.`
+      `Olá! Sou ${nome}, cliente da Jamais Enganada. Fiz um tira-dúvidas na plataforma e gostaria de conversar.`
     );
     window.open(`https://wa.me/${whatsappAdm}?text=${mensagem}`, "_blank");
   };
@@ -474,7 +474,7 @@ function PesquisaPage() {
             {historico.length === 0 ? (
               <div className="rounded-lg bg-white border border-[#E8D0E0] p-4 text-center">
                 <p className="text-sm text-gray-400">
-                  Nenhuma pergunta ainda. Faça sua primeira consulta! 💜
+                  Nenhuma pergunta ainda. Faça seu primeiro tira-dúvidas! 💜
                 </p>
               </div>
             ) : (
@@ -517,8 +517,8 @@ function PesquisaPage() {
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className={`text-xs font-medium ${consultasRestantes > 0 ? "text-[#6B0F4B]" : "text-[#A8002B]"}`}>
                   {consultasRestantes > 0
-                    ? `${consultasRestantes} consulta${consultasRestantes !== 1 ? "s" : ""} restante${consultasRestantes !== 1 ? "s" : ""} no seu plano`
-                    : "Nenhuma consulta restante"}
+                    ? `${consultasRestantes} tira-dúvidas restante${consultasRestantes !== 1 ? "s" : ""} no seu plano`
+                    : "Nenhum tira-dúvidas restante"}
                   {restantesHoje !== null && restantesHoje < 9999 && consultasRestantes > 0 && (
                     <span className="text-gray-500 font-normal"> · {restantesHoje} disponíve{restantesHoje === 1 ? "l" : "is"} hoje</span>
                   )}
@@ -681,7 +681,7 @@ function PesquisaPage() {
         userId={user?.id ?? null}
         onRecargaConfirmada={async () => {
           setUpsellOpen(false);
-          toast("Recarga confirmada! +10 consultas e +1 perfil liberados. 💜");
+          toast("Recarga confirmada! +10 tira-dúvidas e +1 perfil liberados. 💜");
           // Recarrega perfil/limites
           const { data: chk } = await supabase.rpc("pode_fazer_consulta", { p_user_id: user!.id });
           if (chk) console.log("limites atualizados", chk);
@@ -692,10 +692,10 @@ function PesquisaPage() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDiarioModal(null)}>
           <div className="bg-white rounded-xl w-full max-w-sm p-6 space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
             <div className="text-4xl">💜</div>
-            <h3 className="font-bold text-[#1A0010]">Você já fez suas consultas de hoje!</h3>
+            <h3 className="font-bold text-[#1A0010]">Você já fez seus tira-dúvidas de hoje!</h3>
             <p className="text-sm text-gray-600">
-              Volte amanhã para continuar — você ainda tem <strong>{diarioModal.restantes}</strong> consulta{diarioModal.restantes !== 1 ? "s" : ""} no seu plano.
-              Suas consultas diárias renovam a cada dia na primeira semana.
+              Volte amanhã para continuar — você ainda tem <strong>{diarioModal.restantes}</strong> tira-dúvidas no seu plano.
+              Seus tira-dúvidas diários renovam a cada dia na primeira semana.
             </p>
             <button
               onClick={() => setDiarioModal(null)}

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/checkout")({
       {
         name: "description",
         content:
-          "Acesso completo à plataforma Jamais Enganada: perfil jurídico, 17 consultas com IA e plano de ação personalizado.",
+          "Acesso completo à plataforma Jamais Enganada: perfil jurídico, 17 tira-dúvidas com IA e plano de ação personalizado.",
       },
     ],
   }),
@@ -160,7 +160,7 @@ function CheckoutPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               "Perfil jurídico completo e personalizado",
-              "Até 17 consultas jurídicas com nossa IA",
+              "Até 17 tira-dúvidas jurídicos com nossa IA",
               "Análise de todas as áreas: família, bens, herança, empresa",
               "Pontos de atenção e seus direitos em cada situação",
               "Plano de ação prático e personalizado",
@@ -212,7 +212,7 @@ function CheckoutPage() {
               <ul className="space-y-2 mb-6 text-sm text-gray-700">
                 {[
                   "Perfil jurídico completo",
-                  "17 consultas com IA",
+                  "17 tira-dúvidas com IA",
                   "Plano de ação personalizado",
                   "Acesso por 1 ano",
                 ].map((b) => (

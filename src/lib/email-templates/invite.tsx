@@ -54,7 +54,7 @@ export const InviteEmail = ({
         </Text>
         <Text style={list}>
           ✓ Perfil jurídico completo e personalizado<br />
-          ✓ Até 17 consultas com nossa IA<br />
+          ✓ Até 17 tira-dúvidas com nossa IA<br />
           ✓ Plano de ação prático para você<br />
           ✓ Contato direto com uma advogada parceira
         </Text>

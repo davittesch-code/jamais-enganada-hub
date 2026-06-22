@@ -80,7 +80,7 @@ export function UpsellModal({
   const isPerguntas = tipo === "perguntas";
   const Icon = isPerguntas ? Search : Scale;
   const titulo = isPerguntas
-    ? "Você usou todas as suas consultas!"
+    ? "Você usou todos os seus tira-dúvidas!"
     : "Limite de gerações de perfil atingido";
   const subtitulo = isPerguntas
     ? "Mas a boa notícia é que você pode continuar."
@@ -141,7 +141,7 @@ export function UpsellModal({
             >
               <p className="text-sm font-semibold mb-2">✨ Recarga Jamais Enganada</p>
               <ul className="text-sm space-y-1 mb-3 opacity-95">
-                <li>+ 10 consultas jurídicas</li>
+                <li>+ 10 tira-dúvidas jurídicos</li>
                 <li>+ 1 geração de perfil</li>
               </ul>
               <div className="flex items-baseline gap-2">
@@ -152,7 +152,7 @@ export function UpsellModal({
 
             <ul className="space-y-2 mb-6">
               {[
-                "+10 novas consultas jurídicas",
+                "+10 novos tira-dúvidas jurídicos",
                 "+1 nova geração de perfil",
                 "Pix com confirmação imediata ou cartão em até 3x",
               ].map((b) => (

@@ -208,7 +208,7 @@ function AdminDashboard() {
               color="#DC2626"
               highlight={stats.vulnerabilidade_alta > 0}
             />
-            <StatCard icon={MessageSquare} label="Consultas 24h" value={stats.consultas_hoje} color="#A8006E" />
+            <StatCard icon={MessageSquare} label="Tira-dúvidas 24h" value={stats.consultas_hoje} color="#A8006E" />
           </div>
         )}
 

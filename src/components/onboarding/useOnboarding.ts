@@ -311,7 +311,7 @@ export function useOnboarding() {
         () =>
           addMessage(
             "sofia",
-            "Antes de mergulharmos na sua consulta, quero te conhecer um pouquinho. Vou fazer algumas perguntas — responde com suas próprias palavras, do seu jeito, sem pressa. Aqui é um espaço seguro. 🌸",
+            "Antes de mergulharmos no seu tira-dúvidas, quero te conhecer um pouquinho. Vou fazer algumas perguntas — responde com suas próprias palavras, do seu jeito, sem pressa. Aqui é um espaço seguro. 🌸",
           ),
         5000,
       );

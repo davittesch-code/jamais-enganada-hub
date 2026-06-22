@@ -319,13 +319,13 @@ function PerfilPage() {
           Seu perfil ainda não foi gerado
         </h1>
         <p className="text-gray-600 mb-6 max-w-md">
-          Complete a consulta jurídica para receber seu perfil personalizado.
+          Complete o tira-dúvidas jurídico para receber seu perfil personalizado.
         </p>
         <Button
           onClick={() => navigate({ to: "/consulta" })}
           className="bg-[#552736] hover:bg-[#3F1C28] text-white"
         >
-          Iniciar consulta
+          Iniciar tira-dúvidas
         </Button>
       </div>
     );
@@ -1068,7 +1068,7 @@ function PerfilPage() {
             onClick={refazer}
           >
             <RotateCcw className="w-4 h-4 mr-2" />
-            Refazer consulta
+            Refazer tira-dúvidas
           </Button>
           <p className={`text-xs ${geracoesRestantes > 0 ? "text-gray-500" : "text-[#A8002B]"}`}>
             {geracoesRestantes > 0
