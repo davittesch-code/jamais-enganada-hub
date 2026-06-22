@@ -415,7 +415,9 @@ export function useOnboarding() {
       if (index < 0 || index > 7 || inputDisabled) return;
 
       setInputDisabled(true);
+      hasUserRepliedRef.current = true;
       addMessage("user", text);
+
 
       const question = QUESTIONS[index];
       const newData = { ...dataRef.current, [question.key]: text };
