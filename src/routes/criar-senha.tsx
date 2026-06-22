@@ -243,6 +243,24 @@ function CriarSenhaPage() {
                 </li>
               </ul>
 
+              <div
+                role="note"
+                aria-label="Aviso informativo importante"
+                className="rounded-lg border-l-4 border-[#A8006E] bg-[#FDF6F9] p-4 text-sm leading-relaxed text-gray-800"
+              >
+                <p className="font-semibold text-[#6B0F4B] mb-1">
+                  Importante antes de continuar
+                </p>
+                <p>
+                  A Jamais Enganada tem caráter <strong>informativo</strong>. A
+                  Sofia explica seus direitos e os riscos da sua situação com
+                  base na legislação, de forma personalizada ao que você relata
+                  — mas <strong>não recomenda condutas</strong>,{" "}
+                  <strong>não indica ações judiciais</strong> e{" "}
+                  <strong>não substitui o atendimento individual com um advogado</strong>.
+                </p>
+              </div>
+
               <label className="flex items-start gap-2 text-sm text-gray-700 select-none">
                 <input
                   type="checkbox"
