@@ -207,8 +207,25 @@ export function useOnboarding() {
             : [];
           setMessages(restored);
           messagesRef.current = restored;
+          // Semeia o dedup com a última fala da Sofia restaurada.
+          const lastSofia = [...restored].reverse().find((m) => m.sender === "sofia");
+          if (lastSofia) {
+            lastSofiaTextRef.current = { text: lastSofia.text, at: Date.now() };
+          }
           setProgress(Math.round((currentIndexRef.current / 8) * 88));
           hasStartedRef.current = true;
+          // Já existe progresso salvo → considera que a usuária já interagiu.
+          hasUserRepliedRef.current = true;
+
+          const idx = currentIndexRef.current;
+          const currentQuestionText =
+            idx >= 0 && idx < QUESTIONS.length ? QUESTIONS[idx].text : null;
+          // Se a última fala da Sofia já é exatamente a pergunta atual,
+          // não precisamos reenviar saudação nem re-perguntar — só reabilitar input.
+          if (currentQuestionText && lastSofia && lastSofia.text === currentQuestionText) {
+            setInputDisabled(false);
+            return;
+          }
 
           schedule(() => {
             setIsTyping(true);
@@ -218,16 +235,14 @@ export function useOnboarding() {
                 "sofia",
                 "Que bom te ver de novo! 💜 Vamos continuar de onde paramos.",
               );
-              const idx = currentIndexRef.current;
-              if (idx >= 0 && idx < QUESTIONS.length) {
+              if (currentQuestionText) {
                 schedule(() => {
                   setIsTyping(true);
-                  const nextText = QUESTIONS[idx].text;
                   schedule(() => {
                     setIsTyping(false);
-                    addMessage("sofia", nextText);
+                    addMessage("sofia", currentQuestionText);
                     setInputDisabled(false);
-                  }, calcTypingDelay(nextText));
+                  }, calcTypingDelay(currentQuestionText));
                 }, calcPauseDelay());
               } else {
                 // Estávamos na etapa do advogada picker
