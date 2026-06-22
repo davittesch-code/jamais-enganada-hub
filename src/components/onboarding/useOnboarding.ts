@@ -113,6 +113,8 @@ export function useOnboarding() {
   const concluidoRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasUserRepliedRef = useRef(false);
+  const lastSofiaTextRef = useRef<{ text: string; at: number } | null>(null);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     const t = setTimeout(fn, ms);
