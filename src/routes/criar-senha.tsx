@@ -92,6 +92,7 @@ function CriarSenhaPage() {
           documentos: [
             { documento: "termos", versao: DOC_VERSAO_TERMOS },
             { documento: "privacidade", versao: DOC_VERSAO_PRIVACIDADE },
+            { documento: "aviso_informativo", versao: DOC_VERSAO_AVISO_INFORMATIVO },
           ],
         },
       });
