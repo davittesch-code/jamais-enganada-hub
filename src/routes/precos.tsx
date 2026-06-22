@@ -67,7 +67,7 @@ function PrecosPage() {
 
           <ul className="mt-10 space-y-3">
             {[
-              "Consulta inteligente com a Sofia, sua assistente jurídica",
+              "Tira-dúvidas inteligente com a Sofia, sua assistente jurídica",
               "Perfil jurídico personalizado em 8 áreas da sua vida",
               "Acompanhamento humano com advogada parceira",
               "Pesquisas e materiais exclusivos para mulheres",

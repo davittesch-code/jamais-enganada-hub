@@ -207,7 +207,7 @@ function Landing() {
       <section style={{ background: "var(--vinho-profundo)", color: "#FBF7F4" }}>
         <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6">
           {[
-            { n: "17", l: "consultas jurídicas" },
+            { n: "17", l: "tira-dúvidas jurídicos" },
             { n: "1 ano", l: "de acesso completo" },
             { n: "100%", l: "confidencial" },
             { n: "7 áreas", l: "do direito analisadas" },
@@ -692,7 +692,7 @@ function HeroMockup() {
         </div>
         <div className="leading-tight">
           <div className="text-xs font-medium" style={{ color: "var(--vinho-profundo)" }}>
-            17 consultas
+            17 tira-dúvidas
           </div>
           <div className="text-[10px]" style={{ color: "var(--texto-secundario)" }}>
             disponíveis no plano

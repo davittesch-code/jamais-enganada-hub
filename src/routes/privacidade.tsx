@@ -50,7 +50,7 @@ function PrivacidadePage() {
             </li>
             <li>
               <strong>Perfil jurídico:</strong> respostas que você fornece à
-              Sofia durante o onboarding e a consulta (situação familiar,
+              Sofia durante o onboarding e o tira-dúvidas (situação familiar,
               patrimonial, profissional, etc.).
             </li>
             <li>
@@ -74,7 +74,7 @@ function PrivacidadePage() {
         <Section title="3. Para que usamos seus dados">
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Criar e manter sua conta;</li>
-            <li>Personalizar a consulta da Sofia e gerar seu perfil jurídico;</li>
+            <li>Personalizar o tira-dúvidas da Sofia e gerar seu perfil jurídico;</li>
             <li>Conectar você, quando solicitado, a uma advogada parceira;</li>
             <li>Prestar suporte e responder a solicitações;</li>
             <li>Cumprir obrigações legais, regulatórias e contratuais;</li>

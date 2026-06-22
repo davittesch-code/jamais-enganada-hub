@@ -12,7 +12,7 @@ const InputSchema = z.object({
     .max(20),
 });
 
-const SYSTEM_PROMPT = `Você é Sofia, assessora jurídica da Jamais Enganada conduzindo uma consulta.
+const SYSTEM_PROMPT = `Você é Sofia, assessora jurídica da Jamais Enganada conduzindo um tira-dúvidas.
 Você JÁ SABE várias informações sobre a usuária (no contexto do usuário). Sua tarefa é avaliar a PRÓXIMA leva de perguntas que o sistema quer fazer e, para cada uma, decidir a ação correta — EVITANDO repetir o que já se sabe.
 
 REGRAS DE DECISÃO (por pergunta):

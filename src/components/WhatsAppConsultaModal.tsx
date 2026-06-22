@@ -65,7 +65,7 @@ export function WhatsAppConsultaModal({ open, onClose, onConfirm }: Props) {
           className="rounded-lg p-4 mb-5 text-sm"
           style={{ backgroundColor: "#FEF9C3", border: "1px solid #D97706", color: "#854D0E" }}
         >
-          <p className="font-semibold mb-1">⚠️ Esta consulta possui custo</p>
+          <p className="font-semibold mb-1">⚠️ Este atendimento possui custo</p>
           <p className="leading-relaxed">
             Os valores e condições serão informados pela própria advogada no atendimento via
             WhatsApp, antes de qualquer compromisso.

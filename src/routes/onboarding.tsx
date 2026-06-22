@@ -168,7 +168,7 @@ function OnboardingPage() {
                   (e.currentTarget.style.background = "#552736")
                 }
               >
-                Iniciar minha consulta →
+                Iniciar meu tira-dúvidas →
               </button>
             </div>
           )}

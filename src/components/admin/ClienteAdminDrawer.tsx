@@ -228,7 +228,7 @@ export function ClienteAdminDrawer({ cliente, onClose, onUpdated }: Props) {
                     onClick={() => void resetarPerfil()}
                     className="px-4 py-2 border border-red-300 text-red-600 rounded-md text-sm hover:bg-red-50"
                   >
-                    Resetar e forçar nova consulta
+                    Resetar e forçar novo tira-dúvidas
                   </button>
                 </div>
               )}
