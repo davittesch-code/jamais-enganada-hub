@@ -8,6 +8,7 @@ import {
   registrarConsentimento,
   DOC_VERSAO_TERMOS,
   DOC_VERSAO_PRIVACIDADE,
+  DOC_VERSAO_AVISO_INFORMATIVO,
 } from "@/lib/consentimentos.functions";
 
 
