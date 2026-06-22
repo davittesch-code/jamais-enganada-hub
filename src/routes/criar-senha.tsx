@@ -278,8 +278,8 @@ function CriarSenhaPage() {
                     style={{ color: "#6B0F4B" }}
                   >
                     Termos de Uso
-                  </Link>{" "}
-                  e com a{" "}
+                  </Link>
+                  , com a{" "}
                   <Link
                     to="/privacidade"
                     target="_blank"
@@ -287,8 +287,9 @@ function CriarSenhaPage() {
                     style={{ color: "#6B0F4B" }}
                   >
                     Política de Privacidade
-                  </Link>
-                  .
+                  </Link>{" "}
+                  e declaro que li o aviso acima sobre o caráter informativo da
+                  plataforma.
                 </span>
               </label>
 
