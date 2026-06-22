@@ -1,0 +1,2 @@
+ALTER TABLE public.consentimentos DROP CONSTRAINT IF EXISTS consentimentos_documento_check;
+ALTER TABLE public.consentimentos ADD CONSTRAINT consentimentos_documento_check CHECK (documento IN ('termos','privacidade','cookies','aviso_informativo'));
